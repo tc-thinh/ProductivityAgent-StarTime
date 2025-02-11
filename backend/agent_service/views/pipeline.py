@@ -7,6 +7,7 @@ from scipy.signal import resample
 from agent_service.apps import AgentServiceConfig
 from django.conf import settings
 import os
+# from ..agent import Agent
 
 # helper
 def resample_audio(audio, sample_rate, target_sample_rate=16000):
@@ -51,6 +52,7 @@ def pipeline(request):
 
             processed_prompt += "[AUDIO]: " + transcription + "\n"
 
+        # Agent.start(processed_prompt)
         return Response({"message": "Data processed successfully", "data": processed_prompt}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
