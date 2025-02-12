@@ -7,7 +7,7 @@ from scipy.signal import resample
 from agent_service.apps import AgentServiceConfig
 from django.conf import settings
 import os
-# from ..agent import Agent
+from ..toolbox.agent import agent_action
 
 # helper
 def resample_audio(audio, sample_rate, target_sample_rate=16000):
@@ -47,13 +47,12 @@ def pipeline(request):
         
         if audio_id:
             model = AgentServiceConfig.whispher_model
-            file_path = os.path.join(os.path.dirname(settings.BASE_DIR), "tmp", audio_id)
+            file_path = os.path.join(settings.BASE_DIR, "tmp", audio_id)
             transcription = model.transcribe(file_path)["text"]
-
             processed_prompt += "[AUDIO]: " + transcription + "\n"
 
-        # Agent.start(processed_prompt)
-        return Response({"message": "Data processed successfully", "data": processed_prompt}, status=status.HTTP_200_OK)
+        conversation = agent_action(processed_prompt)
+        return Response({"message": "Data processed successfully", "data": conversation}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     

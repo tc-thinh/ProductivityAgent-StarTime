@@ -11,7 +11,7 @@ BASE_DIR = settings.BASE_DIR
 
 def get_calendar_service():
     SCOPES = [CALENDAR]
-    SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(BASE_DIR), "creds/credentails.json")
+    SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, "creds/credentails.json")
 
     credentials = service_account.Credentials.from_service_account_file(
         SERVICE_ACCOUNT_FILE, scopes=SCOPES)
@@ -19,7 +19,9 @@ def get_calendar_service():
 
     return service
 
-def create_event(event: CalendarEvent):
-    service = get_calendar_service()
-    event = service.events().insert(calendarId='primary', body=event).execute()
-    return event
+def create_event(event: CalendarEvent, calendarId: str):
+    print(event, calendarId)
+    return {"message": "Event created successfully"}
+    # service = get_calendar_service()
+    # event = service.events().insert(calendarId='primary', body=event).execute()
+    # return event
