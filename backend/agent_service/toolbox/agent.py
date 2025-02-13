@@ -27,7 +27,7 @@ def agent_action(initial_prompt: str):
             tool_choice="auto",  # Let the model decide when to call a tool
             temperature=0.0,  # No randomness
         )
-
+        
         message = response.choices
         for msg in message:
             if msg.finish_reason == "tool_calls":
