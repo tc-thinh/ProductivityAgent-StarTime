@@ -1,7 +1,7 @@
 from openai import OpenAI, pydantic_function_tool
 from .models.calendar_event import CreateCalendarEvent
 from agent_service.apps import AgentServiceConfig
-from .services.tools import tools, tool_map, process_initial_prompt
+from .services.tools import tools, tool_map, get_environmental_context_prompt
 from dotenv import load_dotenv
 import os
 import json
@@ -12,8 +12,8 @@ openai_client = AgentServiceConfig.openai_client
 MODEL = os.getenv('OPENAI_MODEL')
 
 def agent_action(initial_prompt: str):
-    initial_prompt = process_initial_prompt(initial_prompt)
     conversation = [
+        get_environmental_context_prompt(),
         {"role": "user", "content": initial_prompt}
     ]
 
@@ -29,8 +29,9 @@ def agent_action(initial_prompt: str):
         )
         
         message = response.choices
+        print(message)
         for msg in message:
-            if msg.finish_reason == "tool_calls":
+            if msg.message.tool_calls:
                 tool_calls = msg.message.tool_calls
                 conversation.append({"role": "assistant", "content": "", "tool_calls": tool_calls})
 
@@ -39,6 +40,7 @@ def agent_action(initial_prompt: str):
                         tool_name = tool_call.function.name
                         arguments = json.loads(tool_call.function.arguments)
                         tool_output = tool_map[tool_name](**arguments)
+                        print(tool_name, arguments, tool_output)
                         conversation.append({"role": "tool", "tool_call_id": tool_call.id, "content": str(tool_output)})
                     except Exception as e:
                         completed = True
