@@ -1,2 +1,3 @@
 from .section_serializer import SectionSerializer
 from .prompt_serializer import PromptSerializer
+from .category_serializer import CategorySerializer
