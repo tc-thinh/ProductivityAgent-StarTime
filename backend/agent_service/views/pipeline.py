@@ -8,6 +8,8 @@ from agent_service.apps import AgentServiceConfig
 from django.conf import settings
 import os
 from ..toolbox.agent import agent_action
+from ..toolbox.services.sections import get_section_name, create_section
+import threading
 
 # helper
 def resample_audio(audio, sample_rate, target_sample_rate=16000):
@@ -32,6 +34,8 @@ def resample_audio(audio, sample_rate, target_sample_rate=16000):
 )
 @api_view(['POST'])
 def pipeline(request):
+    # Create new section
+    # Add all conversation to that section
     try:
         data = request.data
         user_prompt = data.get('user_prompt')
@@ -51,8 +55,18 @@ def pipeline(request):
             transcription = model.transcribe(file_path)["text"]
             processed_prompt += "[AUDIO]: " + transcription + "\n"
 
-        conversation = agent_action(processed_prompt)
-        return Response({"message": "Data processed successfully", "data": conversation}, status=status.HTTP_200_OK)
+        # Get section name
+        section_name = get_section_name(processed_prompt)
+        section_id = create_section(section_name)
+
+        # Create a new thread to process the conversation
+        def process_conversation():
+            agent_action(processed_prompt, section_id)
+
+        conversation_thread = threading.Thread(target=process_conversation)
+        conversation_thread.start()
+
+        return Response({"message": "Data processed successfully", "sectionId": section_id}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
