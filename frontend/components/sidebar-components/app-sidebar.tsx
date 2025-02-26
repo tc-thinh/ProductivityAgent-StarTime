@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { useEffect, useState } from "react"
-import { Bot, Terminal, Settings, MessageCircle, Wand2 } from "lucide-react"
+import { Bot, Terminal } from "lucide-react"
+import { Icon, IconSize } from "@blueprintjs/core"
 
 import { NavMain } from "@/components/sidebar-components/nav-main"
 import { NavUser } from "@/components/sidebar-components/nav-user"
@@ -38,7 +39,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "History",
         url: "#",
-        icon: MessageCircle,
+        icon: "history",
+        isActive: true,
+        items: [
+          // {
+          //   title: "Starred",
+          //   url: "#",
+          // },
+          // {
+          //   title: "All",
+          //   url: "#",
+          // },
+        ],
+      },
+      {
+        title: "Category Management",
+        url: "/category-management",
+        icon: "tags",
         isActive: true,
         items: [
         ],
