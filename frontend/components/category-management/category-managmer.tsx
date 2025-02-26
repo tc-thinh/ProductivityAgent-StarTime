@@ -23,7 +23,6 @@ export default function CategoryManagement() {
 
     return (
         <div>
-            <h1>Category Management</h1>
             <ul>
                 {categories.map(category => <li key={category.c_id}>{category.c_title}</li>)}
             </ul>
