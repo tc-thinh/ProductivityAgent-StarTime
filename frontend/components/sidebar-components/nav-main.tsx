@@ -27,6 +27,7 @@ export function NavMain({
     icon?: string
     isActive?: boolean
     items?: {
+      id: number
       title: string
       url: string
     }[]
@@ -61,7 +62,7 @@ export function NavMain({
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {item.items.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.title}>
+                      <SidebarMenuSubItem key={subItem.id}>
                         <SidebarMenuSubButton asChild>
                           <a href={subItem.url}>
                             <span>{subItem.title}</span>
