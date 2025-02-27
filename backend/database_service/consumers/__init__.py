@@ -1,1 +1,1 @@
-from .consumers import MyWebSocketConsumer
+from .consumers import SectionUpdatesWebSocket
