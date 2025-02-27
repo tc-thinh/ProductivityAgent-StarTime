@@ -10,6 +10,7 @@ import os
 from ..toolbox.agent import agent_action
 from ..toolbox.services.sections import get_section_name, create_section
 import threading
+import time
 
 # helper
 def resample_audio(audio, sample_rate, target_sample_rate=16000):
@@ -34,9 +35,9 @@ def resample_audio(audio, sample_rate, target_sample_rate=16000):
 )
 @api_view(['POST'])
 def pipeline(request):
-    # Create new section
-    # Add all conversation to that section
     try:
+        start_time = time.time()
+
         data = request.data
         user_prompt = data.get('user_prompt')
         audio_id = data.get('audio_id')
@@ -61,7 +62,13 @@ def pipeline(request):
 
         # Create a new thread to process the conversation
         def process_conversation():
+            thread_start_time = time.time()
             agent_action(processed_prompt, section_id)
+            thread_end_time = time.time()
+            print(f"Time taken to process thread: {thread_end_time - thread_start_time} seconds")
+
+        end_time = time.time()  # End time for reaching the thread creation
+        print(f"Time taken to reach the thread creation: {end_time - start_time} seconds")
 
         conversation_thread = threading.Thread(target=process_conversation)
         conversation_thread.start()
