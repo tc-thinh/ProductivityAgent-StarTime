@@ -3,5 +3,5 @@
 - Run this app in 8080!
 ```bash
 cd backend
-python manage.py runserver 8080
+python manage.py runserver 8080 / daphne -v 0 -p 8080 backend.asgi:application
 ```
