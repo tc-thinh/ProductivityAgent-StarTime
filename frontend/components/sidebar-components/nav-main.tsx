@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { Icon } from "@blueprintjs/core"
 
 import {
   Collapsible,
@@ -24,9 +24,10 @@ export function NavMain({
   items: {
     title: string
     url: string
-    icon?: LucideIcon
+    icon?: string
     isActive?: boolean
     items?: {
+      id: number
       title: string
       url: string
     }[]
@@ -37,7 +38,8 @@ export function NavMain({
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <Collapsible
+          item.items && item.items.length > 0 ? (
+            <Collapsible
             key={item.title}
             asChild
             defaultOpen={item.isActive}
@@ -46,10 +48,13 @@ export function NavMain({
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
+                  {item.icon && <Icon icon={item.icon} />}
                   <span>{item.title}</span>
-                  {item.items && (
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  {item.items && item.items.length > 0 && (
+                    <Icon
+                      icon="chevron-down"
+                      className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180"
+                    />
                   )}
                 </SidebarMenuButton>
               </CollapsibleTrigger>
@@ -57,7 +62,7 @@ export function NavMain({
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {item.items.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.title}>
+                      <SidebarMenuSubItem key={subItem.id}>
                         <SidebarMenuSubButton asChild>
                           <a href={subItem.url}>
                             <span>{subItem.title}</span>
@@ -70,6 +75,16 @@ export function NavMain({
               )}
             </SidebarMenuItem>
           </Collapsible>
+          ) : (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild tooltip={item.title}>
+                <a href={item.url} style={{ color: 'black', textDecoration: 'none'}}>
+                  {item.icon && <Icon icon={item.icon} />}
+                  <span>{item.title}</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )  
         ))}
       </SidebarMenu>
     </SidebarGroup>

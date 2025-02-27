@@ -1,0 +1,123 @@
+[
+    {
+        "model": "database_service.category",
+        "pk": 1,
+        "fields": {
+            "c_color_id": "1",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#a4bdfc",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 2,
+        "fields": {
+            "c_color_id": "2",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#7ae7bf",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 3,
+        "fields": {
+            "c_color_id": "3",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#dbadff",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 4,
+        "fields": {
+            "c_color_id": "4",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#ff887c",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 5,
+        "fields": {
+            "c_color_id": "5",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#fbd75b",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 6,
+        "fields": {
+            "c_color_id": "6",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#ffb878",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 7,
+        "fields": {
+            "c_color_id": "7",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#46d6db",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 8,
+        "fields": {
+            "c_color_id": "8",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#e1e1e1",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 9,
+        "fields": {
+            "c_color_id": "9",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#5484ed",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 10,
+        "fields": {
+            "c_color_id": "10",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#51b749",
+            "c_foreground": "#1d1d1d"
+        }
+    },
+    {
+        "model": "database_service.category",
+        "pk": 11,
+        "fields": {
+            "c_color_id": "11",
+            "c_title": "Untitled",
+            "c_description": "No description available.",
+            "c_background": "#dc2127",
+            "c_foreground": "#1d1d1d"
+        }
+    }
+]

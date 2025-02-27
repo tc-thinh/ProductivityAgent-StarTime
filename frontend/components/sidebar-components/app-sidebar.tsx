@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useEffect, useState } from "react"
-import { Bot, Terminal, Settings, MessageCircle, Wand2 } from "lucide-react"
+import { Bot, Terminal } from "lucide-react"
 
 import { NavMain } from "@/components/sidebar-components/nav-main"
 import { NavUser } from "@/components/sidebar-components/nav-user"
@@ -38,7 +38,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "History",
         url: "#",
-        icon: MessageCircle,
+        icon: "history",
+        isActive: true,
+        items: [
+          // {
+          //   title: "Starred",
+          //   url: "#",
+          // },
+          // {
+          //   title: "All",
+          //   url: "#",
+          // },
+        ],
+      },
+      {
+        title: "Category Management",
+        url: "/category-management",
+        icon: "tags",
         isActive: true,
         items: [
         ],
@@ -54,6 +70,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         console.log('Data fetched:', result);
 
         const fetchedHistoryItems = result.map((item: { s_id: number; s_name: string, s_starred: boolean, s_price: number, s_total_tokens: number }) => ({
+          id: item.s_id,
           title: item.s_name + (item.s_starred ? " ★" : ""),
           url: "/" + item.s_id,
         }));
