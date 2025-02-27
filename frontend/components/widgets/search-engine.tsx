@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Upload } from "lucide-react"
+import { H1, H5, Icon } from "@blueprintjs/core";
 
 export function SearchEngine() {
   const [file, setFile] = useState<File | null>(null)
@@ -20,7 +21,12 @@ export function SearchEngine() {
   return (
     <div className="flex flex-col items-center justify-center gap-6 w-full max-w-3xl">
       {/* App Name */}
-      <h1 className="text-5xl font-bold text-gray-900 mb-6">Agentic AI</h1>
+      {/* <h1 className="text-5xl font-bold text-gray-900 mb-6">It's StarTime!</h1> */}
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        {/* <Icon icon="chat" /> */}
+        <H1>It's <span style={{ color: "#106ba3" }}>StarTime!</span></H1>
+        <H5>Scheduling your day, so you can chase the Stars. 🌟✨</H5>
+      </div>
 
       {/* Search Bar */}
       <div className="w-full flex flex-col items-center gap-6">
