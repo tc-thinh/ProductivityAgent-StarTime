@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Prompt
+from database_service.models import Prompt
 
 class PromptSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,1 +1,1 @@
-from .consumers import SectionUpdatesWebSocket
+from database_service.consumers.consumers import SectionUpdatesWebSocket

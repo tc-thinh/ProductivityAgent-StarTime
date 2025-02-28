@@ -7,8 +7,8 @@ from scipy.signal import resample
 from agent_service.apps import AgentServiceConfig
 from django.conf import settings
 import os
-from ..toolbox.agent import agent_action
-from ..toolbox.services.sections import get_section_name, create_section
+from agent_service.toolbox.agent import agent_action
+from agent_service.toolbox.services.sections import get_section_name, create_section
 import threading
 
 # helper

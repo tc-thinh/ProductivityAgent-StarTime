@@ -1,4 +1,6 @@
 import json
+from database_service.models import Prompt
+from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class SectionUpdatesWebSocket(AsyncWebsocketConsumer):
@@ -18,6 +20,19 @@ class SectionUpdatesWebSocket(AsyncWebsocketConsumer):
 
         # Accept the connection
         await self.accept()
+
+        # Query the database for prompts that contain the section ID
+        prompts = await sync_to_async(list)(Prompt.objects.filter(s_id=self.section_id))
+
+        # Send the prompts to the client
+        for prompt in prompts:
+            await self.send(text_data=json.dumps({
+                'section_id': self.section_id,
+                'role': prompt.pr_role,
+                'content': prompt.pr_content,
+                'tool_calls': None,
+                'tool_call_id': None
+            }))
 
     async def disconnect(self, close_code):
         # Remove the client from the group
