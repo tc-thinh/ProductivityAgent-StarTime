@@ -1,10 +1,9 @@
-# filepath: /c:/Users/congt/Desktop/projects/ProductivityAgent-StarTime/backend/database_service/urls.py
 from django.urls import path, re_path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from .views.section_view import SectionListView, SectionDetailView
-from .views.prompt_view import PromptListView
+from .views.conversation_view import ConversationListView
+from .views.message_view import MessageListView
 from .views.category_view import CategoryListView
 
 schema_view = get_schema_view(
@@ -24,8 +23,7 @@ urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('sections/', SectionListView.as_view(), name='section-list-create'),
-    path('sections/section', SectionDetailView.as_view(), name='section-detail'),
-    path('prompts/', PromptListView.as_view(), name='prompt-list-create'),
+    path('conversations/', ConversationListView.as_view(), name='conversation-view-create-edit'),
+    path('messages/', MessageListView.as_view(), name='mesage-list-create'),
     path('categories/', CategoryListView.as_view(), name='category-list-view'),
 ]
