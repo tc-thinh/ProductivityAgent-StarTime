@@ -37,7 +37,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     navMain: [
       {
         title: "History",
-        url: "#",
+        url: "/history",
         icon: "history",
         isActive: true,
         items: [
