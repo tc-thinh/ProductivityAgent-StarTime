@@ -31,10 +31,6 @@ export default function Landing() {
                 Category Manager
               </BreadcrumbLink>
             </BreadcrumbItem>
-            {/* <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Chat</BreadcrumbPage>
-            </BreadcrumbItem> */}
           </BreadcrumbList>
         </header>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
