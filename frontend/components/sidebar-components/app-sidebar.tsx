@@ -65,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(BACKEND + "/database/sections/"); 
+        const response = await fetch(BACKEND + "/database/conversations/"); 
         const result = await response.json();
         console.log('Data fetched:', result);
 

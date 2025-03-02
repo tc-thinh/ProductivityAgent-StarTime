@@ -24,11 +24,32 @@ export default function CategoryManagement() {
 
   const handleSave = (updatedCategory: Category) => {
     console.log("Updated Category:", updatedCategory);
-    setNotification({ message: "Changes saved successfully!", intent: Intent.SUCCESS });
-    setTimeout(() => setNotification(null), 3000);
-    setCategories(prev => prev.map(cat => 
-      cat.c_id === updatedCategory.c_id ? updatedCategory : cat
-    ));
+
+    fetch(`${BACKEND}/database/categories/?categoryId=${updatedCategory.c_id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedCategory),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to update category');
+      }
+      return response.json();
+    })
+    .then(data => {
+      setNotification({ message: "Changes saved successfully!", intent: Intent.SUCCESS });
+      setTimeout(() => setNotification(null), 3000);
+      setCategories(prev => prev.map(cat => 
+        cat.c_id === updatedCategory.c_id ? updatedCategory : cat
+      ));
+    })
+    .catch(error => {
+      console.error("Error updating category:", error);
+      setNotification({ message: "Failed to save changes", intent: Intent.DANGER });
+      setTimeout(() => setNotification(null), 3000);
+    });
   };
 
   return (
