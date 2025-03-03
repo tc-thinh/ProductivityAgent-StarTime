@@ -36,6 +36,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
     navMain: [
       {
+        title: "New Chat",
+        "url": "/",
+        icon: "annotation",
+        isActive: true,
+        items: []
+      },
+      {
         title: "History",
         url: "#",
         icon: "history",
@@ -69,17 +76,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         const result = await response.json();
         console.log('Data fetched:', result);
 
-        const fetchedHistoryItems = result.map((item: { s_id: number; s_name: string, s_starred: boolean, s_price: number, s_total_tokens: number }) => ({
-          id: item.s_id,
-          title: item.s_name + (item.s_starred ? " ★" : ""),
-          url: "/" + item.s_id,
+        const fetchedHistoryItems = result.map((item: { c_id: number; c_name: string, c_starred: boolean }) => ({
+          id: item.c_id,
+          title: item.c_name + (item.c_starred ? " ★" : ""),
+          url: "/" + item.c_id,
         }));
         // console.log(fetchedHistoryItems)
 
         setData(prevData => ({
           ...prevData,
           navMain: prevData.navMain.map((item, index) =>
-            index === 0 ? { ...item, items: fetchedHistoryItems } : item
+            index === 1 ? { ...item, items: fetchedHistoryItems } : item
           ),
         }))
 

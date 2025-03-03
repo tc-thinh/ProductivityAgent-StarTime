@@ -1,3 +1,5 @@
+"use client"
+
 import { AppSidebar } from "@/components/sidebar-components/app-sidebar"
 import {
   Breadcrumb,
@@ -15,7 +17,6 @@ import {
 } from "@/components/ui/sidebar"
 
 import { SearchEngine } from "@/components/widgets/search-engine"
-
 
 export default function Landing() {
   return (

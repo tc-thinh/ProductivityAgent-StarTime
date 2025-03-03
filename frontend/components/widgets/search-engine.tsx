@@ -1,12 +1,17 @@
 "use client"
 
 import { useState } from "react"
+import { useNavigate } from 'react-router-dom'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Upload } from "lucide-react"
-import { H1, H5, Icon } from "@blueprintjs/core";
+import { H1, H5 } from "@blueprintjs/core"
+
+const BACKEND = process.env.BACKEND || 'http://localhost:8080'
 
 export function SearchEngine() {
+  // TODO: Migrate these components to Blueprint.js\
+  const [inputValue, setInputValue] = useState<string>("")
   const [file, setFile] = useState<File | null>(null)
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,6 +20,33 @@ export function SearchEngine() {
       setFile(selectedFile)
       console.log("File selected:", selectedFile.name)
       // You can add file upload logic here (e.g., send to an API)
+    }
+  }
+
+  const navigate = useNavigate()
+  const handleSearch = async () => {
+    console.log("Current Input:", inputValue)
+
+    const response = await fetch(BACKEND + "/agent/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", 
+      },
+      body: JSON.stringify({
+        "userPrompt": inputValue,
+        "audio_id": "",
+      }),
+    });
+
+    const data = await response.json();
+    console.log(data)
+
+    navigate(`/${data.conversationId}`);
+  }
+
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
+      handleSearch()
     }
   }
 
@@ -30,13 +62,18 @@ export function SearchEngine() {
 
       {/* Search Bar */}
       <div className="w-full flex flex-col items-center gap-6">
-        <div className="relative w-full max-w-2xl">
+      <div className="relative w-full max-w-2xl">
           <Input
             placeholder="Ask me anything..."
             className="w-full rounded-lg px-6 py-6 text-lg shadow-sm border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyPress}
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-            <Search className="size-5 text-gray-400" />
+          <Button onClick={handleSearch} className="text-gray-400 bg-transparent border-none hover:bg-transparent hover:text-blue-500">
+            <Search />
+          </Button>
           </div>
         </div>
 

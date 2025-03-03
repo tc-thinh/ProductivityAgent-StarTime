@@ -109,7 +109,7 @@ export const mockConversation1: ConversationMessages = {
           {
             "id": "call_9PQeuR51PDIXZpFa5RXnUm5w",
             "function": {
-              "arguments": "{\"event\":{\"start\":{\"dateTime\":\"2025-03-03T08:00:00-07:00\",\"timeZone\":\"America/Phoenix\"},\"end\":{\"dateTime\":\"2025-03-03T09:00:00-07:00\",\"timeZone\":\"America/Phoenix\"},\"summary\":\"Demo to Mia Vo about StarTime\",\"description\":\"Blocker to demo my start-up idea, StarTime, to Mia Vo.\",\"location\":\"\",\"attendees\":[{\"email\":\"mia.vo@example.com\",\"displayName\":\"Mia Vo\"}],\"reminders\":{\"useDefault\":true,\"overrides\":[]},\"colorId\":\"0\",\"recurrence\":[]},"calendarId":"primary\"}",
+              "arguments": "{\"event\":{\"start\":{\"dateTime\":\"2025-03-03T08:00:00-07:00\",\"timeZone\":\"America/Phoenix\"},\"end\":{\"dateTime\":\"2025-03-03T09:00:00-07:00\",\"timeZone\":\"America/Phoenix\"},\"summary\":\"Demo to Mia Vo about StarTime\",\"description\":\"Blocker to demo my start-up idea, StarTime, to Mia Vo.\",\"location\":\"\",\"attendees\":[{\"email\":\"mia.vo@example.com\",\"displayName\":\"Mia Vo\"}],\"reminders\":{\"useDefault\":true,\"overrides\":[]},\"colorId\":\"0\",\"recurrence\":[]}, \"calendarId\":\"primary\"}",
               "name": "CreateCalendarEvent"
             },
             "type": "function"
@@ -164,3 +164,8 @@ export const mockConversation2: ConversationMessages = {
     }
   ]  
 }
+
+export const mockPromptSuggestions: string[] = [
+  "Quick overview of my schedule for today",
+  "Add an event: "
+]
