@@ -2,9 +2,7 @@ from django.urls import path, re_path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from .views.conversation_view import ConversationListView
-from .views.message_view import MessageListView
-from .views.category_view import CategoryListView
+from database_service.views import *
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -26,4 +24,5 @@ urlpatterns = [
     path('conversations/', ConversationListView.as_view(), name='conversation-view-create-edit'),
     path('messages/', MessageListView.as_view(), name='mesage-list-create'),
     path('categories/', CategoryListView.as_view(), name='category-list-view'),
+    path('toolcalls/', ToolCallListView.as_view(), name='toolcall-list-create')
 ]

@@ -30,4 +30,5 @@ def update_conversation(conversation_id: int, conversation_name: str):
 
 def create_blank_conversation():
     conversation = requests.post(DATABASE_SERVICE_URL + "/conversations/").json()
-    return conversation.c_id
+    # print(conversation)
+    return conversation.get('c_id')

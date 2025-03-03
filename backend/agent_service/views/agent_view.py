@@ -10,6 +10,7 @@ import os
 from agent_service.toolbox.agent import agent_action
 from agent_service.toolbox.services.conversations import *
 import threading
+from rest_framework.views import APIView
 
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 
@@ -48,31 +49,41 @@ def process(data: dict, conversation_id: int):
     conversation_thread = threading.Thread(target=process_conversation)
     conversation_thread.start()
 
-@swagger_auto_schema(
-    method='post',
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'user_prompt': openapi.Schema(type=openapi.TYPE_STRING, description='User input prompt. Required.'),
-            'audio_id': openapi.Schema(type=openapi.TYPE_STRING, description='The id of the audio file. Optional.'),
-        },
-        required=[],
-    ),
-    responses={
-        200: openapi.Response('OK'),
-        400: openapi.Response('Bad Request'),
-    }
-)
-@api_view(['POST'])
-def agent(request):
-    try:
-        # new conversation (c_id, c_name, c_starred, c_created_at)
-        conversation_id = create_blank_conversation()
-
-        process_thread = threading.Thread(target=process, args=(request.data, conversation_id))
-        process_thread.start()
-
-        return Response({"message": "Data processed successfully", "conversationId": conversation_id}, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
+class AgentView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'user_prompt': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description='User input prompt. Required.'
+                ),
+                'audio_id': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description='The id of the audio file. Optional.'
+                ),
+            },
+            required=[],  
+        ),
+        responses={
+            200: openapi.Response('OK'),
+            400: openapi.Response('Bad Request'),
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            # Create a new conversation record.
+            conversation_id = create_blank_conversation()
+            
+            # Start processing in a new thread.
+            process_thread = threading.Thread(target=process, args=(request.data, conversation_id))
+            process_thread.start()
+            
+            return Response({
+                "message": "Data processed successfully", 
+                "conversationId": conversation_id
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "error": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
