@@ -21,7 +21,13 @@ class CategoryListView(APIView):
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('categoryId', openapi.IN_QUERY, description="ID of the category to modify", type=openapi.TYPE_INTEGER, required=True),
+            openapi.Parameter(
+                'categoryId', 
+                openapi.IN_QUERY, 
+                description="ID of the category to modify", 
+                type=openapi.TYPE_INTEGER, 
+                required=True
+            ),
         ],
         request_body=CategorySerializer,
         responses={

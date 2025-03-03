@@ -40,15 +40,25 @@ class ConversationListView(APIView):
 
     @swagger_auto_schema(
         request_body=ConversationSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                'conversationId',
+                openapi.IN_QUERY,  
+                description="Conversation ID to update",
+                type=openapi.TYPE_INTEGER, 
+                required=True
+            ),
+        ],
         responses={
             200: openapi.Response('OK', ConversationSerializer),
             404: openapi.Response('Not Found'),
             400: openapi.Response('Bad Request'),
         }
     )
-    def put(self, request, conversationId=None):
+    def put(self, request):
         try:
-            conversation = Conversation.objects.get(c_id=conversationId)
+            conversation_id = request.query_params.get('conversationId')
+            conversation = Conversation.objects.get(c_id=conversation_id)
         except Conversation.DoesNotExist:
             return Response({"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
 

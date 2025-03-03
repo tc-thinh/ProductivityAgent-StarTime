@@ -19,7 +19,7 @@ export default function ChatCanvas()  {
     useEffect(() => {
         if (!id) return
 
-        const ws = new WebSocket(`${WS_BACKEND}/ws/section/${id}/`)
+        const ws = new WebSocket(`${WS_BACKEND}/ws/conversations/?conversationId=${id}/`)
 
         ws.onopen = () => {
             console.log('WebSocket connection established')

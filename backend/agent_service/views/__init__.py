@@ -1,1 +1,1 @@
-from .pipeline import pipeline
+from .agent import agent
