@@ -1,5 +1,6 @@
 import json
 from database_service.models import Conversation
+from database_service.serializers import ConversationSerializer
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -27,8 +28,17 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
         # Accept the connection
         await self.accept()
 
-        self.conversation_messages = self.conversation.c_messages  
-        await self.send(text_data=json.dumps(self.conversation_messages))
+        self.conversation_messages = self.conversation.c_messages
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                'type': 'chat_message',  # Uses the `chat_message` handler
+                'message': {
+                    'type': 'conversation',
+                    'message': ConversationSerializer(self.conversation).data
+                }
+            }
+        )
 
     async def disconnect(self, close_code):
         # Remove the client from the group
@@ -57,7 +67,6 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
             self.group_name,
             {
                 'type': 'chat_message',
-                'conversation_id': self.conversation_id,
                 'message': data
             }
         )
@@ -65,7 +74,6 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         # Send the message to WebSocket
         await self.send(text_data=json.dumps({
-            'conversation_id': event['conversation_id'],
-            'message': event['message']
+            'data': event['message']
         }))
         

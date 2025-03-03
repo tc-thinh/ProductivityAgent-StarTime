@@ -27,10 +27,12 @@ interface Message {
 }
 
 const WS_BACKEND = process.env.WS_BACKEND || 'ws://localhost:8080'
+const HTTP_BACKEND = process.env.BACKEND || 'http://localhost:8080'
 
 export default function ChatCanvas()  {
     const { id } = useParams()
     const [messages, setMessages] = useState<Message[]>([])
+    const [conversationName, setConversationName] = useState<string>("Untitled")
 
     useEffect(() => {
         if (!id) return
@@ -43,8 +45,24 @@ export default function ChatCanvas()  {
         }
 
         ws.onmessage = (event) => {
-            const message = JSON.parse(event.data)
-            setMessages((prevMessages) => [...prevMessages, message])
+            const data = JSON.parse(event.data).data
+            console.log(data)
+
+            switch (data.type) {
+              case "conversation":
+                setConversationName(data.message.c_name)
+                setMessages((prevMessages) => [...prevMessages, ...data.message.c_messages])
+                break
+              case "conversation_name":
+                setConversationName(data.message.c_name)
+                break
+              case "conversation_message":
+                setMessages((prevMessages) => [...prevMessages, data.message])
+                break
+              default:
+                console.log(":( What is this?")
+                break
+            }
         }
 
         ws.onclose = () => {
@@ -70,7 +88,7 @@ export default function ChatCanvas()  {
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">
-                    Conversation Name
+                    {conversationName}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
