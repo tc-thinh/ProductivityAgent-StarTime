@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Upload } from "lucide-react"
@@ -23,7 +23,8 @@ export function SearchEngine() {
     }
   }
 
-  const navigate = useNavigate()
+  const router = useRouter()
+
   const handleSearch = async () => {
     console.log("Current Input:", inputValue)
 
@@ -34,14 +35,14 @@ export function SearchEngine() {
       },
       body: JSON.stringify({
         "userPrompt": inputValue,
-        "audio_id": "",
+        "audioId": "",
       }),
     });
 
     const data = await response.json();
     console.log(data)
 
-    navigate(`/${data.conversationId}`);
+    router.push(`/${data.conversationId}`)
   }
 
   const handleKeyPress = (event: React.KeyboardEvent) => {

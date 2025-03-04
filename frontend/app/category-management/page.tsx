@@ -14,7 +14,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-import CategoryManagement from "@/components/category-management/category-managmer"
+import CategoryManagement from "@/components/category-management/category-manager"
 
 
 export default function Landing() {
