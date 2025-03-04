@@ -24,7 +24,7 @@ def update_conversation(conversation_id: int, conversation_name: str):
         "c_name": conversation_name
     }
 
-    response = requests.post(f"{DATABASE_SERVICE_URL}/conversations/?conversationId={conversation_id}", json=c_name)
+    response = requests.put(f"{DATABASE_SERVICE_URL}/conversations/?conversationId={conversation_id}", json=c_name)
     print(response.json())
     # return response.json()['s_id']
 
