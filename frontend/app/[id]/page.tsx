@@ -87,7 +87,7 @@ export default function ChatCanvas()  {
               <Separator orientation="vertical" className="mr-2 h-4" />
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
+                  <BreadcrumbLink href="/{id}">
                     {conversationName}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
