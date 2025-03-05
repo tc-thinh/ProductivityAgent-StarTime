@@ -30,6 +30,7 @@ interface History {
   url: string
   id: number
   date: string
+  isToday: boolean
 }
 
 export function NavHistories() {
@@ -40,35 +41,39 @@ export function NavHistories() {
 
   const fetchHistory = async () => {
     try {
-      const response = await fetch(BACKEND + "/database/conversations/"); 
-      const result = await response.json();
-      console.log('Data fetched:', result);
+      const response = await fetch(BACKEND + "/database/conversations/") 
+      const result = await response.json()
+      console.log('Data fetched:', result)
 
-      const today = new Date().toISOString().split('T')[0];
+      const now = new Date()
+      const today = now.toLocaleDateString()
       
-      const fetchedHistoryItems = result.map((item: { c_id: number; c_name: string, c_created_at: string }) => {
-        const conversationDate = new Date(item.c_created_at);
-        const localDate = conversationDate.toLocaleString();
+      const fetchedHistoryItems = result.map((item: { c_id: number, c_name: string, c_created_at: string }) => {
+        const conversationDate = new Date(item.c_created_at)
+        const localDate = conversationDate.toLocaleString()
+        const localDateString = conversationDate.toLocaleDateString()
+
         return {
           id: item.c_id,
           name: item.c_name,
           url: "/" + item.c_id,
-          date: localDate
-        };
-      });
+          date: localDate,
+          isToday: localDateString === today
+        }
+      })
 
-      const todayItems = fetchedHistoryItems.filter((item: History) => new Date(item.date).toISOString().split('T')[0] === today);
-      const olderItems = fetchedHistoryItems.filter((item: History) => new Date(item.date).toISOString().split('T')[0] !== today);
+      const todayItems = fetchedHistoryItems.filter((item: History) => item.isToday)
+      const olderItems = fetchedHistoryItems.filter((item: History) => !item.isToday)
       
-      setTodayHistories(todayItems);
-      setOlderHistories(olderItems);
+      setTodayHistories(todayItems)
+      setOlderHistories(olderItems)
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching data:', error)
     }
   }
 
   useEffect(() => {
-    fetchHistory();
+    fetchHistory()
   }, [])
 
   const deleteConversation = async (conversationId: number) => {
@@ -78,17 +83,17 @@ export function NavHistories() {
         headers: {
           "Content-Type": "application/json",
         },
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete conversation");
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to delete conversation")
       }
 
       fetchHistory()
-      console.log("Conversation deleted successfully");
+      console.log("Conversation deleted successfully")
     } catch (error: any) {
-      console.error("Error deleting conversation:", error.message);
+      console.error("Error deleting conversation:", error.message)
     }
   }
 
