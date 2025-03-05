@@ -28,13 +28,15 @@ const BACKEND = process.env.BACKEND || 'http://localhost:8080'
 interface History {
   name: string
   url: string
-  emoji: string
   id: number
+  date: string
 }
 
 export function NavHistories() {
   const { isMobile } = useSidebar()
-  const [histories, setHistories] = useState<History[]>([])
+  const [todayHistories, setTodayHistories] = useState<History[]>([])
+  const [olderHistories, setOlderHistories] = useState<History[]>([])
+  const [showAll, setShowAll] = useState(false)
 
   const fetchHistory = async () => {
     try {
@@ -42,13 +44,24 @@ export function NavHistories() {
       const result = await response.json();
       console.log('Data fetched:', result);
 
-      const fetchedHistoryItems = result.map((item: { c_id: number; c_name: string, c_deleted: boolean }) => ({
-        id: item.c_id,
-        name: item.c_name,
-        url: "/" + item.c_id,
-      }));
-      setHistories(fetchedHistoryItems)
+      const today = new Date().toISOString().split('T')[0];
+      
+      const fetchedHistoryItems = result.map((item: { c_id: number; c_name: string, c_created_at: string }) => {
+        const conversationDate = new Date(item.c_created_at);
+        const localDate = conversationDate.toLocaleString();
+        return {
+          id: item.c_id,
+          name: item.c_name,
+          url: "/" + item.c_id,
+          date: localDate
+        };
+      });
 
+      const todayItems = fetchedHistoryItems.filter((item: History) => new Date(item.date).toISOString().split('T')[0] === today);
+      const olderItems = fetchedHistoryItems.filter((item: History) => new Date(item.date).toISOString().split('T')[0] !== today);
+      
+      setTodayHistories(todayItems);
+      setOlderHistories(olderItems);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -60,36 +73,33 @@ export function NavHistories() {
 
   const deleteConversation = async (conversationId: number) => {
     try {
-        const response = await fetch(`${BACKEND}/database/conversations/?conversationId=${conversationId}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+      const response = await fetch(`${BACKEND}/database/conversations/?conversationId=${conversationId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to delete conversation");
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete conversation");
+      }
 
-        // Update state to remove deleted conversation
-        fetchHistory()
-
-        console.log("Conversation deleted successfully");
+      fetchHistory()
+      console.log("Conversation deleted successfully");
     } catch (error: any) {
-        console.error("Error deleting conversation:", error.message);
+      console.error("Error deleting conversation:", error.message);
     }
   }
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>History</SidebarGroupLabel>
+      <SidebarGroupLabel>Today's Conversations</SidebarGroupLabel>
       <SidebarMenu>
-        {histories.map((item) => (
+        {todayHistories.map((item) => (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
               <a href={item.url} title={item.name}>
-                <span>{item.emoji}</span>
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
@@ -120,12 +130,51 @@ export function NavHistories() {
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+      </SidebarMenu>
+      <SidebarGroupLabel>Older Conversations</SidebarGroupLabel>
+      <SidebarMenu>
+        {(showAll ? olderHistories : olderHistories.slice(0, 5)).map((item) => (
+          <SidebarMenuItem key={item.id}>
+            <SidebarMenuButton asChild>
+              <a href={item.url} title={item.name}>
+                <span>{item.name}</span>
+              </a>
+            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuAction showOnHover>
+                  <MoreHorizontal />
+                  <span className="sr-only">More</span>
+                </SidebarMenuAction>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-56 rounded-lg"
+                side={isMobile ? "bottom" : "right"}
+                align={isMobile ? "end" : "start"}
+              >
+                <DropdownMenuItem asChild>
+                  <a href={item.url} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpRight className="text-muted-foreground" />
+                    <span>Open in New Tab</span>
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => deleteConversation(item.id)}>
+                  <Trash2 className="text-muted-foreground" />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        ))}
+        {olderHistories.length > 5 && (
+          <SidebarMenuItem>
+            <SidebarMenuButton className="text-sidebar-foreground/70" onClick={() => setShowAll(!showAll)}>
+              <MoreHorizontal />
+              <span>{showAll ? "Show Less" : "View More"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
       </SidebarMenu>
     </SidebarGroup>
   )
