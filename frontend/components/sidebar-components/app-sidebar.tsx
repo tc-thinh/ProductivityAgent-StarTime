@@ -6,6 +6,7 @@ import { Bot, Terminal } from "lucide-react"
 
 import { NavMain } from "@/components/sidebar-components/nav-main"
 import { NavUser } from "@/components/sidebar-components/nav-user"
+import { NavHistories } from "@/components/sidebar-components/nav-history"
 import { TeamSwitcher } from "@/components/sidebar-components/team-switcher"
 import {
   Sidebar,
@@ -43,22 +44,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: []
       },
       {
-        title: "History",
-        url: "#",
-        icon: "history",
-        isActive: true,
-        items: [
-          // {
-          //   title: "Starred",
-          //   url: "#",
-          // },
-          // {
-          //   title: "All",
-          //   url: "#",
-          // },
-        ],
-      },
-      {
         title: "Category Management",
         url: "/category-management",
         icon: "tags",
@@ -66,37 +51,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
         ],
       }
-    ],
+    ]
   })
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(BACKEND + "/database/conversations/"); 
-        const result = await response.json();
-        console.log('Data fetched:', result);
-
-        const fetchedHistoryItems = result.map((item: { c_id: number; c_name: string, c_starred: boolean }) => ({
-          id: item.c_id,
-          title: item.c_name + (item.c_starred ? " ★" : ""),
-          url: "/" + item.c_id,
-        }));
-        // console.log(fetchedHistoryItems)
-
-        setData(prevData => ({
-          ...prevData,
-          navMain: prevData.navMain.map((item, index) =>
-            index === 1 ? { ...item, items: fetchedHistoryItems } : item
-          ),
-        }))
-
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    }
-    
-    fetchData();
-  }, [])
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -105,6 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavHistories />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

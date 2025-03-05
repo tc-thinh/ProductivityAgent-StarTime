@@ -15,7 +15,7 @@ class ConversationListView(APIView):
         }
     )
     def get(self, request):
-        conversations = Conversation.objects.all()
+        conversations = Conversation.objects.filter(c_deleted=False).order_by('-c_created_at')
         serializer = ConversationSerializer(conversations, many=True)
         return Response(serializer.data)
 
@@ -67,3 +67,31 @@ class ConversationListView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'conversationId',
+                openapi.IN_QUERY,  
+                description="Conversation ID to delete",
+                type=openapi.TYPE_INTEGER, 
+                required=True
+            ),
+        ],
+        responses={
+            200: openapi.Response('OK', ConversationSerializer),
+            404: openapi.Response('Not Found'),
+            400: openapi.Response('Bad Request'),
+        }
+    )
+    def delete(self, request):
+        try:
+            conversation_id = request.query_params.get('conversationId')
+            conversation = Conversation.objects.get(c_id=conversation_id)
+        except Conversation.DoesNotExist:
+            return Response({"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        conversation.c_deleted = True
+        conversation.save()
+        serializer = ConversationSerializer(conversation)
+        return Response(serializer.data, status=status.HTTP_200_OK)

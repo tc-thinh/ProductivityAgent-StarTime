@@ -46,10 +46,16 @@ def process(data: dict, conversation_id: int):
                 logger.error(f"Error transcribing audio: {str(e)}")
                 raise
 
-        # TODO: create a new thread for conversation naming
-        c_name = get_conversation_name(processed_prompt)
-        logger.info(f"Conversation {conversation_id} name: {c_name}")
-        update_conversation(conversation_id, c_name)
+        def conversation_naming():
+            try:
+                c_name = get_conversation_name(processed_prompt)
+                logger.info(f"Conversation {conversation_id} name: {c_name}")
+                update_conversation(conversation_id, c_name)
+            except Exception as e:
+                logger.error(f"Error in conversation naming: {str(e)}")
+
+        converastion_naming_thread = threading.Thread(target=conversation_naming)
+        converastion_naming_thread.start()
 
         def process_conversation():
             try:

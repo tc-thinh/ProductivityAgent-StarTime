@@ -1,87 +1,149 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
+import { Edit, X } from 'lucide-react'; 
+import type { Category } from "@/lib/types";
 import { useState } from "react";
-import { Card, Button, SectionCard } from "@blueprintjs/core";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
-import { CategoryCard } from "@/lib/types";
-
-export const CategoryCardSection: React.FC<CategoryCard> = ({ category, onSave }) => {
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
+export const CategoryCardSection: React.FC<{ 
+  category: Category;
+  onEdit: (updatedCategory: Category) => void; 
+}> = ({ category, onEdit }) => {
+  const [isEditing, setIsEditing] = useState(false); 
   const [tempTitle, setTempTitle] = useState(category.c_title);
-  const [tempDescription, setTempDescription] = useState(category.c_description);
+  const [tempDesc, setTempDesc] = useState(category.c_description);
+
+  const handleEditClick = () => {
+    setIsEditing(true); // Enter edit mode
+  };
 
   const handleSave = () => {
-    onSave({
+    const updatedCategory = {
       ...category,
       c_title: tempTitle,
-      c_description: tempDescription,
-    });
-    setIsEditingTitle(false);
-    setIsEditingDescription(false);
+      c_description: tempDesc,
+    };
+    onEdit(updatedCategory); // Notify parent of changes
+    setIsEditing(false); // Exit edit mode
+  };
+
+  const handleCancel = () => {
+    setTempTitle(category.c_title);
+    setTempDesc(category.c_description);
+    setIsEditing(false); // Exit edit mode
   };
 
   return (
-    <SectionCard className="min-w-[300px] max-w-[400px] bg-transparent shadow-none">
+    <>
       <Card
-        className="w-full p-4 rounded-xl shadow-lg flex flex-col justify-between transition-all hover:shadow-xl"
+        className="w-full p-4 shadow-lg flex flex-col justify-between transition-all hover:shadow-xl relative"
         style={{
           backgroundColor: category.c_background,
           color: category.c_foreground,
-          minHeight: '250px'
         }}
       >
-        <div className="space-y-4">
+        {/* Edit Button */}
+        <div
+          className="absolute top-2 right-2 cursor-pointer p-1 rounded-full hover:bg-white hover:bg-opacity-20"
+          onClick={handleEditClick}
+        >
+          <Edit size={14} color={category.c_foreground} />
+        </div>
+
+        <div className="space-y-2">
           {/* Title Section */}
-          <div
-            className={`p-2 rounded-lg ${isEditingTitle ? "bg-white bg-opacity-20" : ""}`}
-            onClick={() => setIsEditingTitle(true)}
-          >
-            {isEditingTitle ? (
-              <input
-                value={tempTitle}
-                onChange={(e) => setTempTitle(e.target.value)}
-                className="text-xl font-bold w-full bg-transparent focus:outline-none"
-                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-                placeholder="Title"
-                autoFocus
-              />
-            ) : (
-              <div className="text-xl font-bold truncate cursor-pointer">
-                {tempTitle || "Title"}
-              </div>
-            )}
+          <div className="p-1">
+            <div className="text- font-bold truncate overflow-hidden text-ellipsis whitespace-nowrap">
+              {category.c_title || "Title"}
+            </div>
           </div>
 
           {/* Description Section */}
-          <div
-            className={`p-2 rounded-lg ${isEditingDescription ? "bg-white bg-opacity-20" : ""}`}
-            onClick={() => setIsEditingDescription(true)}
-          >
-            {isEditingDescription ? (
-              <textarea
-                value={tempDescription}
-                onChange={(e) => setTempDescription(e.target.value)}
-                className="min-h-[120px] w-full bg-transparent focus:outline-none resize-y"
-                placeholder="Description"
-                autoFocus
-              />
-            ) : (
-              <div className="min-h-[120px] cursor-pointer whitespace-pre-line">
-                {tempDescription || "Description"}
-              </div>
-            )}
+          <div className="p-1">
+            <div className="min-h-[60px] overflow-hidden">
+              <p className="text-m line-clamp-3 text-ellipsis break-words">
+                {category.c_description || "Description"}
+              </p>
+            </div>
           </div>
         </div>
-
-        <Button
-          intent="primary"
-          className="mt-4 bg-background w-full font-bold rounded-lg py-2 hover:scale-[1.02] transition-transform"
-          onClick={handleSave}
-        >
-          Save Changes
-        </Button>
       </Card>
-    </SectionCard>
+
+
+      {isEditing && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <Card className="w-full max-w-[70vh] h-full max-h-[70vh] p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Edit Category</h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleCancel} 
+            >
+              <X className="h-4 w-4" /> 
+            </Button>
+          </div>
+
+          <div className="flex-1 flex flex-col space-y-4">
+            {/* Title Input (1/3 of the card height) */}
+            <Label className="flex-[2] flex flex-col">
+              <span className="text-sm font-bold mb-1">Title (Max 50 characters)</span>
+              <Input
+                value={tempTitle}
+                onChange={(e) => {
+                  if (e.target.value.length <= 50) { // Enforce 50-character limit
+                    setTempTitle(e.target.value);
+                  }
+                }}
+                maxLength={50} 
+                className="flex-2" 
+              />
+              <span
+                className={`text-xs mt-1 ${
+                  tempTitle.length >= 50 ? "text-red-500" : "text-gray-500"
+                }`}
+              >
+                {tempTitle.length}/50 characters
+              </span>
+            </Label>
+
+            {/* Description Textarea (2/3 of the card height) */}
+            <Label className="flex-[9] flex flex-col">
+              <span className="text-sm font-bold mb-1">Description (Max 200 characters)</span>
+              <Textarea
+                value={tempDesc}
+                onChange={(e: any) => {
+                  if (e.target.value.length <= 200) { // Enforce 200-character limit
+                    setTempDesc(e.target.value);
+                  }
+                }}
+                maxLength={200} // Optional: Enforce a hard character limit
+                className="flex-1 resize-none" // Make the textarea fill the available space and disable resizing
+              />
+              <span
+                className={`text-xs mt-1 ${
+                  tempDesc.length >= 200 ? "text-red-500" : "text-gray-500"
+                }`}
+              >
+                {tempDesc.length}/200 characters
+              </span>
+            </Label>
+
+            {/* Save and Cancel Buttons */}
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>Save</Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    )}
+    </>
   );
 };
