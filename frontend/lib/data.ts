@@ -3,9 +3,9 @@ import { Category, ConversationMessages } from "./types"
 export const mockCategories:  Category[] = [
   {
     "c_id": 1,
-    "c_color_id": "color1",
-    "c_title": "Work",
-    "c_description": "Tasks related to work",
+    "c_color_id": "color1", 
+    "c_title": "Work dhweuidhuewihiwqu",
+    "c_description": "Tasks related to work whwirbwefdbwiodfhnweqiodneowdifnqikowefqiojhbfuyhqiebfijherfbguyhiqerfiuoyqwrbfqijeuof",
     "c_background": "#FFCCCC",
     "c_foreground": "#000000"
   },

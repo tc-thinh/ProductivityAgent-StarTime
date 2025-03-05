@@ -1,12 +1,10 @@
-"use client"
-
-import { Icon } from "@blueprintjs/core"
+"use client";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -16,77 +14,79 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { ChevronDown, ChevronUp, Home, Settings, Users } from "lucide-react"; // Import specific icons
 
 export function NavMain({
-  items
+  items,
 }: {
   items: {
-    title: string
-    url: string
-    icon?: string
-    isActive?: boolean
+    title: string;
+    url: string;
+    icon?: string;
+    isActive?: boolean;
     items?: {
-      id: number
-      title: string
-      url: string
-    }[]
-  }[]
+      id: number;
+      title: string;
+      url: string;
+    }[];
+  }[];
 }) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {items.map((item) =>
           item.items && item.items.length > 0 ? (
             <Collapsible
-            key={item.title}
-            asChild
-            defaultOpen={item.isActive}
-            className="group/collapsible"
-          >
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <Icon icon={item.icon} />}
-                  <span>{item.title}</span>
-                  {item.items && item.items.length > 0 && (
-                    <Icon
-                      icon="chevron-down"
-                      className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180"
-                    />
-                  )}
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              {item.items && (
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {item.items.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.id}>
-                        <SidebarMenuSubButton asChild>
-                          <a href={subItem.url}>
-                            <span>{subItem.title}</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              )}
-            </SidebarMenuItem>
-          </Collapsible>
+              key={item.title}
+              asChild
+              defaultOpen={item.isActive}
+              className="group/collapsible"
+            >
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton tooltip={item.title}>
+                    {item.icon === "home" && <Home className="h-4 w-4" />}
+                    {item.icon === "settings" && <Settings className="h-4 w-4" />}
+                    {item.icon === "users" && <Users className="h-4 w-4" />}
+                    <span>{item.title}</span>
+                    {item.items && item.items.length > 0 && (
+                      <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                    )}
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                {item.items && (
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.id}>
+                          <SidebarMenuSubButton asChild>
+                            <a href={subItem.url}>
+                              <span>{subItem.title}</span>
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                )}
+              </SidebarMenuItem>
+            </Collapsible>
           ) : (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url} style={{ color: 'black', textDecoration: 'none'}}>
-                  {item.icon && <Icon icon={item.icon} />}
+                <a href={item.url} className="text-black no-underline">
+                  {item.icon === "home" && <Home className="h-4 w-4" />}
+                  {item.icon === "settings" && <Settings className="h-4 w-4" />}
+                  {item.icon === "users" && <Users className="h-4 w-4" />}
                   <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          )  
-        ))}
+          )
+        )}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

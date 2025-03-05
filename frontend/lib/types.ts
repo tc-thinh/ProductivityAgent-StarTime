@@ -42,3 +42,10 @@ export interface ConversationMessages {
     conversationId: number;
     message: (ConversationMessage | ToolCallMessage | ToolCallResult)[]
 }
+
+
+export interface EditCanvasProps {
+  category: Category;
+  onSave: (updatedCategory: Category) => void;
+  onCancel: () => void;
+}

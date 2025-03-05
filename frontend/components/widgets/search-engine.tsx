@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Upload } from "lucide-react"
-import { H1, H5 } from "@blueprintjs/core"
 
 const BACKEND = process.env.BACKEND || 'http://localhost:8080'
 
@@ -56,8 +55,8 @@ export function SearchEngine() {
       {/* <h1 className="text-5xl font-bold text-gray-900 mb-6">It's StarTime!</h1> */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         {/* <Icon icon="chat" /> */}
-        <H1>It's <span style={{ color: "#106ba3" }}>StarTime!</span></H1>
-        <H5>Scheduling your day, so you can chase the Stars. 🌟✨</H5>
+        <h1>It's <span style={{ color: "#106ba3" }}>StarTime!</span></h1>
+        <h5>Scheduling your day, so you can chase the Stars. 🌟✨</h5>
       </div>
 
       {/* Search Bar */}
