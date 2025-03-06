@@ -16,6 +16,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { ChevronDown, ChevronUp, Home, Settings, Users } from "lucide-react"
+import { ElementType } from "react"
 
 export function NavMain({
   items
@@ -23,7 +24,7 @@ export function NavMain({
   items: {
     title: string
     url: string
-    icon?: string
+    icon?: ElementType
     isActive?: boolean
     items?: {
       id: number
@@ -47,9 +48,7 @@ export function NavMain({
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
               <SidebarMenuButton tooltip={item.title}>
-                {item.icon === "home" && <Home className="h-4 w-4" />}
-                {item.icon === "settings" && <Settings className="h-4 w-4" />}
-                {item.icon === "users" && <Users className="h-4 w-4" />}
+                {item.icon && <item.icon className="h-4 w-4" />}
                 <span>{item.title}</span>
                 {item.items && item.items.length > 0 && (
                   <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
@@ -77,9 +76,7 @@ export function NavMain({
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild tooltip={item.title}>
               <a href={item.url} className="text-black no-underline">
-                {item.icon === "home" && <Home className="h-4 w-4" />}
-                {item.icon === "settings" && <Settings className="h-4 w-4" />}
-                {item.icon === "users" && <Users className="h-4 w-4" />}
+                {item.icon && <item.icon className="h-4 w-4" />}
                 <span>{item.title}</span>
               </a>
               </SidebarMenuButton>

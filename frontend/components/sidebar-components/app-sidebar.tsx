@@ -15,8 +15,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-
-const BACKEND = process.env.BACKEND || 'http://localhost:8080'
+import { BotMessageSquare, FolderKanban } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [data, setData] = useState({
@@ -39,14 +38,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "New Chat",
         "url": "/",
-        icon: "annotation",
+        icon: BotMessageSquare,
         isActive: true,
         items: []
       },
       {
         title: "Category Management",
         url: "/category-management",
-        icon: "tags",
+        icon: FolderKanban,
         isActive: true,
         items: [
         ],
