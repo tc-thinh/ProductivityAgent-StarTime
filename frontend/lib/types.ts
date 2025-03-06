@@ -1,10 +1,13 @@
 export interface Category {
-    c_id: number;
-    c_color_id: string;
-    c_title: string;
-    c_description: string;
-    c_background: string;
-    c_foreground: string;
+    cat_id: number;
+    cat_color_id: string;
+    cat_title: string;
+    cat_description: string;
+    cat_background: string;
+    cat_foreground: string;
+    cat_active: boolean;
+    cat_event_prefix: string;
+    cat_examples: string[]
 }
 
 export interface CategoryCard {

@@ -9,7 +9,7 @@ export default function CategoryManagement({ saveEdit, initCategories }: { saveE
     <div className="grid grid-cols-3 gap-3">
       {initCategories.map((category) => (
         <CategoryCardSection
-          key={category.c_id}
+          key={category.cat_id}
           category={category}
           saveEdit={saveEdit}
         />

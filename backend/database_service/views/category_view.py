@@ -42,7 +42,7 @@ class CategoryListView(APIView):
             return Response({"detail": "categoryId query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            category = Category.objects.get(c_id=category_id)
+            category = Category.objects.get(cat_id=category_id)
         except Category.DoesNotExist:
             return Response({"detail": "Category not found."}, status=status.HTTP_404_NOT_FOUND)
 
