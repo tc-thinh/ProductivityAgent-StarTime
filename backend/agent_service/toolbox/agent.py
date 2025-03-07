@@ -1,4 +1,3 @@
-import threading
 import os
 import json
 import asyncio
@@ -50,7 +49,7 @@ async def agent_action(prompt: str, conv_id: int):
                 except Exception as e:
                     logger.error("API request failed: %s", str(e))
                     raise
-
+                
                 logger.debug("Received response: %s", response.choices)
 
                 for choice in response.choices:
@@ -59,10 +58,10 @@ async def agent_action(prompt: str, conv_id: int):
                     else:
                         await handle_assistant_response(choice.message.content, messages, ws_client)
                         done = True
-
+                
                 if done:
                     break
-
+                
             logger.info("Final conversation state: %s", messages)
             return messages
 

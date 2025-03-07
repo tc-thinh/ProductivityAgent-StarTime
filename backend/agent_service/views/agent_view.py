@@ -12,6 +12,7 @@ from agent_service.toolbox.agent import start_agent_action
 from agent_service.toolbox.services.conversations import *
 import threading
 from rest_framework.views import APIView
+import asyncio
 
 logger = logging.getLogger(__name__)
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
@@ -45,12 +46,13 @@ def process(data: dict, conversation_id: int):
             except Exception as e:
                 logger.error(f"Error transcribing audio: {str(e)}")
                 raise
-
+        
         def conversation_naming():
             try:
                 c_name = get_conversation_name(processed_prompt)
                 logger.info(f"Conversation {conversation_id} name: {c_name}")
-                update_conversation(conversation_id, c_name)
+                # Call the async function using asyncio.run
+                asyncio.run(update_conversation(conversation_id, c_name))
             except Exception as e:
                 logger.error(f"Error in conversation naming: {str(e)}")
 
