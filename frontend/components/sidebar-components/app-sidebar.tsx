@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useEffect, useState } from "react"
 import { Bot, Terminal } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 import { NavMain } from "@/components/sidebar-components/nav-main"
 import { NavUser } from "@/components/sidebar-components/nav-user"
@@ -18,10 +19,11 @@ import {
 import { BotMessageSquare, FolderKanban } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = useSession()
   const [data, setData] = useState({
     user: {
-      name: "Thinh Tran",
-      email: "thinh.tran@example.com",
+      name: "",
+      email: "",
       avatar: "",
     },
     teams: [
@@ -52,6 +54,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       }
     ]
   })
+
+  useEffect(() => {
+    if (session) {
+      setData({
+        ...data,
+        user: {
+          ...data.user,
+          name: session.user.name,
+          email: session.user.email,
+          avatar: session.user.image,
+        },
+      })
+    }
+  }, [session])
+
 
   return (
     <Sidebar collapsible="icon" {...props}>

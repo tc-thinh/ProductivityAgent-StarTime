@@ -12,12 +12,12 @@ import "@/app/globals.css"
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "600"],
-});
+})
 
 export const metadata: Metadata = {
   title: "StarTime Productivity",
   description: "AI-agent Productivity Hub",
-};
+}
 
 export default function AuthLayout({
   children,
@@ -32,5 +32,5 @@ export default function AuthLayout({
         {children}
       </body>
     </html>
-  );
+  )
 }
