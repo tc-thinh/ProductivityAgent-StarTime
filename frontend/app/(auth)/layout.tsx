@@ -1,5 +1,4 @@
 import { AppSidebar } from "@/components/sidebar-components/app-sidebar";
-import { Toaster } from "@/components/ui/sonner"
 import {
   SidebarInset,
   SidebarProvider,
@@ -31,9 +30,6 @@ export default function AuthLayout({
         className={`${inter.className} antialiased`}
       >
         {children}
-
-        {/* Toaster for notifications */}
-        <Toaster />
       </body>
     </html>
   );
