@@ -26,8 +26,8 @@ interface Message {
     tool_call_id: string
 }
 
-const WS_BACKEND = process.env.WS_BACKEND || 'ws://localhost:8080'
-const HTTP_BACKEND = process.env.BACKEND || 'http://localhost:8080'
+const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
+const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export default function ChatCanvas()  {
     const { id } = useParams()
