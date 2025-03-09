@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
-import { Edit, X, Info } from 'lucide-react'
+import { Edit, Info } from 'lucide-react'
 import type { Category } from "@/lib/types"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
@@ -82,7 +82,7 @@ export const CategoryCardSection: React.FC<{
 
       {isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-[70vh] h-full max-h-[70vh] p-6 flex flex-col">
+          <Card className="w-full max-w-[80vh] h-full max-h-[80vh] p-6 flex flex-col">
             <div className="flex-1 flex flex-col space-y-4">
               {/* Title Input */}
               <Label className="flex flex-col p-3 relative">
@@ -173,7 +173,7 @@ export const CategoryCardSection: React.FC<{
             <div className="relative">
               <div className="absolute bottom-0 right-0 flex gap-2 max-w-[30%] w-full">
                 <Button variant="ghost" onClick={handleCancel} className="flex-1">Cancel</Button>
-                <Button style={{ backgroundColor: category.cat_background }} onClick={handleSave} className="flex-1 text-white">Save</Button>
+                <Button style={{ backgroundColor: category.cat_background }} onClick={handleSave} className="flex-1 text-black">Save</Button>
               </div>
             </div>
           </Card>

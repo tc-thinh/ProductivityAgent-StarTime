@@ -27,21 +27,11 @@ export interface ToolCall {
 export interface ConversationMessage {
     role: string;
     content: string;
-}
-
-export interface ToolCallMessage {
-    role: string;
-    content: string;
     tool_calls: ToolCall[];
-}
-
-export interface ToolCallResult {
-    role: string;
     tool_call_id: string;
-    content: string;
 }
 
 export interface ConversationMessages {
     conversationId: number;
-    message: (ConversationMessage | ToolCallMessage | ToolCallResult)[]
+    message: ConversationMessage[]
 }
