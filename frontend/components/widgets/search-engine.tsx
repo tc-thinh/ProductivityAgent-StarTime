@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Upload } from "lucide-react"
 
-const BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
+const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export function SearchEngine() {
   // TODO: Migrate these components to Blueprint.js\
