@@ -18,7 +18,9 @@ export default function AccessDenied() {
   )
 }
 
-function LockIcon(props) {
+interface LockIconProps extends React.SVGProps<SVGSVGElement> {}
+
+function LockIcon(props: LockIconProps) {
   return (
     <svg
       {...props}

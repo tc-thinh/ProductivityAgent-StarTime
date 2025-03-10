@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
-import { Edit, Info } from 'lucide-react'
+import { Edit, Info, Minimize2 } from 'lucide-react'
 import type { Category } from "@/lib/types"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
@@ -96,6 +96,7 @@ export const CategoryCardSection: React.FC<{
                   className="border-none focus:ring-0 bg-transparent p-0 mt-4 h-auto"
                   style={{ fontSize: "2.25rem", fontWeight: "bold" }}
                 />
+                <Minimize2 />
                 <span className={'text-xs mt-2 flex justify-end'}>
                   <span className={`${tempTitle.length >= 50 ? "text-red-500" : "text-gray-500"}`}>{tempTitle.length}/50</span>
                   <span title="Provide a category title for all events in this color category."><Info className="h-4 w-4 ml-1 text-gray-400" /></span>
