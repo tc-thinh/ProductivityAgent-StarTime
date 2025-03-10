@@ -9,7 +9,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
   console.log(status)
   if (status === "unauthenticated") {
-    return <p>Access Denied</p>
+    window.location.href = "/unauthorized"
   }
 
   return (
