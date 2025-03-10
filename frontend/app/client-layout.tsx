@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator"
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
-  console.log(status)
   if (status === "unauthenticated") {
     window.location.href = "/unauthorized"
   }
