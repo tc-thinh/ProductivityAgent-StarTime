@@ -19,7 +19,8 @@ import {
 import { BotMessageSquare, FolderKanban } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+
   const [data, setData] = useState({
     user: {
       name: "",

@@ -26,6 +26,10 @@ const options = {
     async redirect({ url, baseUrl }) {
       // Redirect to home page after successful login
       return baseUrl;
+    },
+    async signInError({ error }) {
+      console.error('Error during sign in:', error)
+      return '/error' // Redirect to error page
     }
   },
   secret: process.env.NEXTAUTH_SECRET,

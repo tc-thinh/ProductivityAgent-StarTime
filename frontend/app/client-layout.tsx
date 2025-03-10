@@ -1,11 +1,17 @@
-// app/client-layout.tsx
 "use client"
 
 import { AppSidebar } from "@/components/sidebar-components/app-sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { useSession } from "next-auth/react"
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession()
+  console.log(status)
+  if (status === "unauthenticated") {
+    return <p>Access Denied</p>
+  }
+
   return (
     <div className="flex">
       <AppSidebar />
