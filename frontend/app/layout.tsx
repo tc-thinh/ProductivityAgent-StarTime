@@ -1,4 +1,4 @@
-// app/layout.tsx
+
 import { AppSidebar } from "@/components/sidebar-components/app-sidebar";
 import { Toaster } from "@/components/ui/sonner"
 import {
@@ -40,14 +40,14 @@ export default function RootLayout({
               <div className="flex items-center gap-2 px-4">
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="mr-2 h-4" />
-                <DynamicBreadcrumb /> {/* Use the dynamic breadcrumb component */}
+                <DynamicBreadcrumb />
               </div>
             </header>
             {children}
+          
           </SidebarInset>
         </SidebarProvider>
         
-        {/* Toaster for notifications */}
         <Toaster />
       </body>
     </html>

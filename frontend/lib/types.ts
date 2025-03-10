@@ -23,15 +23,24 @@ export interface ToolCall {
     };
     type: string;
 }
+export interface ToolCallResult {
+    tool_call_id: string
+    content: string
+    status?: "success" | "error"
+  }
+
+export type MessageRole = "system" | "user" | "assistant" | "tool"
 
 export interface ConversationMessage {
-    role: string;
-    content: string;
-    tool_calls: ToolCall[];
-    tool_call_id: string;
+  role: MessageRole
+  content: string
+  tool_calls?: ToolCall[]
+  tool_call_id?: string
+  tool_call_result?: ToolCallResult
 }
 
 export interface ConversationMessages {
     conversationId: number;
     message: ConversationMessage[]
 }
+

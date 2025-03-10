@@ -52,12 +52,11 @@ export default function Landing() {
 
   return (
     <>
-      <div className="p-4 border-r border-gray-200 overflow-y-auto">
+      <div className="p-4border-gray-200 overflow-y-auto">
         <CategoryManagement
           saveEdit={handleSave}
           initCategories={categories}
         />
-
       </div>
     </>
   );
