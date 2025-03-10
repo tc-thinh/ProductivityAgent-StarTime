@@ -7,14 +7,14 @@ import CategoryManagement from "@/components/category-management/category-manage
 import { Category } from "@/lib/types"
 import { mockCategories } from "@/lib/data";
 
-const BACKEND = process.env.BACKEND || 'http://localhost:8080';
+const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export default function Landing() {
   const [categories, setCategories] = useState<Category[]>([])
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   useEffect(() => {
-    fetch(`${BACKEND}/database/categories/`)
+    fetch(`${HTTP_BACKEND}/database/categories/`)
       .then(response => response.json())
       .then(data => setCategories(data))
       .catch(error => {
@@ -24,7 +24,7 @@ export default function Landing() {
   }, [refreshTrigger]);
 
   const handleSave = (updatedCategory: Category) => {
-    fetch(`${BACKEND}/database/categories/?categoryId=${updatedCategory.cat_id}`, {
+    fetch(`${HTTP_BACKEND}/database/categories/?categoryId=${updatedCategory.cat_id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

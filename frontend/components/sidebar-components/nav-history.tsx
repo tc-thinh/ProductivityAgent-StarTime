@@ -23,7 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-const BACKEND = process.env.BACKEND || 'http://localhost:8080'
+const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 interface History {
   name: string
@@ -41,7 +41,7 @@ export function NavHistories() {
 
   const fetchHistory = async () => {
     try {
-      const response = await fetch(BACKEND + "/database/conversations/") 
+      const response = await fetch(HTTP_BACKEND + "/database/conversations/") 
       const result = await response.json()
       console.log('Data fetched:', result)
 
@@ -78,7 +78,7 @@ export function NavHistories() {
 
   const deleteConversation = async (conversationId: number) => {
     try {
-      const response = await fetch(`${BACKEND}/database/conversations/?conversationId=${conversationId}`, {
+      const response = await fetch(`${HTTP_BACKEND}/database/conversations/?conversationId=${conversationId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

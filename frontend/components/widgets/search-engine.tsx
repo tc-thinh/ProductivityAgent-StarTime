@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Upload } from "lucide-react"
 
-const BACKEND = process.env.BACKEND || 'http://localhost:8080'
+const BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export function SearchEngine() {
   // TODO: Migrate these components to Blueprint.js\
@@ -27,7 +27,7 @@ export function SearchEngine() {
   const handleSearch = async () => {
     console.log("Current Input:", inputValue)
 
-    const response = await fetch(BACKEND + "/agent/", {
+    const response = await fetch(HTTP_BACKEND + "/agent/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json", 

@@ -16,8 +16,8 @@ import { useEffect, useState } from "react"
 import { mockConversation1 } from "@/lib/data"
 import { ConversationMessage, ToolCall } from "@/lib/types"
 
-const WS_BACKEND = process.env.WS_BACKEND || 'ws://localhost:8080'
-const HTTP_BACKEND = process.env.BACKEND || 'http://localhost:8080'
+const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
+const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 
 export default function ChatCanvas()  {
