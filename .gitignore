@@ -1,6 +1,5 @@
 .env
 __pycache__/
-models/
 db.sqlite3
 tmp/
 creds/
