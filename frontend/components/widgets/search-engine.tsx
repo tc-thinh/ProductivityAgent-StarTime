@@ -1,16 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, Upload } from "lucide-react"
-import { useSession } from "next-auth/react"
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export function SearchEngine() {
-  // TODO: Migrate these components to Blueprint.js\
   const [inputValue, setInputValue] = useState<string>("")
   const [file, setFile] = useState<File | null>(null)
 
@@ -22,8 +19,6 @@ export function SearchEngine() {
       // You can add file upload logic here (e.g., send to an API)
     }
   }
-
-  const router = useRouter()
 
   const handleSearch = async () => {
     console.log("Current Input:", inputValue)
@@ -42,7 +37,7 @@ export function SearchEngine() {
     const data = await response.json();
     console.log(data)
 
-    router.push(`/${data.conversationId}`)
+    window.location.href = `/${data.conversationId}`
   }
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
