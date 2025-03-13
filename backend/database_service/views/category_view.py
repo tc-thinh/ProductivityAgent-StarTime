@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from ..models import Category
-from ..serializers import CategorySerializer
+from database_service.models import Category
+from database_service.serializers import CategorySerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
