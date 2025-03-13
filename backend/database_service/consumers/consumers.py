@@ -1,16 +1,13 @@
 import logging
 import json
 from database_service.models import Conversation
-from database_service.serializers import ConversationSerializer
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from threading import Lock
+from django.db import transaction
+from database_service.serializers import ConversationSerializer
 
 # Set up logging
 logger = logging.getLogger(__name__)
-
-# Create a lock to ensure thread safety during updates
-conversation_lock = Lock()
 
 class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
     async def connect(self):
@@ -18,38 +15,29 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
         self.conversation_id = self.scope['url_route']['kwargs']['conversationId']
         self.group_name = f'Conversation_{self.conversation_id}'
 
-        # Fetch the conversation object asynchronously
-        self.conversation = await sync_to_async(Conversation.objects.filter(c_id=self.conversation_id).first)()
-
-        if not self.conversation:
-            logger.error(f"Connection rejected: conversation {self.conversation_id} does not exist")
-            await self.close()  # Reject connection
+        exists = await sync_to_async(Conversation.objects.filter(c_id=self.conversation_id).exists)()
+        if not exists:
+            logger.error(f"Conversation {self.conversation_id} does not exist.")
+            await self.close()
             return
-
-        logger.info(f"Connected to conversation: {self.conversation_id}")
-
-        # Add the client to the group
+        
+        await self.accept()
         await self.channel_layer.group_add(
             self.group_name,
             self.channel_name
         )
-
-        # Accept the WebSocket connection
-        await self.accept()
-
-        # Send initial conversation data
-        self.conversation_messages = self.conversation.c_messages
-        self.conversation_name = self.conversation.c_name
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                'type': 'chat_message',  # Calls `chat_message` handler
-                'message': {
-                    'type': 'conversation',
-                    'message': ConversationSerializer(self.conversation).data
-                }
-            }
-        )
+        
+        try:
+            conversation = await sync_to_async(self._get_conversation)()
+            serialized = ConversationSerializer(conversation).data
+            await self.send(text_data=json.dumps({
+                'data': serialized
+            }))
+        except Exception as e:
+            logger.error(f"Error sending initial data: {str(e)}")
+        
+    def _get_conversation(self):
+        return Conversation.objects.get(c_id=self.conversation_id)
 
     async def disconnect(self, close_code):
         # Remove the client from the group
@@ -63,52 +51,47 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
         data = json.loads(text_data)
 
         if data.get('type') == 'conversation_name':
-            # Change conversation name (c_name)
-            new_name = data.get('message').get("c_name")
-            logger.info(f"Updating conversation name to: {new_name}")
-            # Ensure thread safety by acquiring the lock before updating the conversation
-            with conversation_lock:
-                self.conversation_name = new_name
-                # Log before updating
-                await self._update_conversation()
-
+            await self._handle_name_update(data["message"]["c_name"])
         elif data.get('type') == 'conversation_message':
-            # Add new message to conversation
-            new_message = data.get('message')
-            logger.info(f"Adding message: {new_message}")
-            with conversation_lock:
-                self.conversation_messages.append(new_message)
-                await self._update_conversation()
+            await self._handle_message_update(data["message"])
 
-        # Send the updated message to the group
+        await self._broadcast_update()
+
+    async def _handle_name_update(self, new_name):
+        await sync_to_async(self._update_name_in_db)(new_name)
+
+    def _update_name_in_db(self, new_name):
+        with transaction.atomic():
+            conversation = Conversation.objects.select_for_update().get(c_id=self.conversation_id)
+            conversation.c_name = new_name
+            conversation.save()
+
+    async def _handle_message_update(self, new_messages):
+        await sync_to_async(self._update_messages_in_db)(new_messages)
+
+    def _update_messages_in_db(self, new_message):
+        with transaction.atomic():
+            conversation = Conversation.objects.select_for_update().get(c_id=self.conversation_id)
+            conversation.c_messages.append(new_message)
+            conversation.save()
+
+    async def chat_message(self, event):
+        try:
+            await self.send(text_data=json.dumps({
+                'data': event['message']
+            }))
+        except Exception as e:
+            logger.error(f"Error sending chat message: {str(e)}")
+
+    async def _broadcast_update(self):
+        conversation = await sync_to_async(self._get_conversation)()
+        serialized = ConversationSerializer(conversation).data
         await self.channel_layer.group_send(
             self.group_name,
             {
                 'type': 'chat_message',
-                'message': data
+                'message': serialized
             }
         )
 
-    async def chat_message(self, event):
-        # Send the message to the WebSocket
-        await self.send(text_data=json.dumps({
-            'data': event['message']
-        }))
-
-    @sync_to_async
-    def _update_conversation(self):
-        """
-        Update the conversation object in the database with new messages or name.
-        The conversation object is updated after acquiring the lock for thread safety.
-        """
-        # Ensure that the conversation is updated in the DB
-        self.conversation.c_messages = self.conversation_messages
-        self.conversation.c_name = self.conversation_name
-        logger.debug(f"Saving conversation with messages: {self.conversation.c_messages}")
-        try:
-            self.conversation.save()
-            logger.info(f"Conversation {self.conversation_id} updated successfully.")
-            logger.info(self.conversation)
-        except Exception as e:
-            logger.error(f"Error updating conversation {self.conversation_id}: {str(e)}")
     
