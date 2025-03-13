@@ -24,5 +24,6 @@ urlpatterns = [
     path('conversations/', ConversationListView.as_view(), name='conversation-view-create-edit'),
     path('messages/', MessageListView.as_view(), name='mesage-list-create'),
     path('categories/', CategoryListView.as_view(), name='category-list-view'),
-    path('toolcalls/', ToolCallListView.as_view(), name='toolcall-list-create')
+    path('toolcalls/', ToolCallListView.as_view(), name='toolcall-list-create'),
+    path('auth/', AuthView.as_view(), name='auth'),
 ]
