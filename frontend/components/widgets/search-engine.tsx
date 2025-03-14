@@ -1,15 +1,73 @@
 "use client"
 
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
+import { useState, useRef, useEffect } from "react"
+import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Search, Upload } from "lucide-react"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { MicOff, Send, MessageCircle, AudioLines } from "lucide-react" // Added Volume2 for voice icon
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export function SearchEngine() {
   const [inputValue, setInputValue] = useState<string>("")
   const [file, setFile] = useState<File | null>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Calculate the number of new lines in the input value
+  const newLineCount = (inputValue.match(/\n/g) || []).length
+  const maxLines = 10 // Maximum number of lines before adding the cursor
+  const initialHeight = 50
+  const cardHeight = newLineCount > 0 ? Math.min(newLineCount + 2, maxLines) * 24 : initialHeight // 24px per line (adjust as needed)
+
+  // Speech recognition setup
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition()
+        recognition.continuous = true
+        recognition.interimResults = true
+        recognition.lang = "en-US"
+
+        recognition.onstart = () => {
+          setIsListening(true)
+        }
+
+        recognition.onend = () => {
+          setIsListening(false)
+        }
+
+        recognition.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map((result) => result[0])
+            .map((result) => result.transcript)
+            .join("")
+
+          setInputValue(transcript)
+        }
+
+        // Start/stop recording
+        if (isRecording) {
+          recognition.start()
+        } else if (isListening) {
+          recognition.stop()
+        }
+
+        // Cleanup
+        return () => {
+          if (isListening) {
+            recognition.stop()
+          }
+        }
+      } else {
+        console.error("Speech recognition not supported in this browser")
+      }
+    }
+  }, [isRecording])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
@@ -21,88 +79,98 @@ export function SearchEngine() {
   }
 
   const handleSearch = async () => {
+    if (!inputValue.trim() || isSearching) return
+
+    setIsSearching(true)
     console.log("Current Input:", inputValue)
 
-    const response = await fetch(HTTP_BACKEND + "/agent/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", 
-      },
-      body: JSON.stringify({
-        "userPrompt": inputValue,
-        "audioId": "",
-      }),
-    });
+    try {
+      const response = await fetch(HTTP_BACKEND + "/agent/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userPrompt: inputValue,
+          audioId: "",
+        }),
+      })
 
-    const data = await response.json();
-    console.log(data)
+      const data = await response.json()
+      console.log(data)
 
-    window.location.href = `/${data.conversationId}`
+      window.location.href = `/${data.conversationId}`
+    } catch (error) {
+      console.error("Error performing search:", error)
+    } finally {
+      setIsSearching(false)
+      
+      if (textareaRef.current) {
+        textareaRef.current.blur()
+      }
+    }
   }
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault()
       handleSearch()
     }
   }
 
+  const toggleRecording = () => {
+    setIsRecording(!isRecording)
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center gap-6 w-full max-w-3xl">
-      {/* App Name */}
-      {/* <h1 className="text-5xl font-bold text-gray-900 mb-6">It's StarTime!</h1> */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        {/* <Icon icon="chat" /> */}
-        <h1>It's <span style={{ color: "#106ba3" }}>StarTime!</span></h1>
-        <h5>Scheduling your day, so you can chase the Stars. 🌟✨</h5>
-      </div>
-
-      {/* Search Bar */}
-      <div className="w-full flex flex-col items-center gap-6">
-      <div className="relative w-full max-w-2xl">
-          <Input
-            placeholder="Ask me anything..."
-            className="w-full rounded-lg px-6 py-6 text-lg shadow-sm border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyPress}
-          />
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-          <Button onClick={handleSearch} className="text-gray-400 bg-transparent border-none hover:bg-transparent hover:text-blue-500">
-            <Search />
+    <Card
+      className="w-[80vh] mx-auto bg-white border border-gray-200 shadow-lg transition-all duration-300"
+    >
+      <CardContent style={{ height: `${cardHeight}px` }}>
+        <Textarea
+          ref={textareaRef}
+          placeholder="Ask me anything..."
+          className={`w-full text-lg bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0 ${
+            newLineCount < maxLines ? "cursor-transparent" : "" // Hide cursor if less than 10 lines
+          }`}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyPress}
+          disabled={isSearching}
+          rows={8}
+        />
+      </CardContent>
+      <CardFooter>
+        <div className="flex ml-auto space-x-2">
+          {/* Recording Button with Voice Icon and Animation */}
+          <Button
+            type="button"
+            variant={isRecording ? "destructive" : "ghost"}
+            size="icon"
+            onClick={toggleRecording}
+            className={`flex-shrink-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all ${
+              isRecording ? "animate-pulse" : ""
+            }`}
+            title={isRecording ? "Stop recording" : "Start recording"}
+          >
+            {isRecording ? (
+              <MicOff className="h-4 w-4 animate-pulse" /> 
+            ) : (
+              <AudioLines className="h-4 w-4" />
+            )}
           </Button>
-          </div>
-        </div>
 
-        {/* Buttons */}
-        <div className="flex gap-4">
-          <Button className="rounded-lg px-8 py-3 text-lg bg-blue-600 hover:bg-blue-700 text-white">
-            <Search className="mr-2 size-5" />
-            Search
+        
+          <Button
+            size="icon"
+            disabled={!inputValue.trim() || isSearching}
+            className="flex-shrink-0 hover:text-gray-900 hover:bg-gray-100 transition-all"
+            onClick={handleSearch}
+          >
+            {isSearching ? <MessageCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
           </Button>
-
-          {/* File Upload Button */}
-          <div>
-            <input
-              type="file"
-              id="file-upload"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-            <label htmlFor="file-upload">
-              <Button
-                variant="outline"
-                className="rounded-lg px-8 py-3 text-lg border-gray-300 hover:bg-gray-100"
-                asChild
-              >
-                <div>
-                  <Upload className="mr-2 size-5" />
-                  Upload File
-                </div>
-              </Button>
-            </label>
-          </div>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   )
 }
