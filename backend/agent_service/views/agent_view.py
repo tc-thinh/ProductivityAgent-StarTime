@@ -29,7 +29,7 @@ def process(data: dict, conversation_id: int):
         audio_id = data.get('audioId')
 
         if not user_prompt and not audio_id:
-            logger.error("User prompt or voice file is required")
+            logger.error("User prompt or voice file is required", exc_info=True)
             return
 
         processed_prompt = ""
@@ -44,7 +44,7 @@ def process(data: dict, conversation_id: int):
                 transcription = model.transcribe(file_path)["text"]
                 processed_prompt += "[AUDIO]: " + transcription + "\n"
             except Exception as e:
-                logger.error(f"Error transcribing audio: {str(e)}")
+                logger.error(f"Error transcribing audio: {str(e)}", exc_info=True)
                 raise
         
         def conversation_naming():
@@ -54,7 +54,7 @@ def process(data: dict, conversation_id: int):
                 # Call the async function using asyncio.run
                 asyncio.run(update_conversation(conversation_id, c_name))
             except Exception as e:
-                logger.error(f"Error in conversation naming: {str(e)}")
+                logger.error(f"Error in conversation naming: {str(e)}", exc_info=True)
 
         converastion_naming_thread = threading.Thread(target=conversation_naming)
         converastion_naming_thread.start()
@@ -68,13 +68,13 @@ def process(data: dict, conversation_id: int):
                 )
                 process_thread.start()
             except Exception as e:
-                logger.error(f"Error in agent_action: {str(e)}")
+                logger.error(f"Error in agent_action: {str(e)}", exc_info=True)
 
         conversation_thread = threading.Thread(target=process_conversation)
         conversation_thread.start()
 
     except Exception as e:
-        logger.error(f"Error in process: {str(e)}")
+        logger.error(f"Error in process: {str(e)}", exc_info=True)
         raise
 
 class AgentView(APIView):
@@ -105,6 +105,6 @@ class AgentView(APIView):
                 "conversationId": conversation_id
             }, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Error in post: {str(e)}")
+            logger.error(f"Error in post: {str(e)}", exc_info=True)
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         

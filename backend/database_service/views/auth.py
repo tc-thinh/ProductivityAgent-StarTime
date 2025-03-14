@@ -4,7 +4,6 @@ from rest_framework import status
 from database_service.models.KVStore import SqliteKVStore
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-import json
 
 class AuthView(APIView):
     @swagger_auto_schema(
@@ -24,13 +23,13 @@ class AuthView(APIView):
             400: openapi.Response('Bad Request'),
         }
     )
-    def post(self, request):
+    async def post(self, request):
         try:
             data = request.data
 
             # Save the data to KVStore
             kv_store = SqliteKVStore(namespace="auth")
-            kv_store.set('GoogleAuthToken', data)
+            await kv_store.set('GoogleAuthToken', data)
             return Response({"message": "Google Authentication tokens saved successfully"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

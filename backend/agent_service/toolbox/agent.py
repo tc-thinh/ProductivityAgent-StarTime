@@ -47,7 +47,7 @@ async def agent_action(prompt: str, conv_id: int):
                         temperature=0.0,
                     )
                 except Exception as e:
-                    logger.error("API request failed: %s", str(e))
+                    logger.error(f"API request failed: {e}", exc_info=True)
                     raise
                 
                 logger.debug("Received response: %s", response.choices)
@@ -66,7 +66,7 @@ async def agent_action(prompt: str, conv_id: int):
             return messages
 
     except Exception as e:
-        logger.error("Agent action failed: %s", str(e))
+        logger.error(f"Agent action failed: {e}", exc_info=True)
         raise
 
 async def handle_tool_calls(tool_calls, messages, ws_client):
@@ -95,7 +95,7 @@ async def handle_tool_calls(tool_calls, messages, ws_client):
             message={"role": "assistant", "content": "", "tool_calls": tool_calls_json}
         )
     except Exception as e:
-        logger.error("Failed to send tool call message: %s", str(e))
+        logger.error(f"Failed to send tool call message: {e}", exc_info=True)
         raise
 
     for call in tool_calls:
@@ -104,7 +104,7 @@ async def handle_tool_calls(tool_calls, messages, ws_client):
             args = json.loads(call.function.arguments)
             logger.info("Executing tool %s with args %s", tool_name, args)
             
-            result = tool_map[tool_name](**args)
+            result = await tool_map[tool_name](**args)
             logger.debug("Tool %s returned: %s", tool_name, result)
 
             tool_response = {
@@ -120,17 +120,14 @@ async def handle_tool_calls(tool_calls, messages, ws_client):
             )
 
         except json.JSONDecodeError as e:
-            error_msg = f"Invalid JSON arguments: {str(e)}"
-            logger.error(error_msg)
-            await handle_tool_error(call.id, error_msg, messages, ws_client)
+            logger.error(f"Invalid JSON arguments: {str(e)}", exc_info=True)
+            await handle_tool_error(call.id, e, messages, ws_client)
         except KeyError as e:
-            error_msg = f"Unknown tool {tool_name}"
-            logger.error(error_msg)
-            await handle_tool_error(call.id, error_msg, messages, ws_client)
+            logger.error(f"Unknown tool {tool_name}", exc_info=True)
+            await handle_tool_error(call.id, e, messages, ws_client)
         except Exception as e:
-            error_msg = f"Tool execution error: {str(e)}"
-            logger.error(error_msg)
-            await handle_tool_error(call.id, error_msg, messages, ws_client)
+            logger.error(f"Tool execution error: {str(e)}", exc_info=True)
+            await handle_tool_error(call.id, e, messages, ws_client)
 
 async def handle_tool_error(tool_call_id, error, messages, ws_client):
     """Handle tool execution errors"""
@@ -165,7 +162,7 @@ async def handle_assistant_response(content, messages, ws_client):
             message=response
         )
     except Exception as e:
-        logger.error("Failed to send assistant response: %s", str(e))
+        logger.error(f"Failed to send assistant response: {e}", exc_info=True)
         raise
 
 def start_agent_action(prompt: str, conv_id: int):
@@ -175,7 +172,7 @@ def start_agent_action(prompt: str, conv_id: int):
         asyncio.set_event_loop(loop)
         loop.run_until_complete(agent_action(prompt, conv_id))
     except Exception as e:
-        logger.error("Agent thread failed: %s", str(e))
+        logger.error(f"Agent thread failed: {e}", exc_info=True)
     finally:
         if loop.is_running():
             loop.close()

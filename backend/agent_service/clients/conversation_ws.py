@@ -27,7 +27,7 @@ class DBConversationWebSocketClient:
             self.connection = await websockets.connect(self.ws_url)
             logger.info(f"Connected to WebSocket: {self.ws_url}")
         except Exception as e:
-            logger.error(f"Connection failed: {str(e)}")
+            logger.error(f"Connection failed: {str(e)}", exc_info=True)
             raise
 
     async def send_message(self, message_type: str, message: dict):
@@ -42,10 +42,10 @@ class DBConversationWebSocketClient:
             }))
             logger.debug(f"Sent message: {message}")
         except websockets.exceptions.ConnectionClosed as e:
-            logger.error(f"Connection closed unexpectedly: {e.code}")
+            logger.error(f"Connection closed unexpectedly: {e.code}", exc_info=True)
             raise
         except Exception as e:
-            logger.error(f"Failed to send message: {str(e)}")
+            logger.error(f"Failed to send message: {str(e)}", exc_info=True)
             raise
 
     async def close(self):
@@ -55,7 +55,7 @@ class DBConversationWebSocketClient:
                 await self.connection.close()
                 logger.info("WebSocket connection closed properly")
             except Exception as e:
-                logger.error(f"Error closing connection: {str(e)}")
+                logger.error(f"Error closing connection: {str(e)}", exc_info=True)
             finally:
                 self.connection = None
                 

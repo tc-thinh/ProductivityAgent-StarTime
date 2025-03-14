@@ -3,6 +3,8 @@ import GoogleProvider from 'next-auth/providers/google'
 import { signIn, signOut } from 'next-auth/react'
 import { NextApiRequest, NextApiResponse } from 'next'
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_HTTP_BACKEND
+
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
@@ -21,7 +23,26 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async signIn({ account, profile }) {
       if (account && account.provider === "google") {
-        return true 
+        const response = await fetch(`${BACKEND_URL}/database/auth/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            access_token: account.access_token,
+            refresh_token: account.refresh_token,
+            expires_in: account.expires_in,
+            scope: account.scope,
+            token_type: account.token_type,
+          }),
+        })
+
+        if (!response.ok) {
+          console.error('Failed to send auth token to backend')
+          return false
+        }
+
+        return true
       }
       return true
     },
@@ -29,10 +50,12 @@ export const authOptions: AuthOptions = {
       return baseUrl;
     },
     async jwt({ token, user, account }) {
-      // Store Google API access token
       if (account) {
         token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.accessTokenExpires = account.expires_at ? account.expires_at * 1000 : undefined;
       }
+      
       return token;
     },
     async session({ session, token }) {

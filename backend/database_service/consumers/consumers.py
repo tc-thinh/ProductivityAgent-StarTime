@@ -17,7 +17,7 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
 
         exists = await sync_to_async(Conversation.objects.filter(c_id=self.conversation_id).exists)()
         if not exists:
-            logger.error(f"Conversation {self.conversation_id} does not exist.")
+            logger.error(f"Conversation {self.conversation_id} does not exist.", exc_info=True)
             await self.close()
             return
         
@@ -34,7 +34,7 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
                 'data': serialized
             }))
         except Exception as e:
-            logger.error(f"Error sending initial data: {str(e)}")
+            logger.error(f"Error sending initial data: {str(e)}", exc_info=True)
         
     def _get_conversation(self):
         return Conversation.objects.get(c_id=self.conversation_id)
@@ -81,7 +81,7 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
                 'data': event['message']
             }))
         except Exception as e:
-            logger.error(f"Error sending chat message: {str(e)}")
+            logger.error(f"Error sending chat message: {str(e)}", exc_info=True)
 
     async def _broadcast_update(self):
         conversation = await sync_to_async(self._get_conversation)()
