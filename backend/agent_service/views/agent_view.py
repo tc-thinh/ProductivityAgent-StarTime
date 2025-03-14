@@ -1,12 +1,8 @@
 import logging
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from scipy.signal import resample
-from agent_service.apps import AgentServiceConfig
-from django.conf import settings
 import os
 from agent_service.toolbox.agent import start_agent_action
 from agent_service.toolbox.services.conversations import *
@@ -17,35 +13,15 @@ import asyncio
 logger = logging.getLogger(__name__)
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 
-def resample_audio(audio, sample_rate, target_sample_rate=16000):
-    num_samples = int(len(audio) * float(target_sample_rate) / sample_rate)
-    resampled = resample(audio, num_samples)
-    return resampled
-
 def process(data: dict, conversation_id: int):
     logger.info("Starting new process.")
     try:
         user_prompt = data.get('userPrompt')
-        audio_id = data.get('audioId')
-
-        if not user_prompt and not audio_id:
-            logger.error("User prompt or voice file is required", exc_info=True)
-            return
 
         processed_prompt = ""
 
         if user_prompt:
             processed_prompt += "[TEXT]: " + user_prompt + "\n" 
-        
-        if audio_id:
-            try:
-                model = AgentServiceConfig.whispher_model
-                file_path = os.path.join(settings.BASE_DIR, "tmp", audio_id)
-                transcription = model.transcribe(file_path)["text"]
-                processed_prompt += "[AUDIO]: " + transcription + "\n"
-            except Exception as e:
-                logger.error(f"Error transcribing audio: {str(e)}", exc_info=True)
-                raise
         
         def conversation_naming():
             try:
@@ -82,8 +58,7 @@ class AgentView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'userPrompt': openapi.Schema(type=openapi.TYPE_STRING, description='User input prompt.'),
-                'audioId': openapi.Schema(type=openapi.TYPE_STRING, description='The id of the audio file.'),
+                'userPrompt': openapi.Schema(type=openapi.TYPE_STRING, description='User input prompt.')
             },
         ),
         responses={200: 'OK', 400: 'Bad Request'}
