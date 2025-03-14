@@ -16,8 +16,23 @@ def get_conversation_name(prompt: str) -> str:
         model=MODEL,
         messages=[
             {
-            "role": "user",
-            "content": "Summarize the conversation in 5 words or fewer:\n" + prompt
+                "role": "system",
+                "content": """
+                            You are a conversation naming agent for an event and task scheduling application. 
+                            Your goal is to generate a clear, concise, and informative name that summarizes the conversation context accurately.
+                            
+                            Examples of well-formed conversation names:
+                            - Meeting with Mia @ 4pm
+                            - CSE 463 Mid-term exam
+                            - CSE 412 Project 2 deadline
+                            - Elastic Search Service for Project StarTime
+                            
+                            Keep the name short and to the point while retaining key details such as time, participants, or task focus.
+                            """
+            },
+            {
+                "role": "user",
+                "content": f"Generate a short, clear conversation name based on this context:\n{prompt}"
             }
         ],
         temperature=0.0
@@ -32,10 +47,9 @@ async def update_conversation(conversation_id: int, conversation_name: str):
                 message={"c_name": conversation_name}
             )
     except Exception as e:
-        logger.error("Update conversation name failed: %s", str(e))
+        logger.error(f"Update conversation name failed: {e}", exc_info=True)
         raise
 
 def create_blank_conversation():
     conversation = requests.post(DATABASE_SERVICE_URL + "/conversations/").json()
-    # print(conversation)
     return conversation.get('c_id')
