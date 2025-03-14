@@ -4,6 +4,7 @@ from rest_framework import status
 from database_service.models.KVStore import SqliteKVStore
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from asgiref.sync import async_to_sync
 
 class AuthView(APIView):
     @swagger_auto_schema(
@@ -23,7 +24,10 @@ class AuthView(APIView):
             400: openapi.Response('Bad Request'),
         }
     )
-    async def post(self, request):
+    def post(self, request):
+        return async_to_sync(self._post)(request)
+    
+    async def _post(self, request):
         try:
             data = request.data
 

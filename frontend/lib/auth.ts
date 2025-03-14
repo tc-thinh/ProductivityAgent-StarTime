@@ -55,13 +55,17 @@ export const authOptions: AuthOptions = {
         token.refreshToken = account.refresh_token;
         token.accessTokenExpires = account.expires_at ? account.expires_at * 1000 : undefined;
       }
-      
+
+      if (user) {
+        token.user = user;
+      }
+
       return token;
     },
     async session({ session, token }) {
       session.user = token.user!,
       session.accessToken = token.accessToken as string
-      
+
       return session
     },
   },
