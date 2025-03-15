@@ -1,6 +1,6 @@
 "use client"
 
-import { SearchEngine } from "@/components/widgets/search-engine"
+import { SearchEngine } from "@/components/search-engine/search-engine"
 
 export default function Landing() {
   return (
