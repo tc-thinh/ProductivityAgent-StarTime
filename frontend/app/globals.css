@@ -86,3 +86,16 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.animate-fade-in {
+  animation: fadeIn 0.15s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
