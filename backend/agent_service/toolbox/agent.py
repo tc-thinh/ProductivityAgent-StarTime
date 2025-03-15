@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 openai_client = AgentServiceConfig.openai_client
-MODEL = os.getenv('OPENAI_MODEL')
+MODEL = os.getenv('OPENAI_LLM_STANDARD')
 
 async def agent_action(prompt: str, conv_id: int):
     """Main agent execution with proper async handling"""

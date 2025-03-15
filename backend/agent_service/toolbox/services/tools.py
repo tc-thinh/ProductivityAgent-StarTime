@@ -7,7 +7,7 @@ from tzlocal import get_localzone
 tools = [
     pydantic_function_tool(
         CreateCalendarEvent,
-        description="Create a new calendar event based on the provided details."
+        description="Create a new calendar event based on the provided details. Use default color id."
     ),
     pydantic_function_tool(
         GetTodayEvents,

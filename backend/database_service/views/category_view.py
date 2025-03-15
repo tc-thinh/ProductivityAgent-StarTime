@@ -8,6 +8,15 @@ from drf_yasg import openapi
 
 class CategoryListView(APIView):
     @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'active',
+                openapi.IN_QUERY,
+                description="Filter to only get active categories if set to True",
+                type=openapi.TYPE_BOOLEAN,
+                required=False
+            ),
+        ],
         responses={
             200: openapi.Response('OK', CategorySerializer(many=True)),
             404: openapi.Response('Not Found'),
@@ -15,7 +24,11 @@ class CategoryListView(APIView):
         }
     )
     def get(self, request):
-        categories = Category.objects.all()
+        active = request.query_params.get('active')
+        if active is not None and active.lower() == 'true':
+            categories = Category.objects.filter(cat_active=True)
+        else:
+            categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
 

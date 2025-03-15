@@ -5,7 +5,7 @@ from agent_service.clients.conversation_ws import DBConversationWebSocketClient
 import logging
 
 openai_client = AgentServiceConfig.openai_client
-MODEL = os.getenv('OPENAI_CONVERSATION_NAMING_MODEL')
+MODEL = os.getenv('OPENAI_LLM_SMALL')
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 
 # Initialize logging

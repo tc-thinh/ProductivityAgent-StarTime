@@ -8,6 +8,7 @@ from agent_service.toolbox.models.calendar_event import CalendarEvent
 from database_service.models.KVStore import SqliteKVStore
 import logging
 from datetime import datetime, timedelta, timezone
+from agent_service.toolbox.services.categories import get_category_by_event
 
 load_dotenv()
 CALENDAR = os.getenv('CALENDAR')
@@ -53,6 +54,12 @@ def simplify_event(event):
     return simplified
 
 async def create_event(event: CalendarEvent, calendarId: str = 'primary'):
+    color_category = get_category_by_event(event.get('summary', ''), event.get('description', ''))
+    logger.info(f"Color category: {color_category}")
+
+    event['colorId'] = color_category['cat_color_id']
+    event['summary'] = f"{color_category['cat_event_prefix']} {event['summary']}"
+
     service = await get_calendar_service()
     event = service.events().insert(calendarId=calendarId, body=event).execute()
     return event
