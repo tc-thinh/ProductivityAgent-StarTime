@@ -1,15 +1,28 @@
-from .calendar import create_event
+from agent_service.toolbox.services.calendar import create_event, get_today_events, get_this_week_events
 from openai import pydantic_function_tool
-from ..models.calendar_event import CreateCalendarEvent
+from agent_service.toolbox.models.calendar_event import CreateCalendarEvent, GetTodayEvents, GetThisWeekEvents
 from datetime import datetime
 from tzlocal import get_localzone
 
 tools = [
-    pydantic_function_tool(CreateCalendarEvent)
+    pydantic_function_tool(
+        CreateCalendarEvent,
+        description="Create a new calendar event based on the provided details."
+    ),
+    pydantic_function_tool(
+        GetTodayEvents,
+        description="Fetch all events scheduled for today."
+    ),
+    pydantic_function_tool(
+        GetThisWeekEvents,
+        description="Fetch all events scheduled for this week."
+    )
 ]
 
 tool_map = {
-    "CreateCalendarEvent": create_event
+    "CreateCalendarEvent": create_event,
+    "GetTodayEvents": get_today_events,
+    "GetThisWeekEvents": get_this_week_events
 }
 
 def get_environmental_context_prompt():
@@ -23,9 +36,5 @@ def get_environmental_context_prompt():
             - Ensure the time zone context is accounted for when scheduling events.
             - If the user provides incomplete information, create the event with the available details and leave any missing or uncertain information blank.
             - When parsing event details, account for variations in user input (e.g., "tomorrow" = next day at the same time zone).
-            - When time is not specified, default to a reasonable time based on the event type:
-                - Meetings → Default to 9:00 AM
-                - Deadlines → Default to 11:59 PM
-                - Reminders → Default to 8:00 AM
         """
     }

@@ -106,3 +106,15 @@ class CreateCalendarEvent(BaseModel):
         ...,
         description="Identifier of the calendar where the event should be added (e.g., 'primary')."
     )
+
+class GetTodayEvents(BaseModel):
+    calendarId: str = Field(
+        ...,
+        description="Identifier of the calendar to fetch events from (e.g., 'primary')."
+    )
+
+class GetThisWeekEvents(BaseModel):
+    calendarId: str = Field(
+        ...,
+        description="Identifier of the calendar to fetch events from (e.g., 'primary')."
+    )

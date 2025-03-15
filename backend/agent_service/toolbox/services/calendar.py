@@ -7,6 +7,7 @@ from django.conf import settings
 from agent_service.toolbox.models.calendar_event import CalendarEvent
 from database_service.models.KVStore import SqliteKVStore
 import logging
+from datetime import datetime, timedelta, timezone
 
 load_dotenv()
 CALENDAR = os.getenv('CALENDAR')
@@ -42,7 +43,81 @@ async def get_calendar_service():
     service = build('calendar', 'v3', credentials=creds)
     return service
 
+def simplify_event(event):
+    """Extract only essential information from event"""
+    simplified = {
+        'summary': event.get('summary', 'No Title'),
+        'start': event.get('start', {}).get('dateTime', event.get('start', {}).get('date', 'Unknown')),
+        'end': event.get('end', {}).get('dateTime', event.get('end', {}).get('date', 'Unknown'))
+    }
+    return simplified
+
 async def create_event(event: CalendarEvent, calendarId: str = 'primary'):
     service = await get_calendar_service()
     event = service.events().insert(calendarId=calendarId, body=event).execute()
     return event
+
+async def get_today_events(calendarId: str = 'primary'):
+    service = await get_calendar_service()
+    
+    # Get current date in the correct timezone
+    now = datetime.now()
+    today = now.date()
+    
+    # Calculate today's date boundaries
+    start_of_day = datetime.combine(today, datetime.min.time())
+    end_of_day = datetime.combine(today, datetime.max.time())
+    
+    # Format to RFC3339 timestamp
+    start_time_str = start_of_day.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    end_time_str = end_of_day.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    
+    # Call the Calendar API
+    events_result = service.events().list(
+        calendarId=calendarId,
+        timeMin=start_time_str,
+        timeMax=end_time_str,
+        singleEvents=True,
+        orderBy='startTime'
+    ).execute()
+    
+    events = events_result.get('items', [])
+    
+    # Simplify events to only include essential information
+    simplified_events = [simplify_event(event) for event in events]
+    
+    return simplified_events
+    
+async def get_this_week_events(calendarId: str = 'primary'):
+    service = await get_calendar_service()
+    
+    # Get current date
+    now = datetime.now()
+    today = now.date()
+    
+    # Calculate this week's date boundaries (Monday to Sunday)
+    start_of_week = today - timedelta(days=today.weekday())  # Monday
+    end_of_week = start_of_week + timedelta(days=6)  # Sunday
+    
+    start_datetime = datetime.combine(start_of_week, datetime.min.time())
+    end_datetime = datetime.combine(end_of_week, datetime.max.time())
+    
+    # Format to RFC3339 timestamp
+    start_time_str = start_datetime.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    end_time_str = end_datetime.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    
+    # Call the Calendar API
+    events_result = service.events().list(
+        calendarId=calendarId,
+        timeMin=start_time_str,
+        timeMax=end_time_str,
+        singleEvents=True,
+        orderBy='startTime'
+    ).execute()
+    
+    events = events_result.get('items', [])
+    
+    # Simplify events to only include essential information
+    simplified_events = [simplify_event(event) for event in events]
+    
+    return simplified_events
