@@ -82,8 +82,8 @@ export const CategoryCardSection: React.FC<{
 
       {isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-[80vh] h-full max-h-[80vh] p-6 flex flex-col">
-            <div className="flex-1 flex flex-col space-y-4">
+          <Card className="w-full max-w-[80vh] p-6 flex flex-col">
+            <div className="flex-1 flex flex-col space-y-4 mb-10">
               {/* Title Input */}
               <Label className="flex flex-col p-3 relative">
                 <Input
@@ -96,7 +96,12 @@ export const CategoryCardSection: React.FC<{
                   className="border-none focus:ring-0 bg-transparent p-0 mt-4 h-auto"
                   style={{ fontSize: "2.25rem", fontWeight: "bold" }}
                 />
-                <Minimize2 />
+                <div
+                  className="absolute top-2 right-2 cursor-pointer p-1 rounded-full hover:bg-white hover:bg-opacity-20"
+                  onClick={handleCancel}
+                >
+                  <Minimize2 size={20} color={category.cat_foreground} />
+                </div>
                 <span className={'text-xs mt-2 flex justify-end'}>
                   <span className={`${tempTitle.length >= 50 ? "text-red-500" : "text-gray-500"}`}>{tempTitle.length}/50</span>
                   <span title="Provide a category title for all events in this color category."><Info className="h-4 w-4 ml-1 text-gray-400" /></span>

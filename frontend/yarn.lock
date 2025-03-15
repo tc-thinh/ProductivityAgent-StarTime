@@ -14,6 +14,11 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
+"@codehard-th/whisperlive-client@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.npmjs.org/@codehard-th/whisperlive-client/-/whisperlive-client-1.2.1.tgz"
+  integrity sha512-8sOfBuvmQVFJVTNWG6oKpsIkRDyoi2aGlm6VB8wK+fuzXT/WXescDdjLDcA6JPm8xkTARF4cx0VHlxUjttH4Ew==
+
 "@eslint-community/eslint-utils@^4.2.0", "@eslint-community/eslint-utils@^4.4.0":
   version "4.4.1"
   resolved "https://registry.npmjs.org/@eslint-community/eslint-utils/-/eslint-utils-4.4.1.tgz"
@@ -1703,6 +1708,7 @@ foreground-child@^3.1.0:
   version "0.1.0"
   resolved "file:"
   dependencies:
+    "@codehard-th/whisperlive-client" "^1.2.1"
     "@heroicons/react" "^2.2.0"
     "@radix-ui/react-alert-dialog" "^1.1.6"
     "@radix-ui/react-avatar" "^1.1.3"
