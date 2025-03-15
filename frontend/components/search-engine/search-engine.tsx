@@ -1,82 +1,30 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { MicOff, Send, MessageCircle, AudioLines } from "lucide-react" // Added Volume2 for voice icon
+import { MicOff, Send, MessageCircle, AudioLines } from "lucide-react"
+import { VoiceInputWithTranscript } from "./voice-recording"
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export function SearchEngine() {
   const [inputValue, setInputValue] = useState<string>("")
-  const [file, setFile] = useState<File | null>(null)
   const [isRecording, setIsRecording] = useState(false)
-  const [isListening, setIsListening] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
+  const [transcript, setTranscript] = useState("") // State to store the transcript
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Calculate the number of new lines in the input value
   const newLineCount = (inputValue.match(/\n/g) || []).length
-  const maxLines = 10 // Maximum number of lines before adding the cursor
+  const maxLines = 10
   const initialHeight = 50
   const cardHeight = newLineCount > 0 ? Math.min(newLineCount + 2, maxLines) * 24 : initialHeight // 24px per line (adjust as needed)
 
-  // Speech recognition setup
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition()
-        recognition.continuous = true
-        recognition.interimResults = true
-        recognition.lang = "en-US"
-
-        recognition.onstart = () => {
-          setIsListening(true)
-        }
-
-        recognition.onend = () => {
-          setIsListening(false)
-        }
-
-        recognition.onresult = (event) => {
-          const transcript = Array.from(event.results)
-            .map((result) => result[0])
-            .map((result) => result.transcript)
-            .join("")
-
-          setInputValue(transcript)
-        }
-
-        // Start/stop recording
-        if (isRecording) {
-          recognition.start()
-        } else if (isListening) {
-          recognition.stop()
-        }
-
-        // Cleanup
-        return () => {
-          if (isListening) {
-            recognition.stop()
-          }
-        }
-      } else {
-        console.error("Speech recognition not supported in this browser")
-      }
-    }
-  }, [isRecording])
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0]
-    if (selectedFile) {
-      setFile(selectedFile)
-      console.log("File selected:", selectedFile.name)
-      // You can add file upload logic here (e.g., send to an API)
-    }
-  }
+  
+  const handleTranscript = (newTranscript: string) => {
+    setTranscript(newTranscript); // Update the transcript state
+  };
 
   const handleSearch = async () => {
     if (!inputValue.trim() || isSearching) return
@@ -131,7 +79,7 @@ export function SearchEngine() {
           ref={textareaRef}
           placeholder="Ask me anything..."
           className={`w-full text-lg bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0 ${
-            newLineCount < maxLines ? "cursor-transparent" : "" // Hide cursor if less than 10 lines
+            newLineCount < maxLines ? "cursor-transparent" : "" 
           }`}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -140,27 +88,48 @@ export function SearchEngine() {
           rows={8}
         />
       </CardContent>
+
+      {/* Voice Input Panel (shown when recording) */}
+      {isRecording && (
+        <div className="p-6">
+          <VoiceInputWithTranscript
+            onStart={() => setIsRecording(true)}
+            onStop={handleTranscript} // Pass transcript back to parent
+          />
+        </div>
+      )}
+
+      {/* Display transcript in a separate Textarea when not recording */}
+      {!isRecording && transcript && (
+        <div className="ml-6 mt-2">
+          <p className="text-sm text-gray-500">Voice action:</p>
+          <Textarea
+            className="w-full text-lg bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0"
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value)}
+            rows={2}
+          />
+        </div>
+      )}
+
       <CardFooter>
         <div className="flex ml-auto space-x-2">
           {/* Recording Button with Voice Icon and Animation */}
           <Button
             type="button"
-            variant={isRecording ? "destructive" : "ghost"}
+            variant={"ghost"}
             size="icon"
             onClick={toggleRecording}
-            className={`flex-shrink-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all ${
-              isRecording ? "animate-pulse" : ""
-            }`}
-            title={isRecording ? "Stop recording" : "Start recording"}
+            className={`flex-shrink-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all`}
           >
             {isRecording ? (
-              <MicOff className="h-4 w-4 animate-pulse" /> 
+              <MicOff className="h-4 w-4" /> 
             ) : (
               <AudioLines className="h-4 w-4" />
             )}
           </Button>
 
-        
+          {/* Send Button */}
           <Button
             size="icon"
             disabled={!inputValue.trim() || isSearching}
