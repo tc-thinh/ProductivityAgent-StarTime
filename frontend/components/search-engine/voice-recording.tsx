@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Mic } from "lucide-react";
+import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface VoiceInputWithTranscriptProps {
@@ -101,7 +102,7 @@ export const VoiceInputWithTranscript = forwardRef(function VoiceInputWithTransc
     let intervalId: NodeJS.Timeout;
     if (isListening) {
       intervalId = setInterval(() => {
-        const levels = Array.from({ length: 20 }, () => Math.random() * 100);
+        const levels = Array.from({ length: 100 }, () => Math.random() * 100);
         setAudioLevels(levels);
       }, 100);
     } else {
@@ -115,14 +116,15 @@ export const VoiceInputWithTranscript = forwardRef(function VoiceInputWithTransc
   };
 
   return (
-    <div className={cn("w-full py-4", className)}>
-      <div className="relative max-w-xl w-full mx-auto flex items-center flex-col gap-2">
-        <div className="h-4 w-64 flex items-center justify-center gap-0.5">
+    <div className={cn("w-full", className)}>
+      <div className="relative flex items-center flex-col gap-2">
+        <div className="h-20 w-[60vh] mb-2 flex items-center gap-0.5 justify-center">
+        {/* <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-300"></div> */}
           {audioLevels.map((level, i) => (
             <div
               key={i}
               className={cn(
-                "w-0.5 rounded-full transition-all duration-300",
+                "w-1 rounded-full transition-all duration-300",
                 isListening
                   ? "bg-black/50 dark:bg-white/50 animate-pulse"
                   : "bg-black/10 dark:bg-white/10 h-1"
