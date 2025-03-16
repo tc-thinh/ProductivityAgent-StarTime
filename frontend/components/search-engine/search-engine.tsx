@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -81,46 +81,54 @@ export function SearchEngine() {
     }
   };
 
-  return (
-    <div className="justify-content-center flex flex-col items-center">
-      <div>
-      {(isRecording || transcript) && (
-          <div className="bg-secondary animate-fade-in w-[78vh]">
-            {isRecording && (
-              <div className="p-6">
-                <VoiceInputWithTranscript
-                  onStart={() => setIsRecording(true)}
-                  onStop={(finalTranscript) => {
-                    setTranscript(finalTranscript);
-                    setCurrentTranscript("");
-                    setIsRecording(false);
-                  }}
-                  onTranscriptChange={setCurrentTranscript}
-                  autoStart={true}
-                  ref={voiceComponentRef}
-                />
-              </div>
-            )}
-            {currentTranscript || transcript && (
-              <div className="ml-6 mt-2">
-                <p className="text-lg text-gray-900">{currentTranscript}</p>
-              </div>
-            )}
-            {!isRecording && transcript && (
-              <div className="ml-6 mt-2">
-                <p className="text-sm text-gray-500">Voice transcript:</p>
-                <Textarea
-                  className="w-full text-lg bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0"
-                  value={transcript}
-                  onChange={(e) => setTranscript(e.target.value)}
-                  rows={2}
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+  const transcriptContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (transcriptContainerRef.current) {
+      transcriptContainerRef.current.scrollTop = transcriptContainerRef.current.scrollHeight;
+    }
+  }, [currentTranscript, transcript]);
 
+
+  return (
+    <div className="justify-content-center flex flex-col items-center transition-all duration-300">
+      {isRecording && (
+        <div className="relative">
+          <VoiceInputWithTranscript
+            onStart={() => setIsRecording(true)}
+            onStop={(finalTranscript) => {
+              setTranscript(finalTranscript);
+              setIsRecording(false);
+            }}
+            onTranscriptChange={setCurrentTranscript}
+            autoStart={true}
+            ref={voiceComponentRef}
+          />
+          {(currentTranscript || transcript) && (
+            <div
+              ref={transcriptContainerRef}
+              className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm p-2 rounded-t-lg shadow-md h-10 overflow-y-auto [box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-2px_rgba(0,0,0,0.1)]"
+            >
+              <p className="text-sm text-gray-900 whitespace-pre-wrap break-words">
+                {currentTranscript}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+      {!isRecording && currentTranscript && (
+        <div className="w-full max-w-[50vh]">
+          <p className="text-sm text-gray-500 mb-2">Voice transcript:</p>
+          <Textarea
+            ref={textareaRef}
+            className="w-full text-sm bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0"
+            value={currentTranscript}
+            onChange={(e) => setTranscript(e.target.value)}
+            rows={2}
+          />
+        </div>
+      )}
+
+      {/* Card with input and buttons */}
       <Card className="w-[80vh] mx-auto bg-white border border-gray-200 shadow-lg transition-all duration-300 mt-0">
         <CardContent style={{ height: `${cardHeight}px` }}>
           <Textarea
