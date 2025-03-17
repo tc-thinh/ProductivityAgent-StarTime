@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { Card } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
@@ -11,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 
 export const CategoryCardSection: React.FC<{
-  category: Category;
-  saveEdit: (updatedCategory: Category) => void;
+  category: Category
+  saveEdit: (updatedCategory: Category) => void
 }> = ({ category, saveEdit }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [tempTitle, setTempTitle] = useState(category.cat_title)
@@ -21,8 +21,8 @@ export const CategoryCardSection: React.FC<{
   const [tempEventPrefix, setTempEventPrefix] = useState(category.cat_event_prefix ?? "")
 
   const handleEditClick = () => {
-    setIsEditing(true); // Enter edit mode
-  };
+    setIsEditing(true) // Enter edit mode
+  }
 
   const handleSave = () => {
     const updatedCategory = {
@@ -33,15 +33,15 @@ export const CategoryCardSection: React.FC<{
       cat_event_prefix: tempEventPrefix,
     }
 
-    saveEdit(updatedCategory);
-    setIsEditing(false);
-  };
+    saveEdit(updatedCategory)
+    setIsEditing(false)
+  }
 
   const handleCancel = () => {
-    setTempTitle(category.cat_title);
-    setTempDesc(category.cat_description);
-    setIsEditing(false);
-  };
+    setTempTitle(category.cat_title)
+    setTempDesc(category.cat_description)
+    setIsEditing(false)
+  }
 
   return (
     <>
@@ -89,7 +89,7 @@ export const CategoryCardSection: React.FC<{
                 <Input
                   value={tempTitle}
                   onChange={(e) => {
-                    if (e.target.value.length <= 50) setTempTitle(e.target.value);
+                    if (e.target.value.length <= 50) setTempTitle(e.target.value)
                   }}
                   placeholder="Category Title..."
                   maxLength={50}
@@ -131,7 +131,7 @@ export const CategoryCardSection: React.FC<{
                 <Textarea
                   value={tempDesc}
                   onChange={(e) => {
-                    if (e.target.value.length <= 200) setTempDesc(e.target.value);
+                    if (e.target.value.length <= 200) setTempDesc(e.target.value)
                   }}
                   placeholder="Your description..."
                   maxLength={200}
@@ -149,7 +149,7 @@ export const CategoryCardSection: React.FC<{
                 <Input
                   value={tempEventPrefix}
                   onChange={(e) => {
-                    if (e.target.value.length <= 10) setTempEventPrefix(e.target.value);
+                    if (e.target.value.length <= 10) setTempEventPrefix(e.target.value)
                   }}
                   placeholder='Prefix for the events in this category. E.g. "[ASU]" -> [ASU] Capstone Project Meeting'
                   maxLength={10}
@@ -186,5 +186,5 @@ export const CategoryCardSection: React.FC<{
         </div>
       )}
     </>
-  );
-};
+  )
+}

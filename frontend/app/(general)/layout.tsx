@@ -1,11 +1,3 @@
-import { AppSidebar } from "@/components/sidebar-components/app-sidebar";
-import { Toaster } from "@/components/ui/sonner"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { SessionProvider } from "next-auth/react"
 import { Providers } from "@/app/providers"
 
 import type { Metadata } from "next"

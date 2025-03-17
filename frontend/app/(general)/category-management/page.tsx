@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
 import CategoryManagement from "@/components/category-management/category-manager"
 import { Category } from "@/lib/types"
-import { mockCategories } from "@/lib/data";
+import { mockCategories } from "@/lib/data"
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
@@ -18,10 +18,10 @@ export default function Landing() {
       .then(response => response.json())
       .then(data => setCategories(data))
       .catch(error => {
-        console.error("Can't fetch data, use mock instead:", error);
-        setCategories(mockCategories);
-      });
-  }, [refreshTrigger]);
+        console.error("Can't fetch data, use mock instead:", error)
+        setCategories(mockCategories)
+      })
+  }, [refreshTrigger])
 
   const handleSave = (updatedCategory: Category) => {
     fetch(`${HTTP_BACKEND}/database/categories/?categoryId=${updatedCategory.cat_id}`, {
@@ -32,22 +32,22 @@ export default function Landing() {
       body: JSON.stringify(updatedCategory),
     })
       .then(response => {
-        if (!response.ok) throw new Error('Failed to update category');
+        if (!response.ok) throw new Error('Failed to update category')
 
         toast("Category updated successfully!", {
           description: "Your changes have been saved."
-        });
-        return response.json();
+        })
+        return response.json()
       })
       .then(() => {
-        setRefreshTrigger(prev => prev + 1); // Trigger a re-fetch
+        setRefreshTrigger(prev => prev + 1) // Trigger a re-fetch
       })
       .catch(error => {
         console.error("Error updating category:", error)
         toast.error("Failed to save changes.", {
           description: "An error occurred. Please try again later.",
         })
-      });
+      })
   }
 
   return (
@@ -60,5 +60,5 @@ export default function Landing() {
 
       </div>
     </>
-  );
+  )
 }
