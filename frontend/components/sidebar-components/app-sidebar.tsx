@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useEffect, useState } from "react"
-import { Bot, Terminal } from "lucide-react"
 import { useSession } from "next-auth/react"
 
 import { NavMain } from "@/components/sidebar-components/nav-main"
@@ -16,7 +15,16 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { BotMessageSquare, FolderKanban } from "lucide-react"
+import { 
+  BotMessageSquare, 
+  LayoutGrid, 
+  Inbox, 
+  LayoutList, 
+  CalendarDays, 
+  AtSign,
+  FolderSync,
+  Bot
+} from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession()
@@ -29,26 +37,68 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
     teams: [
       {
-        name: "Thinh Tran",
-        logo: Terminal,
-      },
-      {
         name: "StarTime!",
         logo: Bot,
       },
     ],
-    navMain: [
+    navAssistant: [
       {
         title: "New Chat",
         "url": "/",
         icon: BotMessageSquare,
         isActive: true,
         items: []
+      }
+    ],
+    navEvents: [
+      {
+        title: "Today Events",
+        url: "/today-events",
+        icon: CalendarDays,
+        isActive: true,
+        items: [
+        ],
       },
       {
         title: "Category Management",
         url: "/category-management",
-        icon: FolderKanban,
+        icon: LayoutGrid,
+        isActive: true,
+        items: [
+        ],
+      }
+    ],
+    navTasks: [
+      {
+        title: "Today Tasks",
+        url: "/today-tasks",
+        icon: LayoutList,
+        isActive: true,
+        items: [
+        ],
+      },
+      {
+        title: "Backlog",
+        url: "/backlog-tasks",
+        icon: Inbox,
+        isActive: true,
+        items: [
+        ],
+      }
+    ],
+    navBriefs: [
+      {
+        title: "Today Briefs",
+        url: "/today-briefs",
+        icon: AtSign,
+        isActive: true,
+        items: [
+        ],
+      },
+      {
+        title: "Previous Briefs",
+        url: "/backlog-briefs",
+        icon: FolderSync,
         isActive: true,
         items: [
         ],
@@ -70,14 +120,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }, [session])
 
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navAssistant} groupName="Your Assistant" />
+        <NavMain items={data.navEvents} groupName="Events Manager" />
+        <NavMain items={data.navTasks} groupName="Tasks Manager" />
+        <NavMain items={data.navBriefs} groupName="Briefings" />
         <NavHistories />
       </SidebarContent>
       <SidebarFooter>

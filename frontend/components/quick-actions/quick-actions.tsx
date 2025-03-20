@@ -1,11 +1,52 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { Icon } from "lucide-react"
-import { fruit } from "@lucide/lab"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import {
+    Plus,
+    Icon,
+    StickyNote,
+    LucideIcon,
+} from "lucide-react"
+import {
+    fruit,
+    bucket,
+    gridLines,
+} from "@lucide/lab"
+
+// Define the type for the icon
+type IconType = JSX.Element
+
+function getIcon(icon: [elementName: any, attrs: Record<string, string>][]): JSX.Element {
+    return <Icon iconNode={icon} size="3rem" />;
+}
 
 export default function QuickActions() {
+    // Define the type for actions
+    type Action = {
+        title: string
+        icon: IconType
+    }
+
+    // MOST -> LEAST important  
+    const actions: Action[] = [
+        { 
+            title: "Pomodoro Timer", 
+            icon: <>{getIcon(fruit)}</> 
+        },
+        { 
+            title: "Pop-up Notes", 
+            icon: <StickyNote size="3rem" /> 
+        },
+        { 
+            title: "Habit Tracker", 
+            icon: <>{getIcon(gridLines)}</> 
+        },
+        { 
+            title: "Bucket List", 
+            icon: <>{getIcon(bucket)}</> 
+        },
+    ]
+
     return (
         <TooltipProvider>
             <div style={{ position: "fixed", bottom: "3rem", right: "3rem" }}>
@@ -28,33 +69,38 @@ export default function QuickActions() {
                                 </Button>
                             </PopoverTrigger>
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent side="left">
                             <p>Open Quick Actions</p>
                         </TooltipContent>
                     </Tooltip>
 
                     <PopoverContent style={{ width: "3rem" }}>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    style={{
-                                        width: "100%",
-                                        height: "3rem",
-                                        display: "flex",
-                                        padding: 0,
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        backgroundColor: "transparent",
-                                        color: "var(--color-primary)",
-                                    }}
-                                >
-                                    <Icon iconNode={fruit} size="3rem" /> 
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Pomodoro</p>
-                            </TooltipContent>
-                        </Tooltip>
+                        {actions
+                            .slice()
+                            .reverse()
+                            .map((action, index) => (
+                                <Tooltip key={index}>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            style={{
+                                                width: "100%",
+                                                height: "3rem",
+                                                display: "flex",
+                                                padding: 0,
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                backgroundColor: "transparent",
+                                                color: "var(--color-primary)",
+                                            }}
+                                        >
+                                            {action.icon}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left">
+                                        <p>{action.title}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            ))}
                     </PopoverContent>
                 </Popover>
             </div>

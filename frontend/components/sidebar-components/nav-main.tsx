@@ -19,7 +19,8 @@ import { ChevronDown, ChevronUp, Home, Settings, Users } from "lucide-react"
 import { ElementType } from "react"
 
 export function NavMain({
-  items
+  items,
+  groupName,
 }: {
   items: {
     title: string
@@ -31,11 +32,12 @@ export function NavMain({
       title: string
       url: string
     }[]
-  }[]
+  }[],
+  groupName?: string
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{groupName}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           item.items && item.items.length > 0 ? (
