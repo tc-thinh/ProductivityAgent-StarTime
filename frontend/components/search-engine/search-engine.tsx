@@ -4,14 +4,14 @@ import { useState, useRef, useEffect } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { CircleStop, Send, AudioLines } from "lucide-react"
+import { CircleStop, Send, AudioLines, Paperclip, Images } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
@@ -23,10 +23,12 @@ export function SearchEngine() {
   const [inputValue, setInputValue] = useState<string>("")
   const [isRecording, setIsRecording] = useState<boolean>(false)
   const [transcript, setTranscript] = useState<string>("")
+  const [images, setImages] = useState<File[]>([])
 
   // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Dynamic height calculation for CardContent
   const newLineCount = (inputValue.match(/\n/g) || []).length
@@ -111,6 +113,29 @@ export function SearchEngine() {
     }
   }
 
+  const handlePaste = (event: React.ClipboardEvent) => {
+    const items = event.clipboardData.items
+    for (const item of items) {
+      if (item.type.indexOf("image") === 0) {
+        const file = item.getAsFile()
+        if (!file) return
+        setImages((prevImages) => [...prevImages, file])
+      }
+    }
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (files) {
+      const imageFiles = Array.from(files)
+      setImages((prevImages) => [...prevImages, ...imageFiles])
+    }
+  }
+
+  const handleAttachButtonClick = () => {
+    fileInputRef.current?.click()
+  }
+
   // Toggle recording
   const toggleRecording = () => {
     if (isRecording) {
@@ -144,61 +169,109 @@ export function SearchEngine() {
           <Textarea
             ref={textareaRef}
             placeholder={`How can I help you ${isDay ? "this morning" : isNight ? "this evening" : "today"}?`}
-            className={`w-full text-lg bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0 ${
-              newLineCount < maxLines ? "cursor-transparent" : ""
-            }`}
+            className={`w-full text-lg bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0 ${newLineCount < maxLines ? "cursor-transparent" : ""
+              }`}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyPress}
             rows={8}
+            onPaste={handlePaste}
           />
         </CardContent>
 
         <CardFooter>
-          <TooltipProvider>
-            <div className="flex ml-auto space-x-2">
+          <div className="flex ml-auto space-x-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  className="flex-shrink-0 hover:text-gray-900 hover:bg-gray-100 transition-all"
+                  type="button"
+                  variant={"ghost"}
+                  onClick={handleAttachButtonClick}
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Attach Image</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <input
+              type="file"
+              accept="image/png, image/jpeg, image/jpg"
+              style={{ display: "none" }}
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+
+            {images.length > 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    size="icon"
+                    className="relative flex-shrink-0 hover:text-gray-900 hover:bg-gray-100 transition-all"
                     type="button"
                     variant={"ghost"}
-                    size="icon"
-                    onClick={toggleRecording}
-                    className={`flex-shrink-0 transition-all ${
-                      isRecording
-                        ? "text-white bg-red-500 hover:bg-red-600"
-                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                    }`}
+                    onClick={handleAttachButtonClick}
                   >
-                    {isRecording ? (
-                      <CircleStop className="h-4 w-4" />
-                    ) : (
-                      <AudioLines className="h-4 w-4" />
-                    )}
+                    <Images className="h-4 w-4" />
+                    <Badge
+                      variant="secondary"
+                      className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center text-xs text-[10px] p-0"
+                    >
+                      {images.length}
+                    </Badge>
                   </Button>
+                  {/* Will be a dropdown menu later */}
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p>{isRecording ? "Stop Listening" : "Start Listening"}</p>
+                  <p>Show Attached Images</p>
                 </TooltipContent>
               </Tooltip>
+            )}
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    disabled={(!inputValue.trim() && !transcript.trim())}
-                    className="flex-shrink-0 hover:text-gray-900 hover:bg-gray-100 transition-all"
-                    onClick={handleSearch}
-                  >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant={"ghost"}
+                  size="icon"
+                  onClick={toggleRecording}
+                  className={`flex-shrink-0 transition-all ${isRecording
+                    ? "text-white bg-red-500 hover:bg-red-600"
+                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
+                >
+                  {isRecording ? (
+                    <CircleStop className="h-4 w-4" />
+                  ) : (
+                    <AudioLines className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>{isRecording ? "Stop Listening" : "Start Listening"}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  disabled={(!inputValue.trim())}
+                  className="flex-shrink-0 hover:text-gray-900 hover:bg-gray-100 transition-all"
+                  onClick={handleSearch}
+                >
                   <Send className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p>Search</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </TooltipProvider>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Send</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardFooter>
       </Card>
     </div>

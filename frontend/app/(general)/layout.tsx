@@ -5,6 +5,7 @@ import { Inter } from "next/font/google"
 import "@/app/globals.css"
 
 import QuickActions from "@/components/quick-actions/quick-actions"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,10 +25,12 @@ export default function GeneralLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        <Providers>
-          {children}
-        </Providers>
-        <QuickActions />
+        <TooltipProvider>
+          <Providers>
+            {children}
+          </Providers>
+          <QuickActions />
+        </TooltipProvider>
       </body>
     </html>
   )
