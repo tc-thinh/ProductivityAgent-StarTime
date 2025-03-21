@@ -14,6 +14,8 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
+const MAX_IMAGE_SIZE_MB = 20
+const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024
 
 export function SearchEngine() {
   const isDay = new Date().getHours() < 11 && new Date().getHours() > 6
@@ -119,6 +121,10 @@ export function SearchEngine() {
       if (item.type.indexOf("image") === 0) {
         const file = item.getAsFile()
         if (!file) return
+        if (file.size > MAX_IMAGE_SIZE) {
+          toast.error(`${file.name || "Pasted image"} exceeds the 20MB size limit.`)
+          return
+        }
         setImages((prevImages) => [...prevImages, file])
       }
     }
@@ -127,7 +133,13 @@ export function SearchEngine() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files) {
-      const imageFiles = Array.from(files)
+      const imageFiles = Array.from(files).filter((file) => {
+        if (file.size > MAX_IMAGE_SIZE) {
+          toast.error(`${file.name} exceeds the 20MB size limit.`)
+          return false
+        }
+        return true
+      })
       setImages((prevImages) => [...prevImages, ...imageFiles])
     }
   }
