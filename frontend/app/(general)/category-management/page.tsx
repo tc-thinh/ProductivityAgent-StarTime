@@ -9,7 +9,7 @@ import { mockCategories } from "@/lib/data"
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
-export default function Landing() {
+export default function CategoryManager() {
   const [categories, setCategories] = useState<Category[]>([])
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
