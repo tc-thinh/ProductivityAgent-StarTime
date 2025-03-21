@@ -14,7 +14,7 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
-const MAX_IMAGE_SIZE_MB = 20
+const MAX_IMAGE_SIZE_MB = 5
 const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024
 
 export function SearchEngine() {
