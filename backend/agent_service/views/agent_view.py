@@ -58,7 +58,15 @@ class AgentView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'userPrompt': openapi.Schema(type=openapi.TYPE_STRING, description='User input prompt.')
+                'userPrompt': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description='User input prompt.'
+                ),
+                'images': openapi.Schema(
+                    type=openapi.TYPE_ARRAY, 
+                    items=openapi.Items(type=openapi.TYPE_STRING),
+                    description='List of base64 images.'
+                )
             },
         ),
         responses={200: 'OK', 400: 'Bad Request'}
