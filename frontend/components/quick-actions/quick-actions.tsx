@@ -5,11 +5,11 @@ import {
     Plus,
     Icon,
     StickyNote,
-    LucideIcon,
+    ShoppingCart,
+    ListTodo
 } from "lucide-react"
 import {
     fruit,
-    bucket,
     gridLines,
 } from "@lucide/lab"
 
@@ -43,8 +43,12 @@ export default function QuickActions() {
         },
         {
             title: "Bucket List",
-            icon: <>{getIcon(bucket)}</>
+            icon: <ListTodo size="3rem" />
         },
+        {
+           title: "Shopping List",
+           icon: <ShoppingCart size="3rem" />
+        }
     ]
 
     return (

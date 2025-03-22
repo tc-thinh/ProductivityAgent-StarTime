@@ -15,15 +15,16 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { 
-  BotMessageSquare, 
-  LayoutGrid, 
-  Inbox, 
-  LayoutList, 
-  CalendarDays, 
+import {
+  BotMessageSquare,
+  LayoutGrid,
+  Inbox,
+  LayoutList,
+  CalendarDays,
   AtSign,
   FolderSync,
-  Bot
+  Bot,
+  Vault
 } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -47,7 +48,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         "url": "/",
         icon: BotMessageSquare,
         isActive: true,
-        items: []
+        items: [
+        ]
+      },
+      {
+        title: "Vault",
+        "url": "/vault",
+        icon: Vault,
+        isActive: true,
+        items: [
+        ]
       }
     ],
     navEvents: [
