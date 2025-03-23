@@ -5,6 +5,7 @@ import { Inter } from "next/font/google"
 import "@/app/globals.css"
 
 import QuickActions from "@/components/quick-actions/quick-actions"
+import PomodoroTimer from "@/components/pomodoro-timer/pomodoroTimer"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 const inter = Inter({
@@ -30,6 +31,7 @@ export default function GeneralLayout({
             {children}
           </Providers>
           <QuickActions />
+          <PomodoroTimer />
         </TooltipProvider>
       </body>
     </html>
