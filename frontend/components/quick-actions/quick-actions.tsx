@@ -1,6 +1,8 @@
+"use client"
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
     Plus,
     Icon,
@@ -13,6 +15,8 @@ import {
     gridLines,
 } from "@lucide/lab"
 
+import pomodoroStore from "@/store/pomodoroStore"
+
 // Define the type for the icon
 type IconType = JSX.Element
 
@@ -21,33 +25,41 @@ function getIcon(icon: [elementName: any, attrs: Record<string, string>][]): JSX
 }
 
 export default function QuickActions() {
+    const { turnOn: pomodoroTurnOn } = pomodoroStore()
+
     // Define the type for actions
     type Action = {
         title: string
         icon: IconType
+        onClick: () => void
     }
 
     // MOST -> LEAST important  
     const actions: Action[] = [
         {
             title: "Pomodoro Timer",
-            icon: <>{getIcon(fruit)}</>
+            icon: <>{getIcon(fruit)}</>,
+            onClick: () => { pomodoroTurnOn() }
         },
         {
             title: "Pop-up Notes",
-            icon: <StickyNote size="3rem" />
+            icon: <StickyNote size="3rem" />,
+            onClick: () => {}
         },
         {
             title: "Habit Tracker",
-            icon: <>{getIcon(gridLines)}</>
+            icon: <>{getIcon(gridLines)}</>,
+            onClick: () => {}
         },
         {
             title: "Bucket List",
-            icon: <ListTodo size="3rem" />
+            icon: <ListTodo size="3rem" />,
+            onClick: () => {}
         },
         {
            title: "Shopping List",
-           icon: <ShoppingCart size="3rem" />
+           icon: <ShoppingCart size="3rem" />,
+           onClick: () => {}
         }
     ]
 
@@ -95,6 +107,7 @@ export default function QuickActions() {
                                             backgroundColor: "transparent",
                                             color: "var(--color-primary)",
                                         }}
+                                        onClick={action.onClick}
                                     >
                                         {action.icon}
                                     </Button>

@@ -1,64 +1,200 @@
 "use client"
 
-import React, { useEffect, useState } from "react";
-import pomodoroStore from "@/store/pomodoroStore";
+import React, { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import pomodoroStore from "@/store/pomodoroStore"
+import { Play, Pause, RotateCcw, X } from "lucide-react"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger
+} from "@/components/ui/tooltip"
 
 const PomodoroTimer = () => {
-  const { timeLeft, isRunning, start, pause, reset, tick, hydrated } = pomodoroStore();
+    const {
+        timeLeft,
+        isRunning,
+        start,
+        pause,
+        reset,
+        tick,
+        hydrated,
+        turnOff,
+        backgroundColor,
+        foregroundColor,
+        pomodoroStatus
+    } = pomodoroStore()
+    const [compactMode, setCompactMode] = useState(false)
 
-  // Local state to track hydration
-  const [isHydrated, setIsHydrated] = useState(false);
+    // Local state to track hydration
+    const [isHydrated, setIsHydrated] = useState(false)
 
-  // Ensure hydration is properly tracked
-  useEffect(() => {
-    if (hydrated) {
-      setIsHydrated(true);
+    // Ensure hydration is properly tracked
+    useEffect(() => {
+        if (hydrated) {
+            setIsHydrated(true)
+        }
+    }, [hydrated])
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            tick()
+        }, 1000)
+        return () => clearInterval(interval)
+    }, [tick])
+
+    const minutes = Math.floor(timeLeft / 60)
+    const seconds = timeLeft % 60
+
+    const buttonStyle = {
+        background: foregroundColor,
+        color: backgroundColor,
+        border: "none",
+        padding: "0.3rem",
     }
-  }, [hydrated]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      tick();
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [tick]);
+    const startPomodoro = (e) => {
+        e.stopPropagation()
+        start()
+    }
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+    const pausePomodoro = (e) => {
+        e.stopPropagation()
+        pause()
+    }
 
-  if (!isHydrated) {
-    return <div style={{ position: "fixed", right: 0, top: "33%" }}>Loading Pomodoro...</div>;
-  }
+    const resetPomodoro = (e) => {
+        e.stopPropagation()
+        reset()
+    }
 
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: "33%",
-        right: 0,
-        padding: "1rem",
-        background: "#fff",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-        zIndex: 1000,
-      }}
-    >
-      <h1 style={{ margin: 0 }}>
-        {minutes}:{seconds.toString().padStart(2, "0")}
-      </h1>
-      <div style={{ marginTop: "0.5rem" }}>
-        {!isRunning ? (
-          <button onClick={start}>Start</button>
-        ) : (
-          <button onClick={pause}>Pause</button>
-        )}
-        <button onClick={reset} style={{ marginLeft: "0.5rem" }}>
-          Reset
-        </button>
-      </div>
-    </div>
-  );
-};
+    const turnOffPomodoro = (e) => {
+        e.stopPropagation()
+        setCompactMode(false)
+        turnOff()
+    }
 
-export default PomodoroTimer;
+    return (
+        <div
+            style={{
+                position: "fixed",
+                top: "20%",
+                right: 0,
+                padding: compactMode ? "0.5rem" : "1rem",
+                background: backgroundColor,
+                color: foregroundColor,
+                zIndex: 1000,
+                display: "flex",         // Use flex layout for horizontal alignment
+                alignItems: "center",     // Center items vertically
+                gap: "1rem",              // Gap between timer and buttons
+            }}
+            onClick={() => setCompactMode(!compactMode)}
+        >
+            {!compactMode && (
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            onClick={turnOffPomodoro}
+                            style={{
+                                position: "absolute",
+                                top: "-0.5rem",
+                                left: "-0.5rem",
+                                border: "none",
+                                cursor: "pointer",
+                                ...buttonStyle
+                            }}
+                            className="h-auto w-auto"
+                        >
+                            <X size="0.5rem" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={10}>
+                        <p>Exit</p>
+                    </TooltipContent>
+            </Tooltip>
+            )}
+
+            {/* Timer / Loading Message */}
+            {isHydrated ? (
+                <>
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <div
+                                style={{
+                                    fontSize: "1rem",
+                                    fontWeight: "bold",
+                                    minWidth: "3rem"
+                                }}
+                            >
+                                {minutes}:{seconds.toString().padStart(2, "0")}
+                            </div>
+                        </TooltipTrigger>
+                            <TooltipContent side="left" sideOffset={compactMode ? 15: 30}>
+                                <p>{pomodoroStatus}</p>
+                            </TooltipContent>
+                    </Tooltip>
+
+                    {!compactMode && (
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.25rem"
+                            }}
+                        >
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    {!isRunning ? (
+                                        <Button
+                                            onClick={startPomodoro}
+                                            style={buttonStyle}
+                                            className="h-auto w-auto"
+                                        >
+                                            <Play size="1rem" />
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            onClick={pausePomodoro}
+                                            style={buttonStyle}
+                                            className="h-auto w-auto"
+                                        >
+                                            <Pause size="1rem" />
+                                        </Button>
+                                    )}
+                                </TooltipTrigger>
+                                <TooltipContent side="top" sideOffset={20}>
+                                    <p>{!isRunning ? "Start" : "Pause"}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Button
+                                        onClick={resetPomodoro}
+                                        style={buttonStyle}
+                                        className="h-auto w-auto"
+                                    >
+                                        <RotateCcw size="1rem" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" sideOffset={20}>
+                                    <p>Reset</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    )}
+                </>
+            ) : (
+                <div
+                    style={{
+                        fontSize: "1rem",
+                        fontWeight: "bold"
+                    }}
+                >
+                    <p>Loading...</p>
+                </div>
+            )}
+        </div>
+    )
+}
+
+export default PomodoroTimer
