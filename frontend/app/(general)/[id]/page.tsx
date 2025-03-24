@@ -74,10 +74,10 @@ export default function ChatCanvas() {
                 message.role === "user"
                   ? "bg-blue-50 ml-auto max-w-[60%]"
                   : message.role === "assistant"
-                  ? message.content.includes("successfully scheduled") // Check for success message
-                    ? "bg-green-50 mr-auto max-w-[60%] border border-green-100" // Success style
-                    : "bg-white mr-auto max-w-[60%] border border-gray-100" // Default assistant style
-                  : "bg-gray-100 mx-auto max-w-[60%]" // Tool role (hidden now)
+                  ? message.content.includes("successfully scheduled") 
+                    ? "bg-green-50 mr-auto max-w-[60%] border border-green-100" 
+                    : "bg-white mr-auto max-w-[60%] border border-gray-100" 
+                  : "" 
               }`}
             >
               <div className="text-sm font-medium text-gray-700">
@@ -85,9 +85,9 @@ export default function ChatCanvas() {
               </div>
               {message.role !== "tool" && (
                 <div className="mt-1 text-gray-900 whitespace-pre-line">
-                  {message.content.includes("successfully scheduled") ? ( // Check for success message
+                  {message.content.includes("successfully scheduled") ? ( 
                     <div className="flex items-center space-x-2">
-                      <CheckCircle className="w-5 h-5 text-green-500" /> {/* Checkmark icon */}
+                      <CheckCircle className="w-5 h-5 text-green-500" /> 
                       <span>{message.content}</span>
                     </div>
                   ) : (
@@ -98,7 +98,6 @@ export default function ChatCanvas() {
               
               {/* Display tool calls if they exist */}
               {message.tool_calls?.map((toolCall, idx) => {
-                // Find the corresponding tool call result
                 const result = messages.find(
                   (m) => m.role === "tool" && m.tool_call_id === toolCall.id
                 )
