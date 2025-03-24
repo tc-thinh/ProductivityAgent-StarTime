@@ -15,6 +15,9 @@ import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
+import { DialogTitle} from '@radix-ui/react-dialog';
+import {VisuallyHidden} from "@radix-ui/react-visually-hidden"
+
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND;
 const MAX_IMAGE_SIZE_MB = 5;
 const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024;
@@ -242,6 +245,7 @@ export function SearchEngine() {
           <div className="flex items-center space-x-2 overflow-x-auto max-w-[400px] [&::-webkit-scrollbar]:w-2[&::-webkit-scrollbar]:h-2[&::-webkit-scrollbar-track]:bg-gray-100[&::-webkit-scrollbar-thumb]:bg-gray-300dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
             {imagePreviews.map((preview, index) => (
               <Drawer key={preview}>
+                
                 <DrawerTrigger asChild>
                   <div className="relative flex-shrink-0 cursor-pointer">
                     <Image
@@ -263,7 +267,12 @@ export function SearchEngine() {
                     </button>
                   </div>
                 </DrawerTrigger>
+               
                 <DrawerContent aria-label="Image Preview">
+                  <VisuallyHidden>
+                    <DialogTitle>Image Preview</DialogTitle>
+                  </VisuallyHidden>
+
                   <div className="p-4 flex justify-center items-center">
                     {selectedImageIndex !== null &&
                     selectedImageIndex >= 0 &&
@@ -280,6 +289,7 @@ export function SearchEngine() {
                     )}
                   </div>
                 </DrawerContent>
+               
               </Drawer>
             ))}
           </div>
