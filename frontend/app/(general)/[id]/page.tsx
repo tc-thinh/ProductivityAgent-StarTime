@@ -1,99 +1,121 @@
 "use client"
 
-// TODO: Create a Chat Canvas (Another input Search Bar at the bottom)
-// TODO: Display ToolCall Arguments by using a Card
-// TODO: Refactor all types into subitems of lib/types folder
-// TODO: If tool_call_id in the message object is available, then the content message will be the 
-// details of the tool call result
-  // Create the type for the tool call result in types
-  // Display that type by using a similar Card
-// AC: Make sure that the design aligns with the other elements
-
-
-
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { mockConversation1 } from "@/lib/data"
-import { ConversationMessage, ToolCall } from "@/lib/types"
+import { ConversationMessage } from "@/lib/types"
+import { SearchEngine } from "@/components/search-engine/search-engine"
+import { ToolCallCard } from "@/components/tool-call-card/tool-call"
+import { CheckCircle } from "lucide-react" // Import checkmark icon
 
-const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
-const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
+const WS_BACKEND = process.env.WS_BACKEND || 'ws://localhost:8080'
 
+export default function ChatCanvas() {
+  const { id } = useParams()
+  const [messages, setMessages] = useState<ConversationMessage[]>([])
+  const [conversationName, setConversationName] = useState<string>("Untitled")
 
-export default function ChatCanvas()  {
-    const { id } = useParams()
-    const [messages, setMessages] = useState<ConversationMessage[]>()
-    const [conversationName, setConversationName] = useState<string>("Untitled")
+  useEffect(() => {
+    if (!id) return
+    if (id === "0") {
+      setMessages(mockConversation1.message)
+      setConversationName("New Conversation")
+      return
+    }
 
-    useEffect(() => {
-        if (!id) return
-        if (id === "0") {
-          setMessages(mockConversation1.message)
-          setConversationName("New Conversation")
-          return 
-        }
-        
-        console.log(`${WS_BACKEND}/ws/conversation/${id}/`)
-        const ws = new WebSocket(`${WS_BACKEND}/ws/conversation/${id}/`)
+    const ws = new WebSocket(`${WS_BACKEND}/ws/conversation/${id}/`)
 
-        ws.onopen = () => {
-            console.log('WebSocket connection established')
-        }
+    ws.onopen = () => console.log('WebSocket connection established')
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data).data
+      switch (data.type) {
+        case "conversation":
+          setConversationName(data.message.c_name)
+          setMessages((prevMessages) => [...prevMessages, ...data.message.c_messages])
+          break
+        case "conversation_name":
+          setConversationName(data.message.c_name)
+          break
+        case "conversation_message":
+          setMessages((prevMessages) => [...prevMessages, data.message])
+          break
+        default:
+          console.log("Unknown message type")
+          break
+      }
+    }
+    ws.onclose = () => console.log('WebSocket connection closed')
+    ws.onerror = (error) => console.error('WebSocket error:', error)
 
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data).data
-            console.log(data)
+    return () => ws.close()
+  }, [id])
 
-            switch (data.type) {
-              case "conversation":
-                setConversationName(data.message.c_name)
-                setMessages((prevMessages) => [...prevMessages, ...data.message.c_messages])
-                break
-              case "conversation_name":
-                setConversationName(data.message.c_name)
-                break
-              case "conversation_message":
-                setMessages((prevMessages) => [...prevMessages, data.message])
-                break
-              default:
-                console.log(":( What is this?")
-                break
-            }
-        }
+  const handleNewMessage = (newMessage: string) => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { 
+        role: "user", 
+        content: newMessage, 
+        tool_calls: [], 
+        tool_call_id: "" 
+      }
+    ])
+  }
 
-        ws.onclose = () => {
-            console.log('WebSocket connection closed')
-        }
+  return (
+    <>
+      <div className="flex-col h-full space-y-4 p-9 overflow-y-auto">
+        {messages
+          .filter((message) => message.role !== "system" && message.role !== "tool") // Filter out system and tool messages
+          .map((message, index) => (
+            <div
+              key={index}
+              className={`p-4 rounded-lg ${
+                message.role === "user"
+                  ? "bg-blue-50 ml-auto max-w-[60%]"
+                  : message.role === "assistant"
+                  ? message.content.includes("successfully scheduled") // Check for success message
+                    ? "bg-green-50 mr-auto max-w-[60%] border border-green-100" // Success style
+                    : "bg-white mr-auto max-w-[60%] border border-gray-100" // Default assistant style
+                  : "bg-gray-100 mx-auto max-w-[60%]" // Tool role (hidden now)
+              }`}
+            >
+              <div className="text-sm font-medium text-gray-700">
+                {message.role === "user" ? "You" : message.role === "assistant" ? "Assistant" : "Tool"}
+              </div>
+              {message.role !== "tool" && (
+                <div className="mt-1 text-gray-900 whitespace-pre-line">
+                  {message.content.includes("successfully scheduled") ? ( // Check for success message
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-500" /> {/* Checkmark icon */}
+                      <span>{message.content}</span>
+                    </div>
+                  ) : (
+                    message.content
+                  )}
+                </div>
+              )}
+              
+              {/* Display tool calls if they exist */}
+              {message.tool_calls?.map((toolCall, idx) => {
+                // Find the corresponding tool call result
+                const result = messages.find(
+                  (m) => m.role === "tool" && m.tool_call_id === toolCall.id
+                )
 
-        ws.onerror = (error) => {
-            console.error('WebSocket error:', error)
-        }
-
-        return () => {
-            ws.close()
-        }
-    }, [id])
-
-    return (
-      <>
-        <div>
-            {messages && messages.map((message, index) => (
-                <li key={index}>
-                    <strong>{message.role}:</strong> {message.content}
-                    {message.tool_calls && (
-                        <div>
-                            <strong>Tool Calls:</strong>
-                            {message.tool_calls.map((tool_call, toolIndex) => (
-                                <div key={toolIndex}>
-                                    <strong>Function:</strong> {tool_call.function.name} <br />
-                                    <strong>Arguments:</strong> {tool_call.function.arguments}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </li>
-            ))}
-        </div>
-      </>
-    )
+                return (
+                  <div key={idx} className="mt-2">
+                    <ToolCallCard toolCall={toolCall} result={result} />
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+      </div>
+      {/* Search engine at the bottom of the page */}
+      <div className="sticky inset-x-0 bottom-0 p-4">
+        <SearchEngine />
+      </div>
+    </>
+  )
 }

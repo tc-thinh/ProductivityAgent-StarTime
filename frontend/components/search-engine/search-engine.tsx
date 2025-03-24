@@ -159,7 +159,7 @@ export function SearchEngine() {
   }
 
   return (
-    <div className="justify-content-center flex flex-col items-center transition-all duration-300">
+    <div className="w-full justify-content-center flex flex-col items-center transition-all duration-300">
       {/* Transcript Textarea (Secondary Panel) */}
       <div className="w-[75vh] bg-gray-100 shadow-lg">
         {transcript && (
