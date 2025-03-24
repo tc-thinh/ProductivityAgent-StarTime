@@ -19,7 +19,7 @@ export default function GeneralLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <Wrapper>{children}</Wrapper>
       </body>

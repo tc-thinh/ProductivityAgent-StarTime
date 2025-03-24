@@ -1,9 +1,3 @@
-import { AppSidebar } from "@/components/sidebar-components/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
 
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
