@@ -1,11 +1,7 @@
-import { Providers } from "@/app/providers"
-
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "@/app/globals.css"
-
-import QuickActions from "@/components/quick-actions/quick-actions"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import Wrapper from "@/app/(general)/layoutWrapper"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,12 +21,7 @@ export default function GeneralLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
-        <TooltipProvider>
-          <Providers>
-            {children}
-          </Providers>
-          <QuickActions />
-        </TooltipProvider>
+        <Wrapper>{children}</Wrapper>
       </body>
     </html>
   )
