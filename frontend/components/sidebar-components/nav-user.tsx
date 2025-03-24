@@ -23,6 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { signOut } from "@/lib/auth"
+import { useUserStore } from "@/store/userStore"
 
 export function NavUser({
   user,
@@ -34,6 +35,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { clearUser } = useUserStore()
 
   return (
     <SidebarMenu>
@@ -90,6 +92,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => {
+              clearUser()
               signOut()
               // redirect to login page
               window.location.href = "/login"

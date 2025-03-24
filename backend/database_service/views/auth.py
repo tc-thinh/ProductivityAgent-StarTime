@@ -1,23 +1,29 @@
+import uuid
+import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from database_service.models.KVStore import SqliteKVStore
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from asgiref.sync import async_to_sync
+from drf_yasg.utils import swagger_auto_schema
+from database_service.models import User
 
+# Configure logging
+logger = logging.getLogger(__name__)
 class AuthView(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'access_token': openapi.Schema(type=openapi.TYPE_STRING, description='Google access token'),
-                'refresh_token': openapi.Schema(type=openapi.TYPE_STRING, description='Google refresh token'),
-                'expires_in': openapi.Schema(type=openapi.TYPE_INTEGER, description='Token expiration time in seconds'),
-                'scope': openapi.Schema(type=openapi.TYPE_STRING, description='Token scope'),
-                'token_type': openapi.Schema(type=openapi.TYPE_STRING, description='Token type'),
+                'google_auth': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description='Current Google auth object'
+                ),
+                'email': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='User email'
+                )
             },
-            required=['access_token', 'refresh_token', 'expires_in', 'scope', 'token_type']
+            required=['google_auth', 'email']
         ),
         responses={
             200: openapi.Response('OK'),
@@ -25,16 +31,26 @@ class AuthView(APIView):
         }
     )
     def post(self, request):
-        return async_to_sync(self._post)(request)
-    
-    async def _post(self, request):
         try:
             data = request.data
+            email = data.get('email')
+            google_auth = data.get('google_auth')
 
-            # Save the data to KVStore
-            kv_store = SqliteKVStore(namespace="auth")
-            await kv_store.set('GoogleAuthToken', data)
-            return Response({"message": "Google Authentication tokens saved successfully"}, status=status.HTTP_200_OK)
+            if not email:
+                return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if user exists
+            try:
+                user = User.objects.get(u_email=email)
+                user.u_google_auth = google_auth
+                user.save()
+                logger.info(f"Updated Google auth for user: {email}")
+            except User.DoesNotExist:
+                user = User.objects.create(u_email=email, u_google_auth=google_auth)
+                logger.info(f"Created new user: {email}")
+
+            return Response({"token": str(user.u_id)}, status=status.HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+            logger.error(f"AuthView error: {str(e)}", exc_info=True)
+            return Response({"error": "An unexpected error occurred."}, status=status.HTTP_400_BAD_REQUEST)

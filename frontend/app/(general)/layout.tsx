@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "@/app/globals.css"
-import Wrapper from "@/app/(general)/layoutWrapper"
+import { Providers } from "@/app/providers"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,7 +21,9 @@ export default function GeneralLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
-        <Wrapper>{children}</Wrapper>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   )

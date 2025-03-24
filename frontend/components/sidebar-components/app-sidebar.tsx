@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
+import { useUserStore } from "@/store/userStore"
+
 
 import { NavMain } from "@/components/sidebar-components/nav-main"
 import { NavUser } from "@/components/sidebar-components/nav-user"
@@ -28,7 +29,7 @@ import {
 } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session, status } = useSession()
+  const { id, email, name, image, accessToken, authenticated } = useUserStore()
 
   const [data, setData] = useState({
     user: {
@@ -117,18 +118,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   })
 
   useEffect(() => {
-    if (session) {
+    if (authenticated) {
       setData({
         ...data,
         user: {
           ...data.user,
-          name: session.user?.name ?? "",
-          email: session.user?.email ?? "",
-          avatar: session.user?.image ?? "",
+          name: name ?? "",
+          email: email ?? "",
+          avatar: image ?? "",
         },
       })
     }
-  }, [session])
+  }, [authenticated])
 
   return (
     <Sidebar collapsible="icon" {...props}>
