@@ -36,6 +36,22 @@ const PomodoroTimer = () => {
         }
     }, [hydrated])
 
+    const requestNotificationPermission = () => {
+        if (typeof window !== "undefined" && "Notification" in window) {
+            if (Notification.permission === "default") {
+                Notification.requestPermission().then((permission) => {
+                    if (permission !== "granted") {
+                        console.warn("Notifications are disabled.")
+                    }
+                })
+            }
+        }
+    }
+
+    useEffect(() => {
+        requestNotificationPermission();
+    }, [])
+
     useEffect(() => {
         const interval = setInterval(() => {
             tick()
@@ -84,9 +100,9 @@ const PomodoroTimer = () => {
                 background: backgroundColor,
                 color: foregroundColor,
                 zIndex: 1000,
-                display: "flex",         // Use flex layout for horizontal alignment
-                alignItems: "center",     // Center items vertically
-                gap: "1rem",              // Gap between timer and buttons
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
             }}
             onClick={() => setCompactMode(!compactMode)}
         >
@@ -111,7 +127,7 @@ const PomodoroTimer = () => {
                     <TooltipContent side="top" sideOffset={10}>
                         <p>Exit</p>
                     </TooltipContent>
-            </Tooltip>
+                </Tooltip>
             )}
 
             {/* Timer / Loading Message */}
@@ -129,9 +145,9 @@ const PomodoroTimer = () => {
                                 {minutes}:{seconds.toString().padStart(2, "0")}
                             </div>
                         </TooltipTrigger>
-                            <TooltipContent side="left" sideOffset={compactMode ? 15: 30}>
-                                <p>{pomodoroStatus}</p>
-                            </TooltipContent>
+                        <TooltipContent side="left" sideOffset={compactMode ? 15 : 30}>
+                            <p>{pomodoroStatus}</p>
+                        </TooltipContent>
                     </Tooltip>
 
                     {!compactMode && (

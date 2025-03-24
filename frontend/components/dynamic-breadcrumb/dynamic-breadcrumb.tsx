@@ -14,7 +14,7 @@ import { useEffect, useState } from "react"; // Import useEffect and useState
 // Mapping of URL segments to display names of sidebar component
 const pathToNameMap: { [key: string]: string } = {
   "category-management": "Category Manager",
-  // Add more url element in the sidebar if needed
+  
 };
 
 const generateBreadcrumbItems = (pathname: string) => {

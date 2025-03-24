@@ -90,6 +90,14 @@ const chooseRandom = (items: any[]) => {
   return items[randomIndex];
 }
 
+const sendNotification = (message: string) => {
+  if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("", {
+          body: message,
+      })
+  }
+}
+
 const pomodoroStore = create<PomodoroState>()(
   persist(
     (set, get) => ({
@@ -117,6 +125,9 @@ const pomodoroStore = create<PomodoroState>()(
             return { timeLeft: state.timeLeft - 1 }
           }
           if (state.isRunning && state.timeLeft === 0) {
+            sendNotification(
+              state.working ? "Time for a break! 🎉" : "Back to work! 💪"
+            )
             get().switchPhase()
           }
           return {}
