@@ -19,5 +19,5 @@ export function useAuthSync() {
     } else if (status === "unauthenticated") {
       clearUser()
     }
-  }, [session, status, setUser, clearUser])
+  }, [session?.user?.email, session?.user?.name, session?.user?.image, status, setUser, clearUser])
 }
