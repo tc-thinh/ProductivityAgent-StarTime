@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "@/app/globals.css"
 import { Providers } from "@/app/providers"
 
+
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "600"],

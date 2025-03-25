@@ -10,6 +10,7 @@ import { useAuthSync } from "@/hooks/useAuthAsync"
 import QuickActions from "@/components/quick-actions/quick-actions"
 import PomodoroTimer from "@/components/pomodoro-timer/pomodoroTimer"
 
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
@@ -22,7 +23,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
 function AuthWrapper({ children }: { children: React.ReactNode }) {
   const { show: pomodoroShow } = pomodoroStore()
   useAuthSync()
-
   return (
     <TooltipProvider>
       <SidebarProvider>
