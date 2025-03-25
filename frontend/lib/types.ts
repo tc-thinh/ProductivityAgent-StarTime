@@ -23,24 +23,38 @@ export interface ToolCall {
     };
     type: string;
 }
+
 export interface ToolCallResult {
     tool_call_id: string
     content: string
     status?: "success" | "error"
-  }
-
+}
 
 export type MessageRole = "system" | "user" | "assistant" | "tool"
-
 export interface ConversationMessage {
     role: MessageRole
     content: string
     tool_calls?: ToolCall[]
     tool_call_id?: string
     tool_call_result?: ToolCallResult
-  }
-  
-  export interface ConversationMessages {
-      conversationId: number;
-      message: ConversationMessage[]
-  }
+}
+
+export interface ConversationMessages {
+    conversationId: number;
+    message: ConversationMessage[]
+}
+
+export interface History {
+    name: string
+    url: string
+    id: number
+    date: string
+    isToday: boolean
+}
+
+export interface ConversationHeader {
+    c_id: number
+    c_name: string
+    c_created_at: string
+    c_deleted: boolean
+}

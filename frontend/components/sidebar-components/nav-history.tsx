@@ -22,16 +22,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useUserStore } from "@/store/userStore"
+import { fetchDatabaseService } from "@/lib/utils"
+import { History, ConversationHeader } from "@/lib/types"
+import { toast } from "sonner"
 
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
-
-interface History {
-  name: string
-  url: string
-  id: number
-  date: string
-  isToday: boolean
-}
 
 export function NavHistories() {
   const { isMobile } = useSidebar()
@@ -39,16 +35,27 @@ export function NavHistories() {
   const [olderHistories, setOlderHistories] = useState<History[]>([])
   const [showAll, setShowAll] = useState(false)
 
+  const { accessToken, hydrated } = useUserStore()
+
   const fetchHistory = async () => {
+    if (!hydrated) return
+
     try {
-      const response = await fetch(HTTP_BACKEND + "/database/conversations/") 
-      const result = await response.json()
-      console.log('Data fetched:', result)
+      const { success, data, error } = await fetchDatabaseService<ConversationHeader[]>(
+        {
+          endpoint: `conversations/?token=${accessToken}`,
+          method: "GET",
+        }
+      )
+
+      if (!success) {
+        toast.error(`Error fetching previous conversations: ${error}`)
+      }
 
       const now = new Date()
       const today = now.toLocaleDateString()
       
-      const fetchedHistoryItems = result.map((item: { c_id: number, c_name: string, c_created_at: string }) => {
+      const fetchedHistoryItems = data?.map((item: ConversationHeader) => {
         const conversationDate = new Date(item.c_created_at)
         const localDate = conversationDate.toLocaleString()
         const localDateString = conversationDate.toLocaleDateString()
@@ -62,11 +69,11 @@ export function NavHistories() {
         }
       })
 
-      const todayItems = fetchedHistoryItems.filter((item: History) => item.isToday)
-      const olderItems = fetchedHistoryItems.filter((item: History) => !item.isToday)
+      const todayItems = fetchedHistoryItems?.filter((item: History) => item.isToday)
+      const olderItems = fetchedHistoryItems?.filter((item: History) => !item.isToday)
       
-      setTodayHistories(todayItems)
-      setOlderHistories(olderItems)
+      setTodayHistories(todayItems ?? [])
+      setOlderHistories(olderItems ?? [])
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -74,7 +81,7 @@ export function NavHistories() {
 
   useEffect(() => {
     fetchHistory()
-  }, [])
+  }, [hydrated])
 
   const deleteConversation = async (conversationId: number) => {
     try {
@@ -83,6 +90,9 @@ export function NavHistories() {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          token: accessToken, 
+        })
       })
 
       if (!response.ok) {
