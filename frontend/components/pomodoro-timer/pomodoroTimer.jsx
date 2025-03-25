@@ -99,7 +99,7 @@ const PomodoroTimer = () => {
                 padding: compactMode ? "0.5rem" : "1rem",
                 background: backgroundColor,
                 color: foregroundColor,
-                zIndex: 1000,
+                zIndex: 50,
                 display: "flex",
                 alignItems: "center",
                 gap: "1rem",

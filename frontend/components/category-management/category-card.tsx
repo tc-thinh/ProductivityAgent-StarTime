@@ -81,7 +81,10 @@ export const CategoryCardSection: React.FC<{
 
 
       {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleCancel();
+          }}>
           <Card className="w-full max-w-[80vh] p-6 flex flex-col">
             <div className="flex-1 flex flex-col space-y-4 mb-10">
               {/* Title Input */}
