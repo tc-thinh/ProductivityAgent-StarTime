@@ -27,8 +27,6 @@ import { fetchDatabaseService } from "@/lib/utils"
 import { History, ConversationHeader } from "@/lib/types"
 import { toast } from "sonner"
 
-const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
-
 export function NavHistories() {
   const { isMobile } = useSidebar()
   const [todayHistories, setTodayHistories] = useState<History[]>([])
@@ -54,7 +52,7 @@ export function NavHistories() {
 
       const now = new Date()
       const today = now.toLocaleDateString()
-      
+
       const fetchedHistoryItems = data?.map((item: ConversationHeader) => {
         const conversationDate = new Date(item.c_created_at)
         const localDate = conversationDate.toLocaleString()
@@ -71,7 +69,7 @@ export function NavHistories() {
 
       const todayItems = fetchedHistoryItems?.filter((item: History) => item.isToday)
       const olderItems = fetchedHistoryItems?.filter((item: History) => !item.isToday)
-      
+
       setTodayHistories(todayItems ?? [])
       setOlderHistories(olderItems ?? [])
     } catch (error) {
@@ -84,27 +82,16 @@ export function NavHistories() {
   }, [hydrated])
 
   const deleteConversation = async (conversationId: number) => {
-    try {
-      const response = await fetch(`${HTTP_BACKEND}/database/conversations/?conversationId=${conversationId}`, {
+    const { success, data, error } = await fetchDatabaseService(
+      {
+        endpoint: `conversations/?conversationId=${conversationId}`,
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: accessToken, 
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to delete conversation")
+        body: { token: accessToken }
       }
+    )
 
-      fetchHistory()
-      console.log("Conversation deleted successfully")
-    } catch (error: any) {
-      console.error("Error deleting conversation:", error.message)
-    }
+    if (success) toast.success("Conversation successfully deleted.")
+    else toast.error(`Error while deleting conversation: ${error}`)
   }
 
   return (

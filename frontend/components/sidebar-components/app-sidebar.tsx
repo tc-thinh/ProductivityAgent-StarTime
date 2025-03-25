@@ -29,7 +29,7 @@ import {
 } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { id, email, name, image, accessToken, authenticated } = useUserStore()
+  const { email, name, image, authenticated, hydrated } = useUserStore()
 
   const [data, setData] = useState({
     user: {
@@ -118,6 +118,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   })
 
   useEffect(() => {
+    if (!hydrated) return
+
     if (authenticated) {
       setData({
         ...data,
@@ -129,7 +131,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       })
     }
-  }, [authenticated])
+  }, [authenticated, hydrated])
 
   return (
     <Sidebar collapsible="icon" {...props}>
