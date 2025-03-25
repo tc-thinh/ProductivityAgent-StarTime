@@ -638,6 +638,14 @@
   dependencies:
     "@radix-ui/react-slot" "1.1.2"
 
+"@radix-ui/react-progress@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-progress/-/react-progress-1.1.2.tgz#3584c346d47f2a6f86076ce5af56ab00c66ded2b"
+  integrity sha512-u1IgJFQ4zNAUTjGdDL5dcl/U8ntOR6jsnhxKb5RKp5Ozwl88xKR9EqRZOe/Mk8tnx0x5tNUe2F+MzsyjqMg0MA==
+  dependencies:
+    "@radix-ui/react-context" "1.1.1"
+    "@radix-ui/react-primitive" "2.0.2"
+
 "@radix-ui/react-roving-focus@1.1.2":
   version "1.1.2"
   resolved "https://registry.npmjs.org/@radix-ui/react-roving-focus/-/react-roving-focus-1.1.2.tgz"
@@ -1978,7 +1986,7 @@ foreground-child@^3.1.0:
     "@radix-ui/react-visually-hidden" "^1.1.2"
     class-variance-authority "^0.7.1"
     clsx "^2.1.1"
-    frontend "file:../../../../AppData/Local/Yarn/Cache/v6/npm-frontend-0.1.0-4dafc506-b031-4d92-9e4d-4776305fde45-1742783242236/node_modules/frontend"
+    frontend "file:../../../../AppData/Local/Yarn/Cache/v6/npm-frontend-0.1.0-0f5a3835-b94b-48e0-9d5d-a446ab400801-1742868020557/node_modules/frontend"
     lucide-react "^0.477.0"
     next "15.1.7"
     next-auth "^4.24.11"
