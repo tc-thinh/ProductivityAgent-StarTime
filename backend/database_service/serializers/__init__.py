@@ -1,4 +1,2 @@
-from database_service.serializers.conversation_serializer import ConversationSerializer
-from database_service.serializers.message_serializer import MessageSerializer
+from database_service.serializers.conversation_serializer import ConversationSerializer, ConversationHeaderSerializer
 from database_service.serializers.category_serializer import CategorySerializer
-from database_service.serializers.toolcall_serializer import ToolCallSerializer

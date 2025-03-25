@@ -4,5 +4,9 @@ from database_service.models import Conversation
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = '__all__'
+        exclude = ['u_id']
         
+class ConversationHeaderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Conversation
+        exclude = ['u_id', 'c_messages']

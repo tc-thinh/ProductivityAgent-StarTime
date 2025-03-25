@@ -1,4 +1,5 @@
 from django.db import models
+from database_service.models.users import User
 
 class Category(models.Model):
     cat_id = models.AutoField(primary_key=True)
@@ -10,6 +11,7 @@ class Category(models.Model):
     cat_active = models.BooleanField(default=False)
     cat_examples = models.JSONField(default=list)
     cat_event_prefix = models.CharField(max_length=12, default="", blank=True)
+    u_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.p_name

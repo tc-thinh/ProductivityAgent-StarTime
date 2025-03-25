@@ -1,14 +1,24 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from database_service.models import Category
+from database_service.models import Category, User
 from database_service.serializers import CategorySerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CategoryListView(APIView):
     @swagger_auto_schema(
         manual_parameters=[
+            openapi.Parameter(
+                'token',
+                openapi.IN_QUERY,
+                description="User identifier token",
+                type=openapi.TYPE_STRING,
+                required=True
+            ),
             openapi.Parameter(
                 'active',
                 openapi.IN_QUERY,
@@ -24,25 +34,84 @@ class CategoryListView(APIView):
         }
     )
     def get(self, request):
+        # Retrieve token from query parameters
+        token = request.query_params.get('token')
+        if not token:
+            return Response({"error": "Token is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Attempt to retrieve the user with the given token
+        try:
+            user = User.objects.get(u_id=token)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Filter categories for the found user
         active = request.query_params.get('active')
         if active is not None and active.lower() == 'true':
-            categories = Category.objects.filter(cat_active=True)
+            categories = Category.objects.filter(u_id=user, cat_active=True)
         else:
-            categories = Category.objects.all()
+            categories = Category.objects.filter(u_id=user)
+        
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter(
-                'categoryId', 
-                openapi.IN_QUERY, 
-                description="ID of the category to modify", 
-                type=openapi.TYPE_INTEGER, 
-                required=True
-            ),
-        ],
-        request_body=CategorySerializer,
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'categoryId': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description='ID of the category to modify'
+                ),
+                'token': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='User identifier token'
+                ),
+                'category': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description='Partial object with category fields to update',
+                    properties={
+                        'cat_title': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description='Category title',
+                            default=""
+                        ),
+                        'cat_description': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description='Category description',
+                            default=""
+                        ),
+                        'cat_background': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description='Category background',
+                            default=""
+                        ),
+                        'cat_foreground': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description='Category foreground',
+                            default=""
+                        ),
+                        'cat_active': openapi.Schema(
+                            type=openapi.TYPE_BOOLEAN,
+                            description='Category active flag',
+                            default=False
+                        ),
+                        'cat_examples': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Items(type=openapi.TYPE_STRING),
+                            description='Category examples',
+                            default=[]
+                        ),
+                        'cat_event_prefix': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description='Category event prefix',
+                            default=""
+                        ),
+                    }
+                ),
+            },
+            required=['categoryId', 'token', 'category']
+        ),
         responses={
             200: openapi.Response('OK', CategorySerializer),
             400: openapi.Response('Bad Request'),
@@ -50,18 +119,36 @@ class CategoryListView(APIView):
         }
     )
     def put(self, request):
-        category_id = request.query_params.get('categoryId')
-        if not category_id:
-            return Response({"detail": "categoryId query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            category = Category.objects.get(cat_id=category_id)
-        except Category.DoesNotExist:
-            return Response({"detail": "Category not found."}, status=status.HTTP_404_NOT_FOUND)
+        # Extract required fields from request body
+        category_id = request.data.get('categoryId')
+        user_token = request.data.get('token')
+        category_data = request.data.get('category')
 
-        serializer = CategorySerializer(category, data=request.data, partial=True)
+        if not category_id or not user_token or category_data is None:
+            return Response(
+                {"detail": "categoryId, userToken and category (update data) are required in the request body."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate the user based on the userToken
+        try:
+            user = User.objects.get(u_id=user_token)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Ensure the category belongs to the user
+        try:
+            category = Category.objects.get(cat_id=category_id, u_id=user)
+        except Category.DoesNotExist:
+            return Response(
+                {"detail": "Category not found for the specified user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = CategorySerializer(category, data=category_data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
