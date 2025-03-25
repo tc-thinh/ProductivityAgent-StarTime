@@ -36,7 +36,7 @@ export function NavHistories() {
   const { accessToken, hydrated } = useUserStore()
 
   const fetchHistory = async () => {
-    if (!hydrated) return
+    if (!(hydrated && accessToken)) return
 
     try {
       const { success, data, error } = await fetchBackendService<ConversationHeader[]>(
@@ -79,7 +79,7 @@ export function NavHistories() {
 
   useEffect(() => {
     fetchHistory()
-  }, [hydrated])
+  }, [hydrated, accessToken])
 
   const deleteConversation = async (conversationId: number) => {
     const { success, data, error } = await fetchBackendService(
