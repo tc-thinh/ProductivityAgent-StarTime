@@ -3,6 +3,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import { signIn, signOut } from 'next-auth/react'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { useUserStore } from '@/store/userStore'
+import { fetchBackendService } from './utils'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
@@ -24,32 +25,26 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async signIn({ account, profile }) {
       if (account && profile?.email) {
-        const response = await fetch(`${BACKEND_URL}/database/auth/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: profile.email, 
-            google_auth: {
-              access_token: account.access_token,
-              refresh_token: account.refresh_token,
-              expires_in: account.expires_in,
-              scope: account.scope,
-              token_type: account.token_type,
+        const { success, data } = await fetchBackendService<{ token: string }>(
+          {
+            "endpoint": "database/auth/",
+            "method": "POST",
+            body: {
+              email: profile.email, 
+              google_auth: {
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_in: account.expires_in,
+                scope: account.scope,
+                token_type: account.token_type,
+              },
             },
-          }),
-        })
+          }
+        )
 
-        if (!response.ok) {
-          console.error('Failed to send auth token to backend')
-          return false
-        }
-        
-        console.log(account)
-        const data = await response.json()
+        if (!success) return false
 
-        account.backendAccessToken = data.token
+        account.backendAccessToken = data?.token
         return true
       }
       return false

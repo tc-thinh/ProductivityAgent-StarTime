@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export async function fetchDatabaseService<T>({
+export async function fetchBackendService<T>({
   endpoint,
   method,
   body,
@@ -21,7 +21,7 @@ export async function fetchDatabaseService<T>({
   }
 
   try {
-    const response = await fetch(`${HTTP_BACKEND}/database/${endpoint}`, {
+    const response = await fetch(`${HTTP_BACKEND}/${endpoint}`, {
       method,
       headers: {
         "Content-Type": "application/json",

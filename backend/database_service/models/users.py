@@ -7,4 +7,4 @@ class User(models.Model):
     u_google_auth = models.JSONField(default=dict)  
 
     def __str__(self):
-        return f"User: {self.u_email}"
+        return f"{self.u_id}"

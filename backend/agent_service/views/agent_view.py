@@ -9,6 +9,7 @@ from agent_service.toolbox.services.conversations import *
 import threading
 from rest_framework.views import APIView
 import asyncio
+from app_lib.utils.users import get_user_from_body
 
 logger = logging.getLogger(__name__)
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
@@ -62,6 +63,10 @@ class AgentView(APIView):
                     type=openapi.TYPE_STRING, 
                     description='User input prompt.'
                 ),
+                'token': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='User identification token'
+                ),
                 'images': openapi.Schema(
                     type=openapi.TYPE_ARRAY, 
                     items=openapi.Items(type=openapi.TYPE_STRING),
@@ -73,10 +78,15 @@ class AgentView(APIView):
     )
     def post(self, request, *args, **kwargs):
         try:
-            conversation_id = create_blank_conversation()
-            logger.info(f"Created conversation {conversation_id}")
-            # Pass data as a dictionary to avoid QueryDict issues
             data = request.data.dict() if hasattr(request.data, 'dict') else request.data
+
+            user = get_user_from_body(request)
+            if not user:
+                return Response({"error": "Missing or incorrect token."}, status=status.HTTP_400_BAD_REQUEST)
+
+            conversation_id = create_blank_conversation(user)
+            logger.info(f"Created conversation {conversation_id}")
+            
             process_thread = threading.Thread(
                 target=process,
                 args=(data, conversation_id),

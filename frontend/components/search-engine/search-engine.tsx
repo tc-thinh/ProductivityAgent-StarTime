@@ -1,210 +1,227 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { CircleStop, Send, AudioLines, Images } from "lucide-react";
+import { useState, useRef, useEffect } from "react"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { CircleStop, Send, AudioLines, Images } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+} from "@/components/ui/tooltip"
+import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
+import { DialogTitle } from '@radix-ui/react-dialog'
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+import { useUserStore } from "@/store/userStore"
+import { fetchBackendService } from "@/lib/utils"
 
-import { DialogTitle} from '@radix-ui/react-dialog';
-import {VisuallyHidden} from "@radix-ui/react-visually-hidden"
+const MAX_IMAGE_SIZE_MB = 5
+const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024
 
-const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND;
-const MAX_IMAGE_SIZE_MB = 5;
-const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+const convertToBase64 = (file: File) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = (error) => reject(error)
+  })
+}
 
 export function SearchEngine() {
-  const isDay = new Date().getHours() < 11 && new Date().getHours() > 6;
-  const isNight = new Date().getHours() > 18 || new Date().getHours() < 6;
+  const isDay = new Date().getHours() < 11 && new Date().getHours() > 6
+  const isNight = new Date().getHours() > 18 || new Date().getHours() < 6
+
+  const { accessToken } = useUserStore()
 
   // State declarations
-  const [inputValue, setInputValue] = useState<string>("");
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [transcript, setTranscript] = useState<string>("");
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [inputValue, setInputValue] = useState<string>("")
+  const [isRecording, setIsRecording] = useState<boolean>(false)
+  const [transcript, setTranscript] = useState<string>("")
+  const [images, setImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
 
   // Refs
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Dynamic height calculation for CardContent
-  const newLineCount = (inputValue.match(/\n/g) || []).length;
-  const maxLines = 10;
-  const initialHeight = 50;
-  const cardHeight = newLineCount > 0 ? Math.min(newLineCount + 2, maxLines) * 24 : initialHeight;
+  const newLineCount = (inputValue.match(/\n/g) || []).length
+  const maxLines = 10
+  const initialHeight = 50
+  const cardHeight = newLineCount > 0 ? Math.min(newLineCount + 2, maxLines) * 24 : initialHeight
 
   // Handle search functionality
   const handleSearch = async () => {
-    if (!inputValue.trim() && !transcript.trim()) return;
+    if (!inputValue.trim() && !transcript.trim()) return
 
-    const queryText = inputValue.trim() || transcript.trim();
-    console.log("Current Input:", queryText);
+    const queryText = inputValue.trim() || transcript.trim()
 
     try {
-      const formData = new FormData();
-      formData.append("userPrompt", queryText);
-      images.forEach((image, index) => {
-        formData.append(`image${index}`, image);
-      });
+      const imagesBase64: string[] = []
 
-      const response = await fetch(`${HTTP_BACKEND}/agent/`, {
-        method: "POST",
-        body: formData,
-      });
+      for (let i = 0; i < images.length; i++) {
+        const base64String = await convertToBase64(images[i]) as string
+        imagesBase64.push(base64String)
+      }
 
-      const data = await response.json();
-      console.log(data);
-      toast.success("The AI agents are doing their best to help you! Please wait.");
-      window.location.href = `/${data.conversationId}`;
+      const { success, data, error } = await fetchBackendService<{ conversationId: string }>(
+        {
+          endpoint: `agent/`,
+          method: "POST",
+          body: {
+            "userPrompt": queryText,
+            "token": accessToken || "",
+            "images": imagesBase64
+          }
+        }
+      )
+      if (!success) toast.error("Something went wrong. Please try again later")
+      else toast.success("The AI agents are doing their best to help you! Please wait.")
+    
+      window.location.href = `/${data?.conversationId}`
     } catch (error) {
-      console.error("Failed to connect to the backend: ", error);
-      toast.error("Failed to connect to an AI agent. Please try again later.");
+      console.error("Failed to connect to the backend: ", error)
+      toast.error("Failed to connect to an AI agent. Please try again later.")
     } finally {
       if (textareaRef.current) {
-        textareaRef.current.blur();
+        textareaRef.current.blur()
       }
     }
-  };
+  }
 
   // Set up SpeechRecognition
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
       if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = true;
-        recognitionRef.current.interimResults = true;
-        recognitionRef.current.lang = "en-US";
+        recognitionRef.current = new SpeechRecognition()
+        recognitionRef.current.continuous = true
+        recognitionRef.current.interimResults = true
+        recognitionRef.current.lang = "en-US"
 
         recognitionRef.current.onstart = () => {
-          setIsRecording(true);
-        };
+          setIsRecording(true)
+        }
 
         recognitionRef.current.onend = () => {
-          setIsRecording(false);
-        };
+          setIsRecording(false)
+        }
 
         recognitionRef.current.onresult = (event) => {
           const newTranscript = Array.from(event.results)
             .map((result) => result[0].transcript)
-            .join("");
-          setTranscript(newTranscript);
-        };
+            .join("")
+          setTranscript(newTranscript)
+        }
       } else {
-        console.error("Speech recognition not supported in this browser");
-        toast.error("Speech recognition not supported in this browser");
+        console.error("Speech recognition not supported in this browser")
+        toast.error("Speech recognition not supported in this browser")
       }
 
       return () => {
-        recognitionRef.current?.stop();
-      };
+        recognitionRef.current?.stop()
+      }
     }
-  }, []);
+  }, [])
 
   // Handle Enter key press for search
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      handleSearch();
+      event.preventDefault()
+      handleSearch()
     }
-  };
+  }
 
   const handlePaste = (event: React.ClipboardEvent) => {
-    const items = event.clipboardData.items;
+    const items = event.clipboardData.items
     for (const item of items) {
       if (item.type.indexOf("image") === 0) {
-        const file = item.getAsFile();
-        if (!file) return;
+        const file = item.getAsFile()
+        if (!file) return
         if (file.size > MAX_IMAGE_SIZE) {
-          toast.error(`${file.name || "Pasted image"} exceeds the ${MAX_IMAGE_SIZE_MB}MB size limit.`);
-          return;
+          toast.error(`${file.name || "Pasted image"} exceeds the ${MAX_IMAGE_SIZE_MB}MB size limit.`)
+          return
         }
-        setImages((prevImages) => [...prevImages, file]);
-        const imageUrl = URL.createObjectURL(file);
-        setImagePreviews((prevPreviews) => [...prevPreviews, imageUrl]);
+        setImages((prevImages) => [...prevImages, file])
+        const imageUrl = URL.createObjectURL(file)
+        setImagePreviews((prevPreviews) => [...prevPreviews, imageUrl])
       }
     }
-  };
+  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
+    const files = event.target.files
     if (files) {
       const imageFiles = Array.from(files).filter((file) => {
         if (file.size > MAX_IMAGE_SIZE) {
-          toast.error(`${file.name} exceeds the ${MAX_IMAGE_SIZE_MB}MB size limit.`);
-          return false;
+          toast.error(`${file.name} exceeds the ${MAX_IMAGE_SIZE_MB}MB size limit.`)
+          return false
         }
-        return true;
-      });
+        return true
+      })
 
-      setImages((prevImages) => [...prevImages, ...imageFiles]);
-      const newImagePreviews = imageFiles.map((file) => URL.createObjectURL(file));
-      setImagePreviews((prevPreviews) => [...prevPreviews, ...newImagePreviews]);
+      setImages((prevImages) => [...prevImages, ...imageFiles])
+      const newImagePreviews = imageFiles.map((file) => URL.createObjectURL(file))
+      setImagePreviews((prevPreviews) => [...prevPreviews, ...newImagePreviews])
     }
-  };
+  }
 
   const handleAttachButtonClick = () => {
-    fileInputRef.current?.click();
-  };
+    fileInputRef.current?.click()
+  }
 
   // Toggle recording
   const toggleRecording = () => {
     if (isRecording) {
-      recognitionRef.current?.stop();
-      setIsRecording(false);
+      recognitionRef.current?.stop()
+      setIsRecording(false)
     } else {
-      recognitionRef.current?.start();
+      recognitionRef.current?.start()
     }
-  };
+  }
 
   // Cleanup image URLs on unmount
   useEffect(() => {
     return () => {
-      console.log("Component unmounting, revoking all blob URLs");
-      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, []); // Explicitly empty to ensure it only runs on unmount
+      console.log("Component unmounting, revoking all blob URLs")
+      imagePreviews.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, []) // Explicitly empty to ensure it only runs on unmount
 
   // Handle image deletion
   const handleDeleteImage = (index: number) => {
-    console.log("Deleting image at index:", index, "Current selected index:", selectedImageIndex);
-    const newImages = images.filter((_, i) => i !== index);
-    const newImagePreviews = imagePreviews.filter((_, i) => i !== index);
+    console.log("Deleting image at index:", index, "Current selected index:", selectedImageIndex)
+    const newImages = images.filter((_, i) => i !== index)
+    const newImagePreviews = imagePreviews.filter((_, i) => i !== index)
 
     // Revoke the URL of the deleted image immediately
-    URL.revokeObjectURL(imagePreviews[index]);
+    URL.revokeObjectURL(imagePreviews[index])
 
-    setImages(newImages);
-    setImagePreviews(newImagePreviews);
+    setImages(newImages)
+    setImagePreviews(newImagePreviews)
 
     // Adjust selectedImageIndex
     if (newImagePreviews.length === 0) {
-      setSelectedImageIndex(null);
+      setSelectedImageIndex(null)
     } else if (selectedImageIndex === index) {
-      setSelectedImageIndex(newImagePreviews.length > 0 ? 0 : null); // Default to first image
+      setSelectedImageIndex(newImagePreviews.length > 0 ? 0 : null) // Default to first image
     } else if (selectedImageIndex !== null && index < selectedImageIndex) {
-      setSelectedImageIndex(selectedImageIndex - 1);
+      setSelectedImageIndex(selectedImageIndex - 1)
     }
-    console.log("New previews length:", newImagePreviews.length, "New selected index:", selectedImageIndex);
-  };
+    console.log("New previews length:", newImagePreviews.length, "New selected index:", selectedImageIndex)
+  }
 
   // Handle image selection
   const handleImageSelect = (index: number) => {
-    console.log("Selecting image at index:", index);
-    setSelectedImageIndex(index);
-  };
+    console.log("Selecting image at index:", index)
+    setSelectedImageIndex(index)
+  }
 
   return (
     <div className="w-full justify-content-center flex flex-col items-center transition-all duration-300">
@@ -229,9 +246,8 @@ export function SearchEngine() {
           <Textarea
             ref={textareaRef}
             placeholder={`How can I help you ${isDay ? "this morning" : isNight ? "this evening" : "today"}?`}
-            className={`w-full text-lg bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0 ${
-              newLineCount < maxLines ? "cursor-transparent" : ""
-            }`}
+            className={`w-full text-lg bg-transparent rounded-lg text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0 ${newLineCount < maxLines ? "cursor-transparent" : ""
+              }`}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyPress}
@@ -245,21 +261,21 @@ export function SearchEngine() {
           <div className="flex items-center space-x-2 overflow-x-auto max-w-[400px] [&::-webkit-scrollbar]:w-2[&::-webkit-scrollbar]:h-2[&::-webkit-scrollbar-track]:bg-gray-100[&::-webkit-scrollbar-thumb]:bg-gray-300dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
             {imagePreviews.map((preview, index) => (
               <Drawer key={preview}>
-                
+
                 <DrawerTrigger asChild>
                   <div className="relative flex-shrink-0 cursor-pointer">
                     <Image
                       src={preview}
                       alt={`Uploaded preview ${index}`}
-                      width = {48}
-                      height = {48}
+                      width={48}
+                      height={48}
                       className="w-[2rem] h-[2rem] object-cover"
                       onClick={() => handleImageSelect(index)}
                     />
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteImage(index);
+                        e.stopPropagation()
+                        handleDeleteImage(index)
                       }}
                       className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
                     >
@@ -267,7 +283,7 @@ export function SearchEngine() {
                     </button>
                   </div>
                 </DrawerTrigger>
-               
+
                 <DrawerContent aria-label="Image Preview">
                   <VisuallyHidden>
                     <DialogTitle>Image Preview</DialogTitle>
@@ -275,8 +291,8 @@ export function SearchEngine() {
 
                   <div className="p-4 flex justify-center items-center">
                     {selectedImageIndex !== null &&
-                    selectedImageIndex >= 0 &&
-                    selectedImageIndex < imagePreviews.length ? (
+                      selectedImageIndex >= 0 &&
+                      selectedImageIndex < imagePreviews.length ? (
                       <Image
                         src={imagePreviews[selectedImageIndex]}
                         alt="Preview in drawer"
@@ -289,7 +305,7 @@ export function SearchEngine() {
                     )}
                   </div>
                 </DrawerContent>
-               
+
               </Drawer>
             ))}
           </div>
@@ -337,11 +353,10 @@ export function SearchEngine() {
                   variant={"ghost"}
                   size="icon"
                   onClick={toggleRecording}
-                  className={`flex-shrink-0 transition-all ${
-                    isRecording
-                      ? "text-white bg-red-500 hover:bg-red-600"
-                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                  }`}
+                  className={`flex-shrink-0 transition-all ${isRecording
+                    ? "text-white bg-red-500 hover:bg-red-600"
+                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
                 >
                   {isRecording ? (
                     <CircleStop className="h-4 w-4" />
@@ -374,5 +389,5 @@ export function SearchEngine() {
         </CardFooter>
       </Card>
     </div>
-  );
+  )
 }

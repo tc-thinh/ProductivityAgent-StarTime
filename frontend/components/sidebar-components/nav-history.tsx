@@ -23,7 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useUserStore } from "@/store/userStore"
-import { fetchDatabaseService } from "@/lib/utils"
+import { fetchBackendService } from "@/lib/utils"
 import { History, ConversationHeader } from "@/lib/types"
 import { toast } from "sonner"
 
@@ -39,9 +39,9 @@ export function NavHistories() {
     if (!hydrated) return
 
     try {
-      const { success, data, error } = await fetchDatabaseService<ConversationHeader[]>(
+      const { success, data, error } = await fetchBackendService<ConversationHeader[]>(
         {
-          endpoint: `conversations/?token=${accessToken}`,
+          endpoint: `database/conversations/?token=${accessToken}`,
           method: "GET",
         }
       )
@@ -82,9 +82,9 @@ export function NavHistories() {
   }, [hydrated])
 
   const deleteConversation = async (conversationId: number) => {
-    const { success, data, error } = await fetchDatabaseService(
+    const { success, data, error } = await fetchBackendService(
       {
-        endpoint: `conversations/?conversationId=${conversationId}`,
+        endpoint: `database/conversations/?conversationId=${conversationId}`,
         method: "DELETE",
         body: { token: accessToken }
       }

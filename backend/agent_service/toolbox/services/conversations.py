@@ -50,6 +50,11 @@ async def update_conversation(conversation_id: int, conversation_name: str):
         logger.error(f"Update conversation name failed: {e}", exc_info=True)
         raise
 
-def create_blank_conversation():
-    conversation = requests.post(DATABASE_SERVICE_URL + "/conversations/").json()
+def create_blank_conversation(user):
+    conversation = requests.post(
+        DATABASE_SERVICE_URL + "/conversations/",
+        json = {
+            "token": user.u_id
+        }
+    ).json()
     return conversation.get('c_id')

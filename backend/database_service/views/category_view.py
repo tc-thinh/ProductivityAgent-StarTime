@@ -1,11 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from database_service.models import Category, User
+from database_service.models import Category
 from database_service.serializers import CategorySerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
+from app_lib.utils.users import get_user_from_query_param, fetch_user
 
 logger = logging.getLogger(__name__)
 
@@ -34,17 +35,10 @@ class CategoryListView(APIView):
         }
     )
     def get(self, request):
-        # Retrieve token from query parameters
-        token = request.query_params.get('token')
-        if not token:
-            return Response({"error": "Token is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Attempt to retrieve the user with the given token
-        try:
-            user = User.objects.get(u_id=token)
-        except User.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+        user = get_user_from_query_param(request)
+        if not user:
+            return Response({"error": "Missing or incorrect token."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Filter categories for the found user
         active = request.query_params.get('active')
         if active is not None and active.lower() == 'true':
@@ -119,7 +113,6 @@ class CategoryListView(APIView):
         }
     )
     def put(self, request):
-        # Extract required fields from request body
         category_id = request.data.get('categoryId')
         user_token = request.data.get('token')
         category_data = request.data.get('category')
@@ -130,11 +123,9 @@ class CategoryListView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Validate the user based on the userToken
-        try:
-            user = User.objects.get(u_id=user_token)
-        except User.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        user = fetch_user(user_token)
+        if not user:
+            return Response({"error": "Missing or incorrect token."}, status=status.HTTP_400_BAD_REQUEST)
         
         # Ensure the category belongs to the user
         try:
@@ -151,4 +142,4 @@ class CategoryListView(APIView):
             return Response(serializer.data)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        

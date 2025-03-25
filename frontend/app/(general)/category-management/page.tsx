@@ -7,47 +7,66 @@ import CategoryManagement from "@/components/category-management/category-manage
 import { Category } from "@/lib/types"
 import { mockCategories } from "@/lib/data"
 
+import { useUserStore } from "@/store/userStore"
+import { ProgressPage } from "@/components/progress-bar/progress-bar"
+
+import { fetchBackendService } from "@/lib/utils"
+
 const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export default function CategoryManager() {
   const [categories, setCategories] = useState<Category[]>([])
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [loading, setLoading] = useState(true)  // Track loading state
+
+  const { hydrated, accessToken } = useUserStore()
 
   useEffect(() => {
-    fetch(`${HTTP_BACKEND}/database/categories/`)
-      .then(response => response.json())
-      .then(data => setCategories(data))
-      .catch(error => {
-        console.error("Can't fetch data, use mock instead:", error)
-        setCategories(mockCategories)
-      })
-  }, [refreshTrigger])
-
-  const handleSave = (updatedCategory: Category) => {
-    fetch(`${HTTP_BACKEND}/database/categories/?categoryId=${updatedCategory.cat_id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedCategory),
-    })
-      .then(response => {
-        if (!response.ok) throw new Error('Failed to update category')
-
-        toast("Category updated successfully!", {
-          description: "Your changes have been saved."
+    if (hydrated && accessToken) {
+      if (hydrated && accessToken) {
+        // Simulate a delay for testing the progress bar
+        fetchBackendService<Category[]>({
+          endpoint: `database/categories/?token=${accessToken}&active=false`,
+          method: "GET",
         })
-        return response.json()
-      })
-      .then(() => {
-        setRefreshTrigger(prev => prev + 1) // Trigger a re-fetch
-      })
-      .catch(error => {
-        console.error("Error updating category:", error)
-        toast.error("Failed to save changes.", {
-          description: "An error occurred. Please try again later.",
+        .then(({ success, data, error }) => {
+          if (success && data) {
+            setCategories(data)
+          } else {
+            console.error("Can't fetch data, use mock instead:", error)
+            setCategories(mockCategories)
+          }
+          setLoading(false)
         })
-      })
+        .catch(error => {
+          console.error("Can't fetch data, use mock instead:", error)
+          setCategories(mockCategories)
+          setLoading(false)
+        })
+      }
+    }
+  }, [hydrated, accessToken, refreshTrigger])
+
+  const handleSave = async (updatedCategory: Category) => {
+    const { success, error } = await fetchBackendService(
+      {
+        endpoint: "database/categories/",
+        method: "PUT",
+        body: {
+          categoryId: updatedCategory.cat_id,
+          token: accessToken,
+          category: updatedCategory,
+        },
+      }
+    )
+    
+    console.log(error)
+    if (success) toast.success("Category updated!")
+    else toast.error("Something went wrong. Please try again.")
+  }
+
+  if (loading) {
+    return <ProgressPage initPercentage={33} timeDone={500} />
   }
 
   return (
@@ -57,7 +76,6 @@ export default function CategoryManager() {
           saveEdit={handleSave}
           initCategories={categories}
         />
-
       </div>
     </>
   )

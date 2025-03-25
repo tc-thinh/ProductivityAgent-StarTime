@@ -2,13 +2,13 @@
 
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import { mockConversation1 } from "@/lib/data"
+import { mockConversation2 } from "@/lib/data"
 import { ConversationMessage } from "@/lib/types"
 import { SearchEngine } from "@/components/search-engine/search-engine"
 import { ToolCallCard } from "@/components/tool-call-card/tool-call"
-import { CheckCircle } from "lucide-react" // Import checkmark icon
+import { CheckCircle } from "lucide-react"
 
-const WS_BACKEND = process.env.WS_BACKEND || 'ws://localhost:8080'
+const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
 
 export default function ChatCanvas() {
   const { id } = useParams()
@@ -18,7 +18,7 @@ export default function ChatCanvas() {
   useEffect(() => {
     if (!id) return
     if (id === "0") {
-      setMessages(mockConversation1.message)
+      setMessages(mockConversation2.message)
       setConversationName("New Conversation")
       return
     }
@@ -28,39 +28,15 @@ export default function ChatCanvas() {
     ws.onopen = () => console.log('WebSocket connection established')
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data).data
-      switch (data.type) {
-        case "conversation":
-          setConversationName(data.message.c_name)
-          setMessages((prevMessages) => [...prevMessages, ...data.message.c_messages])
-          break
-        case "conversation_name":
-          setConversationName(data.message.c_name)
-          break
-        case "conversation_message":
-          setMessages((prevMessages) => [...prevMessages, data.message])
-          break
-        default:
-          console.log("Unknown message type")
-          break
-      }
+      console.log(data)
+      setConversationName(data.c_name)
+      setMessages(data.c_messages)
     }
     ws.onclose = () => console.log('WebSocket connection closed')
     ws.onerror = (error) => console.error('WebSocket error:', error)
 
     return () => ws.close()
   }, [id])
-
-  const handleNewMessage = (newMessage: string) => {
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { 
-        role: "user", 
-        content: newMessage, 
-        tool_calls: [], 
-        tool_call_id: "" 
-      }
-    ])
-  }
 
   return (
     <>
