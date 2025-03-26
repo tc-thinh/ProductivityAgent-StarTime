@@ -198,6 +198,45 @@ export const mockConversation2: ConversationMessages = {
   ]  
 }
 
+
+export const mockConversation3: ConversationMessages = {
+  "conversationId": 3,
+  "message": [
+    {
+      "role": "system",
+      "content": "\n            As an event assistant bot, use your predefined tools to create events based on user input. \n            The current datetime is 2025-03-26T20:58:23.450438. The current timezone is America/Phoenix.\n\n            # Notes\n            - Ensure the time zone context is accounted for when scheduling events.\n            - If the user provides incomplete information, go ahead and create the event with every information you have. Leave the uncertain information blank.\n        "
+    },
+    {
+      "role": "user",
+      "content": "[TEXT]: Add to my calendar - An office hour CSE 463 class from 6 - 7:15 pm today.\n"
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "call_3LhKzrMTiluHjbS3ZJpPq1Qx",
+          "function": {
+            "arguments": "{\"event\":{\"start\":{\"dateTime\":\"2025-03-26T18:00:00-07:00\",\"timeZone\":\"America/Phoenix\"},\"end\":{\"dateTime\":\"2025-03-26T19:15:00-07:00\",\"timeZone\":\"America/Phoenix\"},\"summary\":\"Office Hour CSE 463 Class\",\"description\":\"Office hour for CSE 463 class.\",\"location\":\"\",\"attendees\":[],\"reminders\":{\"useDefault\":true,\"overrides\":[]},\"colorId\":\"0\",\"recurrence\":[]},\"calendarId\":\"primary\"}",
+            "name": "CreateCalendarEvent"
+          },
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_3LhKzrMTiluHjbS3ZJpPq1Qx",
+      "content": "{\"kind\": \"calendar#event\", \"etag\": \"\\\"3486045427593598\\\"\", \"id\": \"kpjk144t3ih8s0u3v1976n03qg\", \"status\": \"confirmed\", \"htmlLink\": \"https://www.google.com/calendar/event?eid=a3BqazE0NHQzaWg4czB1M3YxOTc2bjAzcWcgdGhpbmgudHJhbi5pbmJveEBt\", \"created\": \"2025-03-26T20:58:33.000Z\", \"updated\": \"2025-03-26T20:58:33.796Z\", \"summary\": \" Office Hour CSE 463 Class\", \"description\": \"Office hour for CSE 463 class.\", \"creator\": {\"email\": \"thinh.tran.inbox@gmail.com\", \"self\": true}, \"organizer\": {\"email\": \"thinh.tran.inbox@gmail.com\", \"self\": true}, \"start\": {\"dateTime\": \"2025-03-26T18:00:00-07:00\", \"timeZone\": \"America/Phoenix\"}, \"end\": {\"dateTime\": \"2025-03-26T19:15:00-07:00\", \"timeZone\": \"America/Phoenix\"}, \"iCalUID\": \"kpjk144t3ih8s0u3v1976n03qg@google.com\", \"sequence\": 0, \"reminders\": {\"useDefault\": true}, \"eventType\": \"default\"}"
+    },
+    {
+      "role": "assistant",
+      "content": "The \"Office Hour CSE 463 Class\" has been scheduled for today from 6:00 PM to 7:15 PM (America/Phoenix timezone). If you need any further adjustments, feel free to let me know!"
+    }
+  ]
+}
+
+
 export const mockPromptSuggestions: string[] = [
   "Quick overview of my schedule for today",
   "Add an event: "
