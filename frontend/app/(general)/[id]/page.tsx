@@ -18,16 +18,6 @@ export default function ChatCanvas() {
   useEffect(() => {
     if (!id) return
     if (id === "0") {
-      setMessages(mockConversation1.message)
-      setConversationName("New Conversation")
-      return
-    }
-    if (id === "2") {
-      setMessages(mockConversation2.message)
-      setConversationName("New Conversation")
-      return
-    }
-    if (id === "3") {
       setMessages(mockConversation3.message)
       setConversationName("New Conversation")
       return
@@ -38,15 +28,31 @@ export default function ChatCanvas() {
     ws.onopen = () => console.log('WebSocket connection established')
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data).data
-      console.log(data)
+      
       setConversationName(data.c_name)
-      setMessages(data.c_messages)
+
+      const messages = data.c_messages
+      messages.forEach((message: ConversationMessage) => {
+        if (message.role === "assistant" && message.tool_calls) {
+          message.tool_calls.forEach((toolCall: any, toolCallIdx: number) => {
+            if (typeof toolCall === 'string') {
+              // Correct way to replace the string with its parsed object
+              message.tool_calls[toolCallIdx] = JSON.parse(toolCall)
+            }
+          })
+        }
+      })
+
+      setMessages(messages)
     }
+    
     ws.onclose = () => console.log('WebSocket connection closed')
     ws.onerror = (error) => console.error('WebSocket error:', error)
 
     return () => ws.close()
   }, [id])
+
+  console.log(messages)
 
   return (
     <>

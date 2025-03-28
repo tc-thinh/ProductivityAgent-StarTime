@@ -15,7 +15,7 @@ load_dotenv()
 openai_client = AgentServiceConfig.openai_client
 MODEL = os.getenv('OPENAI_LLM_STANDARD')
 
-async def agent_action(prompt: str, conv_id: int):
+async def agent_action(prompt: str, token: str, conv_id: int):
     """Main agent execution with proper async handling"""
     logger.info("Starting agent action for conversation %s", conv_id)
     
@@ -54,7 +54,7 @@ async def agent_action(prompt: str, conv_id: int):
 
                 for choice in response.choices:
                     if choice.message.tool_calls:
-                        await handle_tool_calls(choice.message.tool_calls, messages, ws_client)
+                        await handle_tool_calls(choice.message.tool_calls, token, messages, ws_client)
                     else:
                         await handle_assistant_response(choice.message.content, messages, ws_client)
                         done = True
@@ -69,7 +69,7 @@ async def agent_action(prompt: str, conv_id: int):
         logger.error(f"Agent action failed: {e}", exc_info=True)
         raise
 
-async def handle_tool_calls(tool_calls, messages, ws_client):
+async def handle_tool_calls(tool_calls, token, messages, ws_client):
     """Handle tool call responses"""
     messages.append({
         "role": "assistant",
@@ -81,14 +81,16 @@ async def handle_tool_calls(tool_calls, messages, ws_client):
         # Reformat ChatCompletionMessageToolCall to JSON
         tool_calls_json = []
         for call in tool_calls:
-            tool_calls_json.append({
+            tool_calls_json.append(json.dumps(
+                {
                 "id": call.id,
                 "function": {
-                    "arguments": call.function.arguments,
+                    "arguments": json.loads(call.function.arguments),
                     "name": call.function.name
                 },
                 "type": call.type
-            })
+                }   
+            ))
 
         await ws_client.send_message(
             message_type='conversation_message',
@@ -102,6 +104,7 @@ async def handle_tool_calls(tool_calls, messages, ws_client):
         try:
             tool_name = call.function.name
             args = json.loads(call.function.arguments)
+            args['token'] = token
             logger.info("Executing tool %s with args %s", tool_name, args)
             
             result = await tool_map[tool_name](**args)
@@ -110,7 +113,7 @@ async def handle_tool_calls(tool_calls, messages, ws_client):
             tool_response = {
                 "role": "tool",
                 "tool_call_id": call.id,
-                "content": str(result)
+                "content": json.dumps(result)
             }
             
             messages.append(tool_response)
@@ -165,12 +168,12 @@ async def handle_assistant_response(content, messages, ws_client):
         logger.error(f"Failed to send assistant response: {e}", exc_info=True)
         raise
 
-def start_agent_action(prompt: str, conv_id: int):
+def start_agent_action(prompt: str, token: str, conv_id: int):
     """Thread entry point with proper event loop handling"""
     try:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(agent_action(prompt, conv_id))
+        loop.run_until_complete(agent_action(prompt, token, conv_id))
     except Exception as e:
         logger.error(f"Agent thread failed: {e}", exc_info=True)
     finally:

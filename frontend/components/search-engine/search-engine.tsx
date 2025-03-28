@@ -70,7 +70,7 @@ export function SearchEngine() {
         imagesBase64.push(base64String)
       }
 
-      const { success, data, error } = await fetchBackendService<{ conversationId: string }>(
+      const { success, data } = await fetchBackendService<{ conversationId: string }>(
         {
           endpoint: `agent/`,
           method: "POST",

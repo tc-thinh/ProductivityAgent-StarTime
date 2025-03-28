@@ -5,10 +5,11 @@ import os
 from dotenv import load_dotenv
 from django.conf import settings
 from agent_service.toolbox.models.calendar_event import CalendarEvent
-from database_service.models.KVStore import SqliteKVStore
+from app_lib.utils.users import fetch_user
 import logging
 from datetime import datetime, timedelta, timezone
 from agent_service.toolbox.services.categories import get_category_by_event
+from asgiref.sync import sync_to_async
 
 load_dotenv()
 CALENDAR = os.getenv('CALENDAR')
@@ -18,9 +19,9 @@ BASE_DIR = settings.BASE_DIR
 
 logger = logging.getLogger(__name__)
 
-async def get_calendar_service():
-    kv_store = SqliteKVStore(namespace="auth")
-    auth_data = await kv_store.get('GoogleAuthToken')
+async def get_calendar_service(token: str):
+    user = await sync_to_async(fetch_user)(token)
+    auth_data = user.u_google_auth
     auth_data["client_id"] = GOOGLE_CLIENT_ID
     auth_data["client_secret"] = GOOGLE_CLIENT_SECRET
     creds = Credentials.from_authorized_user_info(auth_data)
@@ -28,14 +29,16 @@ async def get_calendar_service():
     if creds.expired and creds.refresh_token:
         try:
             creds.refresh(Request())
-            await kv_store.set('GoogleAuthToken', {
+            # Update the u_google_auth attribute
+            user.u_google_auth = {
                 'token': creds.token,
                 'refresh_token': creds.refresh_token,
                 'token_uri': creds.token_uri,
                 'client_id': creds.client_id,
                 'client_secret': creds.client_secret,
                 'scopes': creds.scopes
-            })
+            }
+            user.save()  # Save the updated user
             logger.info("Token refreshed successfully.")
         except Exception as e:
             logger.error(f"Failed to refresh token: {e}", exc_info=True)
@@ -53,19 +56,19 @@ def simplify_event(event):
     }
     return simplified
 
-async def create_event(event: CalendarEvent, calendarId: str = 'primary'):
+async def create_event(event: CalendarEvent, token: str, calendarId: str = 'primary'):
     color_category = get_category_by_event(event.get('summary', ''), event.get('description', ''))
     logger.info(f"Color category: {color_category}")
 
     event['colorId'] = color_category['cat_color_id']
     event['summary'] = f"{color_category['cat_event_prefix']} {event['summary']}"
 
-    service = await get_calendar_service()
+    service = await get_calendar_service(token)
     event = service.events().insert(calendarId=calendarId, body=event).execute()
     return event
 
-async def get_today_events(calendarId: str = 'primary'):
-    service = await get_calendar_service()
+async def get_today_events(token: str, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
     
     # Get current date in the correct timezone
     now = datetime.now()
@@ -95,8 +98,8 @@ async def get_today_events(calendarId: str = 'primary'):
     
     return simplified_events
     
-async def get_this_week_events(calendarId: str = 'primary'):
-    service = await get_calendar_service()
+async def get_this_week_events(token: str, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
     
     # Get current date
     now = datetime.now()

@@ -9,7 +9,7 @@ from agent_service.toolbox.services.conversations import *
 import threading
 from rest_framework.views import APIView
 import asyncio
-from app_lib.utils.users import get_user_from_body
+from app_lib.utils.users import fetch_user
 
 logger = logging.getLogger(__name__)
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
@@ -18,7 +18,7 @@ def process(data: dict, conversation_id: int):
     logger.info("Starting new process.")
     try:
         user_prompt = data.get('userPrompt')
-
+        user_token = data.get('token')
         processed_prompt = ""
 
         if user_prompt:
@@ -40,7 +40,7 @@ def process(data: dict, conversation_id: int):
             try:
                 process_thread = threading.Thread(
                     target=start_agent_action,
-                    args=(processed_prompt, conversation_id),
+                    args=(processed_prompt, user_token, conversation_id),
                     daemon=True
                 )
                 process_thread.start()
@@ -80,7 +80,7 @@ class AgentView(APIView):
         try:
             data = request.data.dict() if hasattr(request.data, 'dict') else request.data
 
-            user = get_user_from_body(request)
+            user = fetch_user(data.get("token"))
             if not user:
                 return Response({"error": "Missing or incorrect token."}, status=status.HTTP_400_BAD_REQUEST)
 

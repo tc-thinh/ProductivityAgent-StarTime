@@ -29,7 +29,6 @@ export const useUserStore = create<UserState>()(
       hydrated: false, 
 
       setUser: (authenticated, email, name, image, accessToken) => {
-        console.log("Setting user in Zustand:", { authenticated, email, name, image, accessToken })
         set({ email, name, image, accessToken, authenticated })
       },
 
@@ -41,7 +40,6 @@ export const useUserStore = create<UserState>()(
     {
       name: "user-store",
       onRehydrateStorage: () => (state) => {
-        console.log("Rehydrating Zustand store:", state)
         if (state) {
           state.hydrated = true 
         }
