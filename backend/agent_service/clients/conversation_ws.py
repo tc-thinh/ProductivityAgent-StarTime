@@ -32,7 +32,7 @@ class DBConversationWebSocketClient:
 
     async def send_message(self, message_type: str, message: dict):
         """Send a message through the WebSocket connection"""
-        if not self.connection or self.connection.closed:
+        if not self.connection:
             raise ConnectionError("WebSocket connection not established or closed")
 
         try:
@@ -50,7 +50,7 @@ class DBConversationWebSocketClient:
 
     async def close(self):
         """Close the WebSocket connection gracefully"""
-        if self.connection and not self.connection.closed:
+        if self.connection:
             try:
                 await self.connection.close()
                 logger.info("WebSocket connection closed properly")

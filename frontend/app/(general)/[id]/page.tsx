@@ -1,12 +1,11 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
-import { mockConversation1, mockConversation2, mockConversation3 } from "@/lib/data"
-import { ConversationMessage } from "@/lib/types"
+import { useEffect, useState, useMemo } from "react"
+import { ConversationMessage, ToolCall } from "@/lib/types"
 import { SearchEngine } from "@/components/search-engine/search-engine"
 import { ToolCallCard } from "@/components/tool-call-card/tool-call"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle, Loader2 } from "lucide-react"
 
 const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
 
@@ -14,98 +13,174 @@ export default function ChatCanvas() {
   const { id } = useParams()
   const [messages, setMessages] = useState<ConversationMessage[]>([])
   const [conversationName, setConversationName] = useState<string>("Untitled")
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Helper function to normalize event data from different structures
+  const normalizeEventData = (content: any) => {
+    const eventDetails = content?.event_details || content
+    
+    // Handle both time_data and direct start/end formats
+    const start = eventDetails?.time_data?.start || eventDetails?.start
+    const end = eventDetails?.time_data?.end || eventDetails?.end
+    
+    return {
+      summary: eventDetails?.summary,
+      description: eventDetails?.description,
+      status: eventDetails?.status || "scheduled",
+      htmlLink: eventDetails?.htmlLink,
+      start: {
+        dateTime: start?.dateTime,
+        timeZone: start?.timeZone
+      },
+      end: {
+        dateTime: end?.dateTime,
+        timeZone: end?.timeZone
+      }
+    }
+  }
 
   useEffect(() => {
     if (!id) return
-    if (id === "0") {
-      setMessages(mockConversation3.message)
-      setConversationName("New Conversation")
-      return
-    }
-
+    
+    setIsLoading(true)
+    
     const ws = new WebSocket(`${WS_BACKEND}/ws/conversation/${id}/`)
 
     ws.onopen = () => console.log('WebSocket connection established')
+    
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data).data
-      
-      setConversationName(data.c_name)
+      try {
+        const data = JSON.parse(event.data).data
+        setConversationName(data.c_name || "Untitled")
 
-      const messages = data.c_messages
-      messages.forEach((message: ConversationMessage) => {
-        if (message.role === "assistant" && message.tool_calls) {
-          message.tool_calls.forEach((toolCall: any, toolCallIdx: number) => {
-            if (typeof toolCall === 'string') {
-              // Correct way to replace the string with its parsed object
-              message.tool_calls[toolCallIdx] = JSON.parse(toolCall)
+        const processedMessages = data.c_messages.map((msg: ConversationMessage) => {
+          // Parse tool calls if they exist
+          if (msg.role === "assistant" && msg.tool_calls) {
+            return {
+              ...msg,
+              tool_calls: msg.tool_calls.map((tc: string | ToolCall) => 
+                typeof tc === 'string' ? JSON.parse(tc) : tc
+              )
             }
-          })
-        }
-      })
+          }
+        
+          if (typeof msg.content === 'string') {
+            try {
+              return {
+                ...msg,
+                content: JSON.parse(msg.content)
+              }
+            } catch {
+              return msg // Keep as string if not JSON
+            }
+          }
+          return msg
+        })
 
-      setMessages(messages)
+        setMessages(processedMessages)
+        console.log(processedMessages)
+      } catch (error) {
+        console.error('Error processing message:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
     
-    ws.onclose = () => console.log('WebSocket connection closed')
-    ws.onerror = (error) => console.error('WebSocket error:', error)
+    ws.onclose = () => {
+      console.log('WebSocket connection closed')
+      setIsLoading(false)
+    }
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error)
+      setIsLoading(false)
+    }
 
     return () => ws.close()
   }, [id])
 
-  console.log(messages)
+  const filteredMessages = useMemo(() => {
+    return messages.filter(msg => {
+      if (msg.role === "user") return true
+
+      if (msg.role === "assistant" && typeof msg.content === 'string' && 
+          msg.content.includes("scheduled")) {
+        return true
+      }
+      
+      if (msg.role === "tool") {
+        const normalized = normalizeEventData(msg.content)
+        return normalized.summary && normalized.start.dateTime
+      }
+      
+      return false
+    })
+  }, [messages])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+      </div>
+    )
+  }
+
 
   return (
-    <>
-      <div className="flex-col h-full space-y-4 p-9 overflow-y-auto">
-        {messages
-          .filter((message) => message.role !== "system" && message.role !== "tool") // Filter out system and tool messages
-          .map((message, index) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg ${
-                message.role === "user"
-                  ? "bg-blue-50 ml-auto max-w-[60%]"
-                  : message.role === "assistant"
-                  ? message.content.includes("scheduled") 
-                    ? "bg-green-50 mr-auto max-w-[60%] border border-green-100" 
-                    : "bg-white mr-auto max-w-[60%] border border-gray-100" 
-                  : "" 
-              }`}
-            >
-              <div className="text-sm font-medium text-gray-700">
-                {message.role === "user" ? "You" : message.role === "assistant" ? "Assistant" : "Tool"}
-              </div>
-              {message.role !== "tool" && (
-                <div className="mt-1 text-gray-900 whitespace-pre-line">
-                  {message.content.includes("scheduled")  ? ( 
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="w-5 h-5 text-green-500" /> 
-                      <span>{message.content}</span>
-                    </div>
-                  ) : (
-                    message.content
-                  )}
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {filteredMessages.map((message, index) => {
+          if (message.role === "user") {
+            return (
+              <div 
+                key={`${index}-user`} 
+                className="p-4 rounded-lg max-w-[60%] bg-blue-50 ml-auto"
+              >
+                <div className="text-sm font-medium text-gray-700 mb-1">You</div>
+                <div className="text-gray-900 whitespace-pre-line">
+                  {typeof message.content === 'string' 
+                    ? message.content 
+                    : JSON.stringify(message.content)}
                 </div>
-              )}
-              
-              {/* Display tool calls if they exist */}
-              {message.tool_calls?.map((toolCall, idx) => {
-                const result = messages.find(
-                  (m) => m.role === "tool" && m.tool_call_id === toolCall.id
-                )
+              </div>
+            )
+          }
 
-                return (
-                  <div key={idx} className="mt-2">
-                    <ToolCallCard toolCall={toolCall} result={result} />
-                  </div>
-                )
-              })}
-            </div>
-          ))}
+          if (message.role === "assistant") {
+            return (
+              <div 
+                key={`${index}-assistant`} 
+                className="p-4 rounded-lg max-w-[60%] bg-green-50 mr-auto"
+              >
+                <div className="flex items-center gap-2 text-gray-900">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>{message.content}</span>
+                </div>
+              </div>
+            )
+          }
+
+          if (message.role === "tool") {
+            const normalized = normalizeEventData(message.content)
+            return (
+              <div 
+                key={`${index}-event`} 
+                className="p-4 rounded-lg max-w-[60%] bg-gray-50 mr-auto mt-2"
+              >
+                <ToolCallCard 
+                  result={{ content: { event_details: normalized }}}
+                />
+              </div>
+            )
+          }
+
+          return null
+        })}
       </div>
-      <div className="sticky inset-x-0 bottom-0 p-4">
+      
+      <div className="sticky bottom-0 p-4">
         <SearchEngine />
       </div>
-    </>
+    </div>
   )
 }
