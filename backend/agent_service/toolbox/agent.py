@@ -19,10 +19,8 @@ async def agent_action(prompt: str, token: str, conv_id: int):
     """Main agent execution with proper async handling"""
     logger.info("Starting agent action for conversation %s", conv_id)
     
-    messages = [
-        get_environmental_context_prompt(),
-        {"role": "user", "content": prompt}
-    ]
+    messages = get_environmental_context_prompt()
+    messages.append({"role": "user", "content": prompt})
 
     try:
         async with DBConversationWebSocketClient(conv_id) as ws_client:

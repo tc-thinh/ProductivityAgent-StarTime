@@ -15,4 +15,3 @@ cd frontend
 yarn
 yarn run dev
 ```
-    

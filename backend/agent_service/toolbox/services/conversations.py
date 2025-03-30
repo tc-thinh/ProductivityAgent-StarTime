@@ -3,38 +3,24 @@ import os
 import requests
 from agent_service.clients.conversation_ws import DBConversationWebSocketClient
 import logging
+from agent_service.apps import AgentServiceConfig
 
 openai_client = AgentServiceConfig.openai_client
+langfuse_client = AgentServiceConfig.langfuse_client
 MODEL = os.getenv('OPENAI_LLM_SMALL')
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 
 # Initialize logging
 logger = logging.getLogger(__name__)
 
-def get_conversation_name(prompt: str) -> str:
+def get_conversation_name(user_request: str) -> str:
+    prompt = langfuse_client.get_prompt("NamingAgent_SysteContext", type="chat")
+
     response = openai_client.chat.completions.create(
         model=MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": """
-                            You are a conversation naming agent for an event and task scheduling application. 
-                            Your goal is to generate a clear, concise, and informative name that summarizes the conversation context accurately.
-                            
-                            Examples of well-formed conversation names:
-                            - Meeting with Mia @ 4pm
-                            - CSE 463 Mid-term exam
-                            - CSE 412 Project 2 deadline
-                            - Elastic Search Service for Project StarTime
-                            
-                            Keep the name short and to the point while retaining key details such as time, participants, or task focus.
-                            """
-            },
-            {
-                "role": "user",
-                "content": f"Generate a short, clear conversation name based on this context:\n{prompt}"
-            }
-        ],
+        messages=prompt.compile(
+            initial_request=user_request
+        ),
         temperature=0.0
     )
     return response.choices[0].message.content

@@ -1,20 +1,16 @@
-# methods for:
-# determine category for calendar creation
-# disrupt and remove agent from the main pipeline to
-# decide on the color category
-# input: event name, event descriptions, categories available
-# output: {color code}
 import requests
 import os
 from agent_service.apps import AgentServiceConfig
 from agent_service.toolbox.models.category import Category
 import logging
+from agent_service.apps import AgentServiceConfig
 
 logger = logging.getLogger(__name__)
 
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 MODEL = os.getenv('OPENAI_LLM_STANDARD')
 openai_client = AgentServiceConfig.openai_client
+langfuse_client = AgentServiceConfig.langfuse_client
 
 def simplify_category(category):
     """
@@ -61,15 +57,14 @@ def get_category_by_event(event_name: str, event_description: str) -> dict[str, 
     }] + [simplify_category(category) for category in categories]
     logger.info(f"Available categories: {simplified_categories}")
     
+    prompt = langfuse_client.get_prompt("langfuse_client", type="chat")
     response = openai_client.beta.chat.completions.parse(
         model=MODEL,
-        messages=[
-            {
-                "role": "system", 
-                "content":  f"Choose one category from the available options that best fits the event title and description. You are a category manager for an event scheduler app. The available categories are: {simplified_categories}"
-            },
-            {"role": "user", "content": f"Assign a category to the event: Event Name: {event_name} - Event Description: {event_description}"}
-        ],
+        messages=prompt.compile(
+            simplified_categories=simplified_categories,
+            event_name=event_name,
+            event_description=event_description
+        ),
         response_format=Category
     )
 
