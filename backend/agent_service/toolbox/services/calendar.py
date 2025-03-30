@@ -38,7 +38,7 @@ async def get_calendar_service(token: str):
                 'client_secret': creds.client_secret,
                 'scopes': creds.scopes
             }
-            user.save()  # Save the updated user
+            await sync_to_async(user.save)()  # Save the updated user
             logger.info("Token refreshed successfully.")
         except Exception as e:
             logger.error(f"Failed to refresh token: {e}", exc_info=True)
