@@ -1,1 +1,1 @@
-from agent_service.views.agent_view import AgentView
+from agent_service.views.agent_view import AgentView, AgentMessageView

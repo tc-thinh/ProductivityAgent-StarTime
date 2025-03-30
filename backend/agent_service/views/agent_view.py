@@ -14,7 +14,7 @@ from app_lib.utils.users import fetch_user
 logger = logging.getLogger(__name__)
 DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 
-def process(data: dict, conversation_id: int):
+def process(data: dict, conversation_id: int, create_new: bool = True):
     logger.info("Starting new process.")
     try:
         user_prompt = data.get('userPrompt')
@@ -33,8 +33,9 @@ def process(data: dict, conversation_id: int):
             except Exception as e:
                 logger.error(f"Error in conversation naming: {str(e)}", exc_info=True)
 
-        converastion_naming_thread = threading.Thread(target=conversation_naming)
-        converastion_naming_thread.start()
+        if create_new:
+            converastion_naming_thread = threading.Thread(target=conversation_naming)
+            converastion_naming_thread.start()
 
         def process_conversation():
             try:
@@ -83,6 +84,9 @@ class AgentView(APIView):
             user = fetch_user(data.get("token"))
             if not user:
                 return Response({"error": "Missing or incorrect token."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if not data.get("userPrompt"):
+                return Response({"error": "User prompt is required."}, status=status.HTTP_400_BAD_REQUEST)
 
             conversation_id = create_blank_conversation(user)
             logger.info(f"Created conversation {conversation_id}")
@@ -101,3 +105,58 @@ class AgentView(APIView):
             logger.error(f"Error in post: {str(e)}", exc_info=True)
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
+class AgentMessageView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'userPrompt': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description='New user input prompt.'
+                ),
+                'token': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='User identification token'
+                ),
+                'images': openapi.Schema(
+                    type=openapi.TYPE_ARRAY, 
+                    items=openapi.Items(type=openapi.TYPE_STRING),
+                    description='List of base64 images.'
+                ),
+                'conversationId': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description='Current Conversation ID'
+                )
+            },
+        ),
+        responses={200: 'OK', 400: 'Bad Request'}
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data.dict() if hasattr(request.data, 'dict') else request.data
+
+            user = fetch_user(data.get("token"))
+            if not user:
+                return Response({"error": "Missing or incorrect token."}, status=status.HTTP_400_BAD_REQUEST)
+
+            if not data.get("userPrompt"):
+                return Response({"error": "User prompt is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            if not data.get("conversationId"):
+                return Response({"error": "Conversation ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            conversation_id = data.get("conversationId")
+            logger.info(f"New message in conversation {conversation_id}")
+            
+            process_thread = threading.Thread(
+                target=process,
+                args=(data, conversation_id, False),
+                daemon=True
+            )
+            process_thread.start()
+            return Response({
+                "message": "Processing started"
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error in post: {str(e)}", exc_info=True)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

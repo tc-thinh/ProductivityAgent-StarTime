@@ -6,6 +6,9 @@ import { ConversationMessage, ToolCall } from "@/lib/types"
 import { SearchEngine } from "@/components/search-engine/search-engine"
 import { ToolCallCard } from "@/components/tool-call-card/tool-call"
 import { CheckCircle, Loader2 } from "lucide-react"
+import { useUserStore } from "@/store/userStore"
+import { fetchBackendService, convertToBase64 } from "@/lib/utils"
+import { toast } from "sonner"
 
 const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
 
@@ -15,14 +18,51 @@ export default function ChatCanvas() {
   const [conversationName, setConversationName] = useState<string>("Untitled")
   const [isLoading, setIsLoading] = useState(true)
 
+  const { accessToken } = useUserStore()
+
+  // Handle search
+  const handleSearch = async (promptText: string, voiceTranscript: string, images: File[]) => {
+    if (!promptText.trim() && !voiceTranscript.trim()) return
+
+    const queryText = promptText.trim() || voiceTranscript.trim()
+
+    try {
+      const imagesBase64: string[] = []
+
+      for (let i = 0; i < images.length; i++) {
+        const base64String = await convertToBase64(images[i]) as string
+        imagesBase64.push(base64String)
+      }
+
+      const { success, data } = await fetchBackendService<{ conversationId: string }>(
+        {
+          endpoint: `ai/message/`,
+          method: "POST",
+          body: {
+            "userPrompt": queryText,
+            "token": accessToken || "",
+            "images": imagesBase64,
+            "conversationId": id,
+          }
+        }
+      )
+      if (!success) toast.error("Something went wrong. Please try again later")
+      else toast.success("The AI agents are doing their best to help you! Please wait.")
+    } catch (error) {
+      console.error("Failed to connect to the backend: ", error)
+      toast.error("Failed to connect to an AI agent. Please try again later.")
+    } finally {
+    }
+  }
+
   // Helper function to normalize event data from different structures
   const normalizeEventData = (content: any) => {
     const eventDetails = content?.event_details || content
-    
+
     // Handle both time_data and direct start/end formats
     const start = eventDetails?.time_data?.start || eventDetails?.start
     const end = eventDetails?.time_data?.end || eventDetails?.end
-    
+
     return {
       summary: eventDetails?.summary,
       description: eventDetails?.description,
@@ -41,13 +81,13 @@ export default function ChatCanvas() {
 
   useEffect(() => {
     if (!id) return
-    
+
     setIsLoading(true)
-    
+
     const ws = new WebSocket(`${WS_BACKEND}/ws/conversation/${id}/`)
 
     ws.onopen = () => console.log('WebSocket connection established')
-    
+
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data).data
@@ -58,12 +98,12 @@ export default function ChatCanvas() {
           if (msg.role === "assistant" && msg.tool_calls) {
             return {
               ...msg,
-              tool_calls: msg.tool_calls.map((tc: string | ToolCall) => 
+              tool_calls: msg.tool_calls.map((tc: string | ToolCall) =>
                 typeof tc === 'string' ? JSON.parse(tc) : tc
               )
             }
           }
-        
+
           if (typeof msg.content === 'string') {
             try {
               return {
@@ -85,12 +125,12 @@ export default function ChatCanvas() {
         setIsLoading(false)
       }
     }
-    
+
     ws.onclose = () => {
       console.log('WebSocket connection closed')
       setIsLoading(false)
     }
-    
+
     ws.onerror = (error) => {
       console.error('WebSocket error:', error)
       setIsLoading(false)
@@ -103,16 +143,16 @@ export default function ChatCanvas() {
     return messages.filter(msg => {
       if (msg.role === "user") return true
 
-      if (msg.role === "assistant" && typeof msg.content === 'string' && 
-          msg.content.includes("scheduled")) {
+      if (msg.role === "assistant" && typeof msg.content === 'string' &&
+        msg.content.includes("scheduled")) {
         return true
       }
-      
+
       if (msg.role === "tool") {
         const normalized = normalizeEventData(msg.content)
         return normalized.summary && normalized.start.dateTime
       }
-      
+
       return false
     })
   }, [messages])
@@ -132,14 +172,14 @@ export default function ChatCanvas() {
         {filteredMessages.map((message, index) => {
           if (message.role === "user") {
             return (
-              <div 
-                key={`${index}-user`} 
+              <div
+                key={`${index}-user`}
                 className="p-4 rounded-lg max-w-[60%] bg-blue-50 ml-auto"
               >
                 <div className="text-sm font-medium text-gray-700 mb-1">You</div>
                 <div className="text-gray-900 whitespace-pre-line">
-                  {typeof message.content === 'string' 
-                    ? message.content 
+                  {typeof message.content === 'string'
+                    ? message.content
                     : JSON.stringify(message.content)}
                 </div>
               </div>
@@ -148,8 +188,8 @@ export default function ChatCanvas() {
 
           if (message.role === "assistant") {
             return (
-              <div 
-                key={`${index}-assistant`} 
+              <div
+                key={`${index}-assistant`}
                 className="p-4 rounded-lg max-w-[60%] bg-green-50 mr-auto"
               >
                 <div className="flex items-center gap-2 text-gray-900">
@@ -163,12 +203,12 @@ export default function ChatCanvas() {
           if (message.role === "tool") {
             const normalized = normalizeEventData(message.content)
             return (
-              <div 
-                key={`${index}-event`} 
+              <div
+                key={`${index}-event`}
                 className="p-4 rounded-lg max-w-[60%] bg-gray-50 mr-auto mt-2"
               >
-                <ToolCallCard 
-                  result={{ content: { event_details: normalized }}}
+                <ToolCallCard
+                  result={{ content: { event_details: normalized } }}
                 />
               </div>
             )
@@ -177,9 +217,9 @@ export default function ChatCanvas() {
           return null
         })}
       </div>
-      
+
       <div className="sticky bottom-0 p-4">
-        <SearchEngine />
+        <SearchEngine handleSearch={handleSearch} />
       </div>
     </div>
   )

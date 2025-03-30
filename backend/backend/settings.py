@@ -36,12 +36,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'corsheaders',
+
+    "corsheaders",
     "rest_framework",
-    "agent_service",
-    "database_service",
     "drf_yasg",
-    'channels',
+    "channels",
+
+    "agent_service",
+    "database_service"
 ]
 
 CHANNEL_LAYERS = {

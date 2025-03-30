@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from agent_service.clients.conversation_ws import DBConversationWebSocketClient
 from .services.tools import tools, tool_map, get_environmental_context_prompt
 from agent_service.apps import AgentServiceConfig
+from app_lib.utils.conversations import fetch_previous_messages
 
 # Initialize logging
 logger = logging.getLogger(__name__)
@@ -20,6 +21,11 @@ async def agent_action(prompt: str, token: str, conv_id: int):
     logger.info("Starting agent action for conversation %s", conv_id)
     
     messages = get_environmental_context_prompt()
+    
+    # Get the new conversation id
+    prev_messages = fetch_previous_messages(conv_id)
+    for prev_message in prev_messages:
+        messages.append(prev_message)
     messages.append({"role": "user", "content": prompt})
 
     try:

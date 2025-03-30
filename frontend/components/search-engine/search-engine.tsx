@@ -16,26 +16,21 @@ import Image from "next/image"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
 import { DialogTitle } from '@radix-ui/react-dialog'
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
-import { useUserStore } from "@/store/userStore"
-import { fetchBackendService } from "@/lib/utils"
 
 const MAX_IMAGE_SIZE_MB = 5
 const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_MB * 1024 * 1024
 
-const convertToBase64 = (file: File) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = (error) => reject(error)
-  })
+interface SearchEngineProps {
+  handleSearch: (
+    promptText: string,
+    voiceTranscript: string,
+    images: File[]
+  ) => void
 }
 
-export function SearchEngine() {
+export function SearchEngine({ handleSearch }: SearchEngineProps) {
   const isDay = new Date().getHours() < 11 && new Date().getHours() > 6
   const isNight = new Date().getHours() > 18 || new Date().getHours() < 6
-
-  const { accessToken } = useUserStore()
 
   // State declarations
   const [inputValue, setInputValue] = useState<string>("")
@@ -55,45 +50,6 @@ export function SearchEngine() {
   const maxLines = 10
   const initialHeight = 50
   const cardHeight = newLineCount > 0 ? Math.min(newLineCount + 2, maxLines) * 24 : initialHeight
-
-  // Handle search functionality
-  const handleSearch = async () => {
-    if (!inputValue.trim() && !transcript.trim()) return
-
-    const queryText = inputValue.trim() || transcript.trim()
-
-    try {
-      const imagesBase64: string[] = []
-
-      for (let i = 0; i < images.length; i++) {
-        const base64String = await convertToBase64(images[i]) as string
-        imagesBase64.push(base64String)
-      }
-
-      const { success, data } = await fetchBackendService<{ conversationId: string }>(
-        {
-          endpoint: `agent/`,
-          method: "POST",
-          body: {
-            "userPrompt": queryText,
-            "token": accessToken || "",
-            "images": imagesBase64
-          }
-        }
-      )
-      if (!success) toast.error("Something went wrong. Please try again later")
-      else toast.success("The AI agents are doing their best to help you! Please wait.")
-    
-      window.location.href = `/${data?.conversationId}`
-    } catch (error) {
-      console.error("Failed to connect to the backend: ", error)
-      toast.error("Failed to connect to an AI agent. Please try again later.")
-    } finally {
-      if (textareaRef.current) {
-        textareaRef.current.blur()
-      }
-    }
-  }
 
   // Set up SpeechRecognition
   useEffect(() => {
@@ -131,10 +87,11 @@ export function SearchEngine() {
   }, [])
 
   // Handle Enter key press for search
-  const handleKeyPress = (event: React.KeyboardEvent) => {
+  const handleKeyPress = async (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()
-      handleSearch()
+      // promptText: string, voiceTranscript: string, images: File[]
+      await handleSearch(inputValue, transcript, images)
     }
   }
 
@@ -376,7 +333,7 @@ export function SearchEngine() {
                   size="icon"
                   disabled={!inputValue.trim()}
                   className="flex-shrink-0 hover:text-gray-900 hover:bg-gray-100 transition-all"
-                  onClick={handleSearch}
+                  onClick={() => handleSearch(inputValue, transcript, images)}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
