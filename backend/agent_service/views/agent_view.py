@@ -19,6 +19,7 @@ def process(data: dict, conversation_id: int, create_new: bool = True):
     try:
         user_prompt = data.get('userPrompt')
         user_token = data.get('token')
+        images = data.get('images')
         processed_prompt = ""
 
         if user_prompt:
@@ -41,7 +42,7 @@ def process(data: dict, conversation_id: int, create_new: bool = True):
             try:
                 process_thread = threading.Thread(
                     target=start_agent_action,
-                    args=(processed_prompt, user_token, conversation_id),
+                    args=(processed_prompt, images, user_token, conversation_id),
                     daemon=True
                 )
                 process_thread.start()
