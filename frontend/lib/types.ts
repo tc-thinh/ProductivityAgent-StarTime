@@ -58,3 +58,8 @@ export interface ConversationHeader {
     c_created_at: string
     c_deleted: boolean
 }
+
+export interface Path {
+    displayName: string
+    reference: string
+}  

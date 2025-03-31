@@ -10,6 +10,9 @@ import { useUserStore } from "@/store/userStore"
 import { fetchBackendService, convertToBase64 } from "@/lib/utils"
 import { toast } from "sonner"
 
+import { Path } from "@/lib/types"
+import useBreadcrumbPath from "@/store/breadcrumbPathStore"
+
 const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
 
 export default function ChatCanvas() {
@@ -17,6 +20,7 @@ export default function ChatCanvas() {
   const [messages, setMessages] = useState<ConversationMessage[]>([])
   const [conversationName, setConversationName] = useState<string>("Untitled")
   const [isLoading, setIsLoading] = useState(true)
+  const { path, setPath } = useBreadcrumbPath()
 
   const { accessToken } = useUserStore()
 
@@ -138,6 +142,11 @@ export default function ChatCanvas() {
 
     return () => ws.close()
   }, [id])
+
+  useEffect(() => {
+    const currentPath: Path[] = [{ displayName: conversationName, reference: `${id}` }]
+    setPath(currentPath)
+  }, [conversationName])
 
   const filteredMessages = useMemo(() => {
     return messages.filter(msg => {
