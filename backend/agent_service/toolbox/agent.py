@@ -42,6 +42,12 @@ async def agent_action(prompt: str, images: List[str], token: str, conv_id: int)
             logger.info(f"Image string: {image_string}")
 
     messages.append({"role": "user", "content": message_content})
+    for message in messages:
+        if message["role"] == "assistant" and "tool_calls" in message:
+            for index in range(len(message["tool_calls"])):
+                message["tool_calls"][index] = json.loads(message["tool_calls"][index])
+
+            logger.info(f"Message: {message}")
 
     try:
         async with DBConversationWebSocketClient(conv_id) as ws_client:
