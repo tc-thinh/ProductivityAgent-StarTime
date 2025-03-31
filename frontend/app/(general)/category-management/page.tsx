@@ -12,8 +12,6 @@ import { ProgressPage } from "@/components/progress-bar/progress-bar"
 
 import { fetchBackendService } from "@/lib/utils"
 
-const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
-
 export default function CategoryManager() {
   const [categories, setCategories] = useState<Category[]>([])
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -60,9 +58,10 @@ export default function CategoryManager() {
       }
     )
     
-    console.log(error)
     if (success) toast.success("Category updated!")
     else toast.error("Something went wrong. Please try again.")
+
+    setRefreshTrigger(refreshTrigger + 1)
   }
 
   if (loading) {
