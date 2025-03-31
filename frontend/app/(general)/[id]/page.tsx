@@ -5,7 +5,8 @@ import { useEffect, useState, useMemo } from "react"
 import { ConversationMessage, ToolCall } from "@/lib/types"
 import { SearchEngine } from "@/components/search-engine/search-engine"
 import { ToolCallCard } from "@/components/tool-call-card/tool-call"
-import { CheckCircle, Loader2 } from "lucide-react"
+import { CheckCircle, Loader2, Bot } from "lucide-react"
+import { MarkdownContent } from "@/components/markdown-content"
 import { useUserStore } from "@/store/userStore"
 import { fetchBackendService, convertToBase64 } from "@/lib/utils"
 import { toast } from "sonner"
@@ -141,21 +142,58 @@ export default function ChatCanvas() {
 
   const filteredMessages = useMemo(() => {
     return messages.filter(msg => {
+      // Always show user messages
       if (msg.role === "user") return true
-
-      if (msg.role === "assistant" && typeof msg.content === 'string' &&
-        msg.content.includes("scheduled")) {
-        return true
+  
+      // Show assistant messages that either:
+      // 1. Contain scheduling confirmation
+      // 2. Are normal messages (no tool calls)
+      if (msg.role === "assistant") {
+        const hasSchedulingConfirmation = typeof msg.content === 'string' && 
+          msg.content.includes("scheduled")
+        const isNormalMessage = !msg.tool_calls
+        return hasSchedulingConfirmation || isNormalMessage
       }
-
+  
+      // Show tool messages that contain valid event data
       if (msg.role === "tool") {
-        const normalized = normalizeEventData(msg.content)
-        return normalized.summary && normalized.start.dateTime
+        try {
+          const content = typeof msg.content === 'string' 
+            ? JSON.parse(msg.content) 
+            : msg.content
+          const event = content.event_details || content
+          return event?.summary && (event.start?.dateTime || event.time_data?.start?.dateTime)
+        } catch {
+          return false
+        }
       }
-
+  
       return false
     })
   }, [messages])
+
+
+  function extractUserMessageContent(content: any): string {
+    // If content is already a string, return it directly
+    if (typeof content === "string") {
+      // Remove [TEXT]: prefix if present
+      return content.replace("[TEXT]: ", "")
+    }
+  
+    // If content is an array of objects with text properties
+    if (Array.isArray(content)) {
+      return content
+        .map(item => item.text || "")
+        .join("\n")
+        .trim()
+    }
+    // If content is an object with a text property
+    if (content?.text) {
+      return content.text
+    }
+    // Fallback - stringify if we can't extract text
+    return JSON.stringify(content)
+  }
 
   if (isLoading) {
     return (
@@ -174,50 +212,62 @@ export default function ChatCanvas() {
             return (
               <div
                 key={`${index}-user`}
-                className="p-4 rounded-lg max-w-[60%] bg-blue-50 ml-auto"
+                className="flex items-start gap-3 max-w-[60%] ml-auto"
               >
-                <div className="text-sm font-medium text-gray-700 mb-1">You</div>
-                <div className="text-gray-900 whitespace-pre-line">
-                  {typeof message.content === 'string'
-                    ? message.content
-                    : JSON.stringify(message.content)}
+                
+                <div className="p-4 rounded-lg bg-blue-50 flex-1">
+                  <div className="text-gray-900 whitespace-pre-line">
+                    <MarkdownContent content={extractUserMessageContent(message.content)} />
+                  </div>
+                </div>
+                <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
             )
           }
-
+  
           if (message.role === "assistant") {
             return (
               <div
                 key={`${index}-assistant`}
-                className="p-4 rounded-lg max-w-[60%] bg-green-50 mr-auto"
+                className="flex items-start gap-3 max-w-[80%] mx-auto"
               >
-                <div className="flex items-center gap-2 text-gray-900">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>{message.content}</span>
+                <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-green-600" />
+                </div>
+                <div className="p-4 rounded-lg  flex-1">
+                  <div className="text-gray-900">
+                    <MarkdownContent content={message.content} />
+                  </div>
                 </div>
               </div>
             )
           }
-
+  
           if (message.role === "tool") {
             const normalized = normalizeEventData(message.content)
             return (
               <div
                 key={`${index}-event`}
-                className="p-4 rounded-lg max-w-[60%] bg-gray-50 mr-auto mt-2"
+                className="flex items-start gap-3 max-w-[80%] mx-auto"
               >
-                <ToolCallCard
-                  result={{ content: { event_details: normalized } }}
-                />
+                <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-gray-600" />
+                </div>
+                <div className="p-4 rounded-lg bg-gray-50 flex-1">
+                  <ToolCallCard
+                    result={{ content: { event_details: normalized } }}
+                  />
+                </div>
               </div>
             )
           }
-
+  
           return null
         })}
       </div>
-
+  
       <div className="sticky bottom-0 p-4">
         <SearchEngine handleSearch={handleSearch} />
       </div>

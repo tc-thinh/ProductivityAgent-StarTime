@@ -2,12 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', sans-serif;
-}
-
 @layer base {
   :root {
+    /* Light theme colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -42,7 +39,9 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
+    /* Dark theme colors */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
@@ -76,26 +75,108 @@ body {
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-}
 
-@layer base {
+  /* Base styles */
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', sans-serif;
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.15s ease-in;
+@layer components {
+  .markdown-content {
+    @apply max-w-none;
+    
+    /* Paragraphs */
+    p {
+      @apply whitespace-pre-wrap my-4 leading-relaxed;
+    }
+
+    /* Lists */
+    ul {
+      @apply list-none my-3 pl-0;
+    }
+
+    ol {
+      @apply list-decimal my-3 pl-5;
+    }
+
+    ul > li {
+      @apply relative pl-5 my-1;
+    }
+
+    ul > li::before {
+      content: "-";
+      @apply absolute left-0;
+    }
+
+    /* Nested lists */
+    ul ul > li::before {
+      content: "–"; /* en dash for nested items */
+    }
+
+    ul ul, ol ol {
+      @apply pl-4 my-1;
+    }
+
+    /* Headings */
+    h1 {
+      @apply text-2xl font-bold mt-6 mb-2;
+    }
+    h2 {
+      @apply text-xl font-bold mt-5 mb-2;
+    }
+    h3 {
+      @apply text-lg font-semibold mt-4 mb-1;
+    }
+
+    /* Code blocks */
+    pre {
+      @apply bg-gray-100 dark:bg-gray-800 rounded-md p-3 my-3 overflow-x-auto;
+    }
+
+    code:not(pre code) {
+      @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4;
+    }
+
+    /* Tables */
+    table {
+      @apply w-full my-4;
+    }
+    th {
+      @apply border border-gray-200 dark:border-gray-700 px-3 py-2 text-left bg-gray-50 dark:bg-gray-800 font-semibold;
+    }
+    td {
+      @apply border border-gray-200 dark:border-gray-700 px-3 py-2;
+    }
+
+    /* Links */
+    a {
+      @apply text-blue-600 dark:text-blue-400 hover:underline;
+    }
+  }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.15s ease-in;
   }
-  to {
-    opacity: 1;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
