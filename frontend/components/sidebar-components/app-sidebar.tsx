@@ -4,7 +4,6 @@ import * as React from "react"
 import { useEffect, useState } from "react"
 import { useUserStore } from "@/store/userStore"
 
-
 import { NavMain } from "@/components/sidebar-components/nav-main"
 import { NavUser } from "@/components/sidebar-components/nav-user"
 import { NavHistories } from "@/components/sidebar-components/nav-history"

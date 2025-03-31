@@ -32,6 +32,7 @@ export function NavHistories() {
   const [todayHistories, setTodayHistories] = useState<History[]>([])
   const [olderHistories, setOlderHistories] = useState<History[]>([])
   const [showAll, setShowAll] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(1)
 
   const { accessToken, hydrated } = useUserStore()
 
@@ -92,6 +93,8 @@ export function NavHistories() {
 
     if (success) toast.success("Conversation successfully deleted.")
     else toast.error(`Error while deleting conversation: ${error}`)
+
+    setRefreshTrigger(refreshTrigger + 1)
   }
 
   return (
