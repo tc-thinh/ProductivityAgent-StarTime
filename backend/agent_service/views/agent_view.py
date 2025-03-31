@@ -19,14 +19,15 @@ def process(data: dict, conversation_id: int, create_new: bool = True):
     try:
         user_prompt = data.get('userPrompt')
         user_token = data.get('token')
+        images = data.get('images')
         processed_prompt = ""
 
         if user_prompt:
-            processed_prompt += "[TEXT]: " + user_prompt + "\n" 
+            processed_prompt = user_prompt + "\n"
         
         def conversation_naming():
             try:
-                c_name = get_conversation_name(processed_prompt)
+                c_name = get_conversation_name(processed_prompt, images)
                 logger.info(f"Conversation {conversation_id} name: {c_name}")
                 # Call the async function using asyncio.run
                 asyncio.run(update_conversation(conversation_id, c_name))
@@ -41,7 +42,7 @@ def process(data: dict, conversation_id: int, create_new: bool = True):
             try:
                 process_thread = threading.Thread(
                     target=start_agent_action,
-                    args=(processed_prompt, user_token, conversation_id),
+                    args=(processed_prompt, images, user_token, conversation_id),
                     daemon=True
                 )
                 process_thread.start()

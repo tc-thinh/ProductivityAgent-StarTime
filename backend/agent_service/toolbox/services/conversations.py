@@ -4,6 +4,7 @@ import requests
 from agent_service.clients.conversation_ws import DBConversationWebSocketClient
 import logging
 from agent_service.apps import AgentServiceConfig
+from typing import List
 
 openai_client = AgentServiceConfig.openai_client
 langfuse_client = AgentServiceConfig.langfuse_client
@@ -13,14 +14,29 @@ DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 # Initialize logging
 logger = logging.getLogger(__name__)
 
-def get_conversation_name(user_request: str) -> str:
+def get_conversation_name(user_request: str, images: List[str]) -> str:
     prompt = langfuse_client.get_prompt("NamingAgent_SysteContext", type="chat")
+    messages = prompt.compile(
+        initial_request=user_request
+    )
+
+    if images:
+        for image_string in images:
+            messages.append({
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"{image_string}"
+                        }
+                    }
+                ]
+            })
 
     response = openai_client.chat.completions.create(
         model=MODEL,
-        messages=prompt.compile(
-            initial_request=user_request
-        ),
+        messages=messages,
         temperature=0.0
     )
     return response.choices[0].message.content

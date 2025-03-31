@@ -8,6 +8,9 @@ from agent_service.clients.conversation_ws import DBConversationWebSocketClient
 from .services.tools import tools, tool_map, get_environmental_context_prompt
 from agent_service.apps import AgentServiceConfig
 from app_lib.utils.conversations import fetch_previous_messages
+from asgiref.sync import sync_to_async
+
+from typing import List
 
 # Initialize logging
 logger = logging.getLogger(__name__)
@@ -16,17 +19,29 @@ load_dotenv()
 openai_client = AgentServiceConfig.openai_client
 MODEL = os.getenv('OPENAI_LLM_STANDARD')
 
-async def agent_action(prompt: str, token: str, conv_id: int):
+async def agent_action(prompt: str, images: List[str], token: str, conv_id: int):
     """Main agent execution with proper async handling"""
     logger.info("Starting agent action for conversation %s", conv_id)
     
     messages = get_environmental_context_prompt()
     
     # Get the new conversation id
-    prev_messages = fetch_previous_messages(conv_id)
+    prev_messages = await sync_to_async(fetch_previous_messages)(conv_id)
     for prev_message in prev_messages:
         messages.append(prev_message)
-    messages.append({"role": "user", "content": prompt})
+
+    message_content = [{"type": "text", "text": prompt}]
+    if images:
+        for image_string in images:
+            message_content.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"{image_string}",
+                },
+            })
+            logger.info(f"Image string: {image_string}")
+
+    messages.append({"role": "user", "content": message_content})
 
     try:
         async with DBConversationWebSocketClient(conv_id) as ws_client:
@@ -35,7 +50,7 @@ async def agent_action(prompt: str, token: str, conv_id: int):
             # Send initial message
             await ws_client.send_message(
                 message_type='conversation_message',
-                message={"role": "user", "content": prompt}
+                message={"role": "user", "content": message_content}
             )
 
             done = False
@@ -172,12 +187,12 @@ async def handle_assistant_response(content, messages, ws_client):
         logger.error(f"Failed to send assistant response: {e}", exc_info=True)
         raise
 
-def start_agent_action(prompt: str, token: str, conv_id: int):
+def start_agent_action(prompt: str, images: List[int], token: str, conv_id: int):
     """Thread entry point with proper event loop handling"""
     try:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(agent_action(prompt, token, conv_id))
+        loop.run_until_complete(agent_action(prompt, images, token, conv_id))
     except Exception as e:
         logger.error(f"Agent thread failed: {e}", exc_info=True)
     finally:
