@@ -8,16 +8,26 @@ import { Category } from "@/lib/types"
 import { mockCategories } from "@/lib/data"
 
 import { useUserStore } from "@/store/userStore"
+import useBreadcrumbPath from "@/store/breadcrumbPathStore"
 import { ProgressPage } from "@/components/progress-bar/progress-bar"
+import { useParams } from "next/navigation"
+import { Path } from "@/lib/types"
 
 import { fetchBackendService } from "@/lib/utils"
 
 export default function CategoryManager() {
+  const { currPath } = useParams()
   const [categories, setCategories] = useState<Category[]>([])
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [loading, setLoading] = useState(true)  // Track loading state
+  const { setPath } = useBreadcrumbPath()
 
   const { hydrated, accessToken } = useUserStore()
+
+  useEffect(() => {
+    const path: Path[] = [{ displayName: "Event's Color Category Management", reference: `/${currPath}` }]
+    setPath(path)
+  }, [])
 
   useEffect(() => {
     if (hydrated && accessToken) {
