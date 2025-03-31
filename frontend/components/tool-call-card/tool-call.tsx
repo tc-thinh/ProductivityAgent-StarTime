@@ -45,7 +45,7 @@ export function ToolCallCard({ result }: { result?: any }) {
             <span className="text-gray-500">Start:</span>
             <span className="text-right">
               {new Date(eventData.start.dateTime).toLocaleString(undefined, {
-                timeZone: eventData.start.timeZone || 'UTC',
+                timeZone: eventData.start.timeZone,
                 timeZoneName: 'short',
                 weekday: 'short',
                 month: 'short',
@@ -59,7 +59,7 @@ export function ToolCallCard({ result }: { result?: any }) {
             <span className="text-gray-500">End:</span>
             <span className="text-right">
               {new Date(eventData.end.dateTime).toLocaleString(undefined, {
-                timeZone: eventData.end.timeZone || 'UTC',
+                timeZone: eventData.end.timeZone,
                 timeZoneName: 'short',
                 hour: '2-digit',
                 minute: '2-digit'
