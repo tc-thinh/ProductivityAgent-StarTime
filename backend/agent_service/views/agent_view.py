@@ -27,7 +27,7 @@ def process(data: dict, conversation_id: int, create_new: bool = True):
         
         def conversation_naming():
             try:
-                c_name = get_conversation_name(processed_prompt)
+                c_name = get_conversation_name(processed_prompt, images)
                 logger.info(f"Conversation {conversation_id} name: {c_name}")
                 # Call the async function using asyncio.run
                 asyncio.run(update_conversation(conversation_id, c_name))
