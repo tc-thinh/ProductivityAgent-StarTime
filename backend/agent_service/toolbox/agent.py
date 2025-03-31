@@ -8,6 +8,7 @@ from agent_service.clients.conversation_ws import DBConversationWebSocketClient
 from .services.tools import tools, tool_map, get_environmental_context_prompt
 from agent_service.apps import AgentServiceConfig
 from app_lib.utils.conversations import fetch_previous_messages
+from asgiref.sync import sync_to_async
 
 from typing import List
 
@@ -25,7 +26,7 @@ async def agent_action(prompt: str, images: List[str], token: str, conv_id: int)
     messages = get_environmental_context_prompt()
     
     # Get the new conversation id
-    prev_messages = fetch_previous_messages(conv_id)
+    prev_messages = await sync_to_async(fetch_previous_messages)(conv_id)
     for prev_message in prev_messages:
         messages.append(prev_message)
 
@@ -35,9 +36,10 @@ async def agent_action(prompt: str, images: List[str], token: str, conv_id: int)
             message_content.append({
                 "type": "image_url",
                 "image_url": {
-                    "url": f"image_string",
+                    "url": f"{image_string}",
                 },
             })
+            logger.info(f"Image string: {image_string}")
 
     messages.append({"role": "user", "content": message_content})
 
