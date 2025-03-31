@@ -23,7 +23,7 @@ def process(data: dict, conversation_id: int, create_new: bool = True):
         processed_prompt = ""
 
         if user_prompt:
-            processed_prompt += "[TEXT]: " + user_prompt + "\n" 
+            processed_prompt = user_prompt + "\n"
         
         def conversation_naming():
             try:
