@@ -58,11 +58,8 @@ export const convertToBase64 = (file: File): Promise<string> => {
 };
 
 export const combinePrompt = ({ textPrompt, transcript }: { textPrompt: string; transcript?: string }) => {
-  if (transcript) {
-    return JSON.stringify({
-      text: textPrompt,
-      voiceTranscript: transcript
-    })
-  }
-  return textPrompt;
+  return JSON.stringify({
+    text: textPrompt,
+    voiceTranscript: transcript
+  })
 }
