@@ -300,6 +300,22 @@ export default function ChatCanvas() {
                     message="Creating Calendar Event..."
                   />)
                 }
+              case "GetTodayEvents":
+                if (message.tool_call_result && message.tool_call_result?.content) {
+                  return <></>
+                } else {
+                  return toolCallWrapper(index, <ToolWaitCard
+                    message="Fetching Today's Event..."
+                  />) 
+                }
+              case "GetThisWeekEvents":
+                if (message.tool_call_result && message.tool_call_result?.content) {
+                  return <></>
+                } else {
+                  return toolCallWrapper(index, <ToolWaitCard
+                    message="Fetching This Week's Event..."
+                  />)
+                }
             }
           }
 
