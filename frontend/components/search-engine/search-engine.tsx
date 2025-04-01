@@ -86,12 +86,22 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
     }
   }, [])
 
+  const reset = () => {
+    setInputValue("")
+    setTranscript("")
+    setImagePreviews([])
+    setSelectedImageIndex(null)
+    setIsRecording(false)
+    setImages([])
+  }
+
   // Handle Enter key press for search
   const handleKeyPress = async (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()
       // promptText: string, voiceTranscript: string, images: File[]
       await handleSearch(inputValue, transcript, images)
+      reset()
     }
   }
 
@@ -333,7 +343,10 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
                   size="icon"
                   disabled={!inputValue.trim()}
                   className="flex-shrink-0 hover:text-gray-900 hover:bg-gray-100 transition-all"
-                  onClick={() => handleSearch(inputValue, transcript, images)}
+                  onClick={() => {
+                    handleSearch(inputValue, transcript, images)
+                    reset()
+                  }}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
