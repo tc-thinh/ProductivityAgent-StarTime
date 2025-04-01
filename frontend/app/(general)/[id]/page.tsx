@@ -5,11 +5,16 @@ import { useEffect, useState, useMemo } from "react"
 import { ConversationMessage, ToolCall } from "@/lib/types"
 import { SearchEngine } from "@/components/search-engine/search-engine"
 import { ToolCallCard } from "@/components/tool-call-card/tool-call"
-import { CheckCircle, Loader2, Bot } from "lucide-react"
+import { Loader2, Bot } from "lucide-react"
 import { MarkdownContent } from "@/components/markdown-content"
 import { useUserStore } from "@/store/userStore"
 import { fetchBackendService, convertToBase64 } from "@/lib/utils"
 import { toast } from "sonner"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
 
 import { Path } from "@/lib/types"
 import useBreadcrumbPath from "@/store/breadcrumbPathStore"
@@ -23,7 +28,7 @@ export default function ChatCanvas() {
   const [isLoading, setIsLoading] = useState(true)
   const { path, setPath } = useBreadcrumbPath()
 
-  const { accessToken } = useUserStore()
+  const { accessToken, image } = useUserStore()
 
   // Handle search
   const handleSearch = async (promptText: string, voiceTranscript: string, images: File[]) => {
@@ -192,7 +197,7 @@ export default function ChatCanvas() {
     // If content is an array of objects with text properties
     if (Array.isArray(content)) {
       return content
-        .map(item => item.text || "")
+        .map(item => item.text.replace("[TEXT]: ", "") || "")
         .join("\n")
         .trim()
     }
@@ -212,7 +217,6 @@ export default function ChatCanvas() {
     )
   }
 
-
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -230,7 +234,10 @@ export default function ChatCanvas() {
                   </div>
                 </div>
                 <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-blue-600" />
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={image??""} alt="User" />
+                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  </Avatar>
                 </div>
               </div>
             )

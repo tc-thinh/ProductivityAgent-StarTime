@@ -46,6 +46,7 @@ async def agent_action(prompt: str, images: List[str], token: str, conv_id: int)
         if message["role"] == "assistant" and "tool_calls" in message:
             for index in range(len(message["tool_calls"])):
                 message["tool_calls"][index] = json.loads(message["tool_calls"][index])
+                message["tool_calls"][index]["function"]["arguments"] = json.dumps(message["tool_calls"][index]["function"]["arguments"])
 
             logger.info(f"Message: {message}")
 
