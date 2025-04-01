@@ -228,10 +228,7 @@ export default function ChatCanvas() {
 
     // If content is an array of objects with text properties
     if (Array.isArray(content)) {
-      return content
-        .map(item => item.text.replace("[TEXT]: ", "") || "")
-        .join("\n")
-        .trim()
+      return content[0].text
     }
     // If content is an object with a text property
     if (content?.text) {
