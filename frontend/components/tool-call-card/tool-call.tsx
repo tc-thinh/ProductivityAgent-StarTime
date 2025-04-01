@@ -28,7 +28,7 @@ export function ToolCallCard({ result }: { result?: any }) {
       <CardHeader className="p-3">
         <div className="flex justify-between items-center">
           <h3 className="font-medium">{eventData.summary}</h3>
-          <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">
+          <span className="text-xs px-2 py-1 bg-green-100 text-green-800">
             {eventData.status || "scheduled"}
           </span>
         </div>

@@ -247,7 +247,7 @@ export default function ChatCanvas() {
             return (
               <div
                 key={`${index}-assistant`}
-                className="flex items-start gap-3 max-w-[80%] mx-auto"
+                className="flex items-start gap-3 max-w-[60%] mr-auto"
               >
                 <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
                   <Bot className="h-5 w-5 text-green-600" />
@@ -266,7 +266,7 @@ export default function ChatCanvas() {
             return (
               <div
                 key={`${index}-event`}
-                className="flex items-start gap-3 max-w-[80%] mx-auto"
+                className="flex items-start gap-3 max-w-[60%] mr-auto"
               >
                 <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
                   <Bot className="h-5 w-5 text-gray-600" />
