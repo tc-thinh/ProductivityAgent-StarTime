@@ -1,7 +1,7 @@
 "use client"
 
 import { SearchEngine } from "@/components/search-engine/search-engine"
-import { fetchBackendService, convertToBase64 } from "@/lib/utils"
+import { fetchBackendService, convertToBase64, combinePrompt } from "@/lib/utils"
 import { toast } from "sonner"
 import { useUserStore } from "@/store/userStore"
 
@@ -12,7 +12,10 @@ export default function Landing() {
     const handleSearch = async (promptText: string, voiceTranscript: string, images: File[]) => {
       if (!promptText.trim() && !voiceTranscript.trim()) return
   
-      const queryText = promptText.trim() || voiceTranscript.trim()
+      const queryText = combinePrompt({
+        textPrompt: promptText.trim(),
+        transcript: voiceTranscript
+      })
   
       try {
         const imagesBase64: string[] = []

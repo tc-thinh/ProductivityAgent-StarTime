@@ -9,7 +9,7 @@ import { ToolWaitCard } from "@/components/tool-call-card/ToolWaitCard"
 import { Loader2, Bot } from "lucide-react"
 import { MarkdownContent } from "@/components/markdown-content"
 import { useUserStore } from "@/store/userStore"
-import { fetchBackendService, convertToBase64 } from "@/lib/utils"
+import { fetchBackendService, convertToBase64, combinePrompt } from "@/lib/utils"
 import { toast } from "sonner"
 import {
   Avatar,
@@ -39,6 +39,19 @@ const toolCallWrapper = (index: number, component: any) => {
   )
 }
 
+interface UserMessageContent {
+  text: string,
+  voiceTranscript: string
+}
+
+function extractUserMessageContent(content: any): UserMessageContent {
+  // If content is an array of objects with text properties
+  if (Array.isArray(content)) {
+    return JSON.parse(content[0].text);
+  }
+  return { text: "", voiceTranscript: "" }
+}
+
 export default function ChatCanvas() {
   const { id } = useParams()
   const [messages, setMessages] = useState<ConversationMessage[]>([])
@@ -53,7 +66,10 @@ export default function ChatCanvas() {
   const handleSearch = async (promptText: string, voiceTranscript: string, images: File[]) => {
     if (!promptText.trim() && !voiceTranscript.trim()) return
 
-    const queryText = promptText.trim() || voiceTranscript.trim()
+    const queryText = combinePrompt({
+      textPrompt: promptText.trim(),
+      transcript: voiceTranscript
+    })
 
     try {
       const imagesBase64: string[] = []
@@ -219,25 +235,6 @@ export default function ChatCanvas() {
 
   console.log(filteredMessages)
 
-  function extractUserMessageContent(content: any): string {
-    // If content is already a string, return it directly
-    if (typeof content === "string") {
-      // Remove [TEXT]: prefix if present
-      return content.replace("[TEXT]: ", "")
-    }
-
-    // If content is an array of objects with text properties
-    if (Array.isArray(content)) {
-      return content[0].text
-    }
-    // If content is an object with a text property
-    if (content?.text) {
-      return content.text
-    }
-    // Fallback - stringify if we can't extract text
-    return JSON.stringify(content)
-  }
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -252,15 +249,23 @@ export default function ChatCanvas() {
         {filteredMessages.map((message, index) => {
           if (message.role === "user") {
             return (
-              <div
-                key={`${index}-user`}
-                className="flex items-start gap-3 max-w-[60%] ml-auto"
-              >
-                <div className="p-4 rounded-lg bg-blue-50 flex-1">
-                  <div className="text-gray-900 whitespace-pre-line">
-                    <MarkdownContent content={extractUserMessageContent(message.content)} />
-                  </div>
+              <div key={`${index}-user`} className="flex max-w-[60%] ml-auto gap-3 items-start">
+                <div className="flex flex-col w-full">
+                  {/* Secondary Transcript Box (on top) */}
+                  {extractUserMessageContent(message.content).voiceTranscript && (
+                    <div className="p-3 bg-gray-100 text-sm text-gray-700 rounded-lg w-full mb-1">
+                      {extractUserMessageContent(message.content).voiceTranscript}
+                    </div>
+                  )}
+
+                  {/* Main Text Content (below, ensuring same width) */}
+                  {extractUserMessageContent(message.content).text && (
+                    <div className="p-4 rounded-lg bg-blue-50 text-gray-900 whitespace-pre-line w-full">
+                      <MarkdownContent content={extractUserMessageContent(message.content).text} />
+                    </div>
+                  )}
                 </div>
+                
                 <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={image ?? ""} alt="User" />
@@ -308,7 +313,7 @@ export default function ChatCanvas() {
                 } else {
                   return toolCallWrapper(index, <ToolWaitCard
                     message="Fetching Today's Event..."
-                  />) 
+                  />)
                 }
               case "GetThisWeekEvents":
                 if (message.tool_call_result && message.tool_call_result?.content) {
