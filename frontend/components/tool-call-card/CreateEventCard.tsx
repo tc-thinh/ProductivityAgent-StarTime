@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 
-export function ToolCallCard({ result }: { result?: any }) {
+export function CreateEventCard({ result }: { result?: any }) {
   const eventData = useMemo(() => {
     const eventDetails = result?.content?.event_details || {};
     

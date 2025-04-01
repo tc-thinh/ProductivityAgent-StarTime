@@ -4,7 +4,8 @@ import { useParams } from "next/navigation"
 import { useEffect, useState, useMemo } from "react"
 import { ConversationMessage, ToolCall } from "@/lib/types"
 import { SearchEngine } from "@/components/search-engine/search-engine"
-import { ToolCallCard } from "@/components/tool-call-card/tool-call"
+import { CreateEventCard } from "@/components/tool-call-card/CreateEventCard"
+import { ToolWaitCard } from "@/components/tool-call-card/ToolWaitCard"
 import { Loader2, Bot } from "lucide-react"
 import { MarkdownContent } from "@/components/markdown-content"
 import { useUserStore } from "@/store/userStore"
@@ -20,6 +21,22 @@ import { Path } from "@/lib/types"
 import useBreadcrumbPath from "@/store/breadcrumbPathStore"
 
 const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
+
+const toolCallWrapper = (index: number, component: any) => {
+  return (
+    <div
+      key={`${index}-event`}
+      className="flex items-start gap-3 max-w-[60%] mr-auto"
+    >
+      <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
+        <Bot className="h-5 w-5 text-gray-600" />
+      </div>
+      <div className="p-4 rounded-lg bg-gray-50 flex-1">
+        {component}
+      </div>
+    </div>
+  )
+}
 
 export default function ChatCanvas() {
   const { id } = useParams()
@@ -44,7 +61,7 @@ export default function ChatCanvas() {
         imagesBase64.push(base64String)
       }
 
-      const { success, data } = await fetchBackendService<{ conversationId: string }>(
+      const { success } = await fetchBackendService<{ conversationId: string }>(
         {
           endpoint: `ai/message/`,
           method: "POST",
@@ -128,7 +145,6 @@ export default function ChatCanvas() {
         })
 
         setMessages(processedMessages)
-        console.log(processedMessages)
       } catch (error) {
         console.error('Error processing message:', error)
       } finally {
@@ -155,37 +171,48 @@ export default function ChatCanvas() {
   }, [conversationName])
 
   const filteredMessages = useMemo(() => {
-    return messages.filter(msg => {
-      // Always show user messages
-      if (msg.role === "user") return true
-  
-      // Show assistant messages that either:
-      // 1. Contain scheduling confirmation
-      // 2. Are normal messages (no tool calls)
-      if (msg.role === "assistant") {
-        const hasSchedulingConfirmation = typeof msg.content === 'string' && 
-          msg.content.includes("scheduled")
-        const isNormalMessage = !msg.tool_calls
-        return hasSchedulingConfirmation || isNormalMessage
+    const transformed: ConversationMessage[] = []
+    const toolResultsMap = new Map<string, any>() // Map tool_call_id to its result
+
+    // First pass: Store tool messages in a map
+    for (const msg of messages) {
+      if (msg.role === "tool" && msg.tool_call_id) {
+        toolResultsMap.set(msg.tool_call_id, msg.content)
       }
-  
-      // Show tool messages that contain valid event data
-      if (msg.role === "tool") {
-        try {
-          const content = typeof msg.content === 'string' 
-            ? JSON.parse(msg.content) 
-            : msg.content
-          const event = content.event_details || content
-          return event?.summary && (event.start?.dateTime || event.time_data?.start?.dateTime)
-        } catch {
-          return false
+    }
+
+    // Second pass: Process and merge tool calls with their results
+    for (const msg of messages) {
+      if (msg.role === "assistant" && msg.tool_calls?.length) {
+        for (const toolCall of msg.tool_calls) {
+          const mergedToolResult = toolResultsMap.get(toolCall.id) || null
+
+          transformed.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            tool_call_result: {
+              tool_call_id: toolCall.id,
+              content: mergedToolResult,
+              status: mergedToolResult ? "success" : "error"
+            },
+            tool_calls: [
+              {
+                id: toolCall.id,
+                function: toolCall.function,
+                type: toolCall.type
+              }
+            ],
+            content: ""
+          })
         }
+      } else if (msg.role !== "tool") {
+        transformed.push(msg) // Keep normal messages
       }
-  
-      return false
-    })
+    }
+    return transformed
   }, [messages])
 
+  console.log(filteredMessages)
 
   function extractUserMessageContent(content: any): string {
     // If content is already a string, return it directly
@@ -193,7 +220,7 @@ export default function ChatCanvas() {
       // Remove [TEXT]: prefix if present
       return content.replace("[TEXT]: ", "")
     }
-  
+
     // If content is an array of objects with text properties
     if (Array.isArray(content)) {
       return content
@@ -227,7 +254,6 @@ export default function ChatCanvas() {
                 key={`${index}-user`}
                 className="flex items-start gap-3 max-w-[60%] ml-auto"
               >
-                
                 <div className="p-4 rounded-lg bg-blue-50 flex-1">
                   <div className="text-gray-900 whitespace-pre-line">
                     <MarkdownContent content={extractUserMessageContent(message.content)} />
@@ -235,14 +261,14 @@ export default function ChatCanvas() {
                 </div>
                 <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={image??""} alt="User" />
+                    <AvatarImage src={image ?? ""} alt="User" />
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                 </div>
               </div>
             )
           }
-  
+
           if (message.role === "assistant") {
             return (
               <div
@@ -260,30 +286,27 @@ export default function ChatCanvas() {
               </div>
             )
           }
-  
+
           if (message.role === "tool") {
-            const normalized = normalizeEventData(message.content)
-            return (
-              <div
-                key={`${index}-event`}
-                className="flex items-start gap-3 max-w-[60%] mr-auto"
-              >
-                <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-gray-600" />
-                </div>
-                <div className="p-4 rounded-lg bg-gray-50 flex-1">
-                  <ToolCallCard
+            switch (message.tool_calls?.[0]?.function?.name) {
+              case "CreateCalendarEvent":
+                if (message.tool_call_result && message.tool_call_result?.content) {
+                  const normalized = normalizeEventData(message.tool_call_result?.content)
+                  return toolCallWrapper(index, <CreateEventCard
                     result={{ content: { event_details: normalized } }}
-                  />
-                </div>
-              </div>
-            )
+                  />)
+                } else {
+                  return toolCallWrapper(index, <ToolWaitCard
+                    message="Creating Calendar Event..."
+                  />)
+                }
+            }
           }
-  
+
           return null
         })}
       </div>
-  
+
       <div className="sticky bottom-0 p-4">
         <SearchEngine handleSearch={handleSearch} />
       </div>
