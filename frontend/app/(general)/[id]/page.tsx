@@ -19,6 +19,7 @@ import {
 
 import { Path } from "@/lib/types"
 import useBreadcrumbPath from "@/store/breadcrumbPathStore"
+import { useApplicationStore } from "@/store/applicationStore"
 
 const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
 
@@ -44,6 +45,7 @@ export default function ChatCanvas() {
   const [conversationName, setConversationName] = useState<string>("Untitled")
   const [isLoading, setIsLoading] = useState(true)
   const { path, setPath } = useBreadcrumbPath()
+  const { refreshSidebar } = useApplicationStore()
 
   const { accessToken, image } = useUserStore()
 
@@ -118,7 +120,10 @@ export default function ChatCanvas() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data).data
-        setConversationName(data.c_name || "Untitled")
+        if (data.c_name || "Untitled" != conversationName) {
+          setConversationName(data.c_name || "Untitled")
+          refreshSidebar()
+        }
 
         const processedMessages = data.c_messages.map((msg: ConversationMessage) => {
           // Parse tool calls if they exist

@@ -23,6 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useUserStore } from "@/store/userStore"
+import { useApplicationStore } from "@/store/applicationStore"
 import { fetchBackendService } from "@/lib/utils"
 import { History, ConversationHeader } from "@/lib/types"
 import { toast } from "sonner"
@@ -32,7 +33,7 @@ export function NavHistories() {
   const [todayHistories, setTodayHistories] = useState<History[]>([])
   const [olderHistories, setOlderHistories] = useState<History[]>([])
   const [showAll, setShowAll] = useState(false)
-  const [refreshTrigger, setRefreshTrigger] = useState<number>(1)
+  const { sidebarRefreshTrigger } = useApplicationStore()
 
   const { accessToken, hydrated } = useUserStore()
 
@@ -80,7 +81,7 @@ export function NavHistories() {
 
   useEffect(() => {
     fetchHistory()
-  }, [hydrated, accessToken])
+  }, [hydrated, accessToken, sidebarRefreshTrigger])
 
   const deleteConversation = async (conversationId: number) => {
     const { success, data, error } = await fetchBackendService(
@@ -94,7 +95,7 @@ export function NavHistories() {
     if (success) toast.success("Conversation successfully deleted.")
     else toast.error(`Error while deleting conversation: ${error}`)
 
-    setRefreshTrigger(refreshTrigger + 1)
+    fetchHistory()
   }
 
   return (
