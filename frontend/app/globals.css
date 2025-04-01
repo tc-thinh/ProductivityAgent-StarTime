@@ -93,7 +93,7 @@
     
     /* Paragraphs */
     p {
-      @apply whitespace-pre-wrap my-4 leading-relaxed;
+      @apply whitespace-pre-wrap leading-relaxed;
     }
 
     /* Lists */

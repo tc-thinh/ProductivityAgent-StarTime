@@ -17,7 +17,7 @@ export function MarkdownContent({ content }: { content: string }) {
           
           // Text
           p: ({ children, ...props }) => (
-            <p className="mb-4 whitespace-pre-wrap" {...props}>
+            <p className="whitespace-pre-wrap" {...props}>
               {children}
             </p>
           ),
@@ -27,7 +27,7 @@ export function MarkdownContent({ content }: { content: string }) {
           // Lists - Custom implementation with hyphens
           ul: ({ children, depth, ...props }) => (
             <ul 
-              className={`my-2 ${depth > 0 ? 'pl-4 list-dash' : 'list-none'}`} 
+              className={`my-2 ${depth > 0 ? 'pl-3 list-dash' : 'list-none'}`} 
               {...props}
             >
               {React.Children.map(children, (child) => {
@@ -65,7 +65,7 @@ export function MarkdownContent({ content }: { content: string }) {
             const inline = !className?.includes('language-')
             
             return inline ? (
-              <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono">
+              <code className="bg-gray-100 px-1.5 py-0.5 text-sm font-mono">
                 {children}
               </code>
             ) : (
@@ -73,7 +73,7 @@ export function MarkdownContent({ content }: { content: string }) {
                 style={materialLight}
                 language={match?.[1] || 'text'}
                 PreTag="div"
-                className="rounded-md text-sm mb-3"
+                className="text-sm mb-3"
                 {...props}
               >
                 {String(children).replace(/\n$/, '')}

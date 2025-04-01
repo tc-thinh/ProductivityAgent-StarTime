@@ -260,7 +260,7 @@ export default function ChatCanvas() {
 
                   {/* Main Text Content (below, ensuring same width) */}
                   {extractUserMessageContent(message.content).text && (
-                    <div className="p-4 rounded-lg bg-blue-50 text-gray-900 whitespace-pre-line w-full">
+                    <div className="p-3 bg-blue-50 text-gray-900 w-full">
                       <MarkdownContent content={extractUserMessageContent(message.content).text} />
                     </div>
                   )}
