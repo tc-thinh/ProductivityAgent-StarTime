@@ -52,6 +52,17 @@ function extractUserMessageContent(content: any): UserMessageContent {
   return { text: "", voiceTranscript: "" }
 }
 
+function extractUserMessageImages(content: any): string[] {
+  const images: string[] = []
+  content.forEach((element: any) => {
+    if (element.type === "image_url") {
+      images.push(element.image_url.url)
+    }
+  })
+
+  return images
+}
+
 export default function ChatCanvas() {
   const { id } = useParams()
   const [messages, setMessages] = useState<ConversationMessage[]>([])
@@ -248,33 +259,44 @@ export default function ChatCanvas() {
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {filteredMessages.map((message, index) => {
           if (message.role === "user") {
+            const images = extractUserMessageImages(message.content);
+          
             return (
               <div key={`${index}-user`} className="flex max-w-[60%] ml-auto gap-3 items-start">
                 <div className="flex flex-col w-full">
                   {/* Secondary Transcript Box (on top) */}
                   {extractUserMessageContent(message.content).voiceTranscript && (
-                    <div className="p-3 bg-gray-100 text-sm text-gray-700 rounded-lg w-full mb-1">
+                    <div className="p-3 bg-gray-100 text-sm text-gray-700 w-full mb-1">
                       {extractUserMessageContent(message.content).voiceTranscript}
                     </div>
                   )}
-
-                  {/* Main Text Content (below, ensuring same width) */}
+          
+                  {/* Main Text Content */}
                   {extractUserMessageContent(message.content).text && (
-                    <div className="p-3 bg-blue-50 text-gray-900 w-full">
+                    <div className="p-3 bg-blue-50 text-gray-900 w-full mb-1">
                       <MarkdownContent content={extractUserMessageContent(message.content).text} />
                     </div>
                   )}
+          
+                  {/* Render Images */}
+                  {images.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-1">
+                      {images.map((src: string, imgIndex: number) => (
+                        <img key={imgIndex} src={src} alt={`User Upload ${imgIndex}`} className="w-32 h-32 object-cover" />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                
-                <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
-                  <Avatar className="h-8 w-8 rounded-lg">
+          
+                <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center">
+                  <Avatar className="h-8 w-8">
                     <AvatarImage src={image ?? ""} alt="User" />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
                 </div>
               </div>
             )
-          }
+          }          
 
           if (message.role === "assistant") {
             return (

@@ -228,7 +228,6 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
           <div className="flex items-center space-x-2 overflow-x-auto max-w-[400px] [&::-webkit-scrollbar]:w-2[&::-webkit-scrollbar]:h-2[&::-webkit-scrollbar-track]:bg-gray-100[&::-webkit-scrollbar-thumb]:bg-gray-300dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
             {imagePreviews.map((preview, index) => (
               <Drawer key={preview}>
-
                 <DrawerTrigger asChild>
                   <div className="relative flex-shrink-0 cursor-pointer">
                     <Image
@@ -341,7 +340,7 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
-                  disabled={!inputValue.trim()}
+                  disabled={!(inputValue.trim() || transcript.trim())}
                   className="flex-shrink-0 hover:text-gray-900 hover:bg-gray-100 transition-all"
                   onClick={() => {
                     handleSearch(inputValue, transcript, images)
