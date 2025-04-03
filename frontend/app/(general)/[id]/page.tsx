@@ -16,6 +16,10 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
+import { DialogTitle } from '@radix-ui/react-dialog'
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+import Image from "next/image"
 
 import { Path } from "@/lib/types"
 import useBreadcrumbPath from "@/store/breadcrumbPathStore"
@@ -70,7 +74,7 @@ export default function ChatCanvas() {
   const [isLoading, setIsLoading] = useState(true)
   const { path, setPath } = useBreadcrumbPath()
   const { refreshSidebar } = useApplicationStore()
-
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const { accessToken, image } = useUserStore()
 
   // Handle search
@@ -258,32 +262,63 @@ export default function ChatCanvas() {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {filteredMessages.map((message, index) => {
+          const messageKey = `message-${index}-${message.role}`;
+          
           if (message.role === "user") {
             const images = extractUserMessageImages(message.content);
-          
+            const content = extractUserMessageContent(message.content);
+            
             return (
-              <div key={`${index}-user`} className="flex max-w-[60%] ml-auto gap-3 items-start">
+              <div key={messageKey} className="flex max-w-[60%] ml-auto gap-3 items-start">
                 <div className="flex flex-col w-full">
                   {/* Secondary Transcript Box (on top) */}
-                  {extractUserMessageContent(message.content).voiceTranscript && (
-                    <div className="p-3 bg-gray-100 text-sm text-gray-700 w-full mb-1">
-                      {extractUserMessageContent(message.content).voiceTranscript}
+                  {content.voiceTranscript && (
+                    <div key={`${messageKey}-transcript`} className="p-3 bg-gray-100 text-sm text-gray-700 w-full mb-1">
+                      {content.voiceTranscript}
                     </div>
                   )}
           
                   {/* Main Text Content */}
-                  {extractUserMessageContent(message.content).text && (
-                    <div className="p-3 bg-blue-50 text-gray-900 w-full mb-1">
-                      <MarkdownContent content={extractUserMessageContent(message.content).text} />
+                  {content.text && (
+                    <div key={`${messageKey}-text`} className="p-3 bg-blue-50 text-gray-900 w-full mb-1">
+                      <MarkdownContent content={content.text} />
                     </div>
                   )}
-          
-                  {/* Render Images */}
+
+                  {/* Render Images with Drawer */}
                   {images.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-1">
-                      {images.map((src: string, imgIndex: number) => (
-                        <img key={imgIndex} src={src} alt={`User Upload ${imgIndex}`} className="w-32 h-32 object-cover" />
-                      ))}
+                    <div key={`${messageKey}-images-container`} className="flex flex-wrap gap-2 mb-1">
+                      {images.map((src: string, imgIndex: number) => {
+                        const imageKey = `${messageKey}-image-${imgIndex}`;
+                        return (
+                          <div key={imageKey} className="relative cursor-pointer">
+                            <Drawer key={`drawer-${imageKey}`}>
+                              <DrawerTrigger asChild>
+                                <img 
+                                  src={src} 
+                                  alt={`User Upload ${imgIndex}`} 
+                                  className="w-32 h-32 object-cover"
+                                  onClick={() => setSelectedImageIndex(imgIndex)}
+                                />
+                              </DrawerTrigger>
+                              <DrawerContent aria-label="Image Preview">
+                                <VisuallyHidden>
+                                  <DialogTitle>Image Preview</DialogTitle>
+                                </VisuallyHidden>
+                                <div className="p-4 flex justify-center items-center">
+                                  <Image
+                                    src={src}
+                                    alt="Preview in drawer"
+                                    width={600}
+                                    height={400}
+                                    className="w-auto h-auto max-w-full max-h-[70vh] object-contain rounded-lg"
+                                  />
+                                </div>
+                              </DrawerContent>
+                            </Drawer>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -295,60 +330,62 @@ export default function ChatCanvas() {
                   </Avatar>
                 </div>
               </div>
-            )
+            );
           }          
 
           if (message.role === "assistant") {
             return (
               <div
-                key={`${index}-assistant`}
+                key={messageKey}
                 className="flex items-start gap-3 max-w-[60%] mr-auto"
               >
                 <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
                   <Bot className="h-5 w-5 text-green-600" />
                 </div>
-                <div className="p-4 rounded-lg  flex-1">
+                <div className="p-4 rounded-lg flex-1">
                   <div className="text-gray-900">
                     <MarkdownContent content={message.content} />
                   </div>
                 </div>
               </div>
-            )
+            );
           }
 
           if (message.role === "tool") {
             switch (message.tool_calls?.[0]?.function?.name) {
               case "CreateCalendarEvent":
                 if (message.tool_call_result && message.tool_call_result?.content) {
-                  const normalized = normalizeEventData(message.tool_call_result?.content)
+                  const normalized = normalizeEventData(message.tool_call_result?.content);
                   return toolCallWrapper(index, <CreateEventCard
                     result={{ content: { event_details: normalized } }}
-                  />)
+                  />);
                 } else {
                   return toolCallWrapper(index, <ToolWaitCard
                     message="Creating Calendar Event..."
-                  />)
+                  />);
                 }
               case "GetTodayEvents":
                 if (message.tool_call_result && message.tool_call_result?.content) {
-                  return <></>
+                  return <div key={messageKey}></div>;
                 } else {
                   return toolCallWrapper(index, <ToolWaitCard
                     message="Fetching Today's Event..."
-                  />)
+                  />);
                 }
               case "GetThisWeekEvents":
                 if (message.tool_call_result && message.tool_call_result?.content) {
-                  return <></>
+                  return <div key={messageKey}></div>;
                 } else {
                   return toolCallWrapper(index, <ToolWaitCard
                     message="Fetching This Week's Event..."
-                  />)
+                  />);
                 }
+              default:
+                return <div key={messageKey}></div>;
             }
           }
 
-          return null
+          return <div key={messageKey}></div>;
         })}
       </div>
 
