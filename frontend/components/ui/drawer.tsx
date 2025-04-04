@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
-
 import { cn } from "@/lib/utils"
 
 const Drawer = ({
@@ -17,9 +16,7 @@ const Drawer = ({
 Drawer.displayName = "Drawer"
 
 const DrawerTrigger = DrawerPrimitive.Trigger
-
 const DrawerPortal = DrawerPrimitive.Portal
-
 const DrawerClose = DrawerPrimitive.Close
 
 const DrawerOverlay = React.forwardRef<
@@ -28,7 +25,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn("fixed inset-0 z-50 bg-black/80", className)}
+    className={cn("fixed inset-0 z-50 bg-black/60", className)}
     {...props}
   />
 ))
@@ -40,16 +37,24 @@ const DrawerContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
-    <DrawerPrimitive.Content
+    <DrawerPrimitive.Content  
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+        "fixed right-0 top-0 z-50 h-full w-[400px] flex-col border-l bg-background shadow-lg",
+        "transform transition-transform duration-300 ease-in-out",
         className
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
-      {children}
+     <div className="absolute left-0 top-1/2 h-16 w-1 -translate-y-1/2 rounded-full bg-muted" /> 
+      {/* Centered content container */}
+      <div className="h-full flex flex-col">
+        <div className="flex-1 overflow-y-auto flex items-center justify-center p-4">
+          <div className="w-full max-w-[350px]"> {/* Constrained width for better centering */}
+            {children}
+          </div>
+        </div>
+      </div>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ))
