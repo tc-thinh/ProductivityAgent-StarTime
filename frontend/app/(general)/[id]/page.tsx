@@ -273,7 +273,7 @@ export default function ChatCanvas() {
                   {/* Secondary Transcript Box (on top) */}
                   {content.voiceTranscript && (
                     <div key={`${messageKey}-transcript`} className="p-3 bg-gray-100 text-gray-700 w-full mb-1 rounded-md">
-                      {content.voiceTranscript}
+                      🎤: {content.voiceTranscript.replace(/^\w/, c => c.toUpperCase())}
                     </div>
                   )}
 
