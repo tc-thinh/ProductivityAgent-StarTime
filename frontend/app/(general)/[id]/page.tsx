@@ -33,7 +33,7 @@ const toolCallWrapper = (index: number, component: any) => {
       key={`${index}-event`}
       className="flex items-start gap-3 max-w-[60%] mr-auto"
     >
-      <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
+      <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center">
         <Bot className="h-5 w-5 text-gray-600" />
       </div>
       <div className="p-4 rounded-lg bg-gray-50 flex-1">
