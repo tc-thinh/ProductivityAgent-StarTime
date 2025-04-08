@@ -263,11 +263,11 @@ export default function ChatCanvas() {
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {filteredMessages.map((message, index) => {
           const messageKey = `message-${index}-${message.role}`;
-          
+
           if (message.role === "user") {
             const images = extractUserMessageImages(message.content);
             const content = extractUserMessageContent(message.content);
-            
+
             return (
               <div key={messageKey} className="flex max-w-[60%] ml-auto gap-3 items-start">
                 <div className="flex flex-col w-full">
@@ -277,7 +277,7 @@ export default function ChatCanvas() {
                       {content.voiceTranscript}
                     </div>
                   )}
-          
+
                   {/* Main Text Content */}
                   {content.text && (
                     <div key={`${messageKey}-text`} className="p-3 bg-blue-50 text-gray-900 w-full mb-1">
@@ -294,9 +294,9 @@ export default function ChatCanvas() {
                           <div key={imageKey} className="relative cursor-pointer">
                             <Drawer key={`drawer-${imageKey}`}>
                               <DrawerTrigger asChild>
-                                <img 
-                                  src={src} 
-                                  alt={`User Upload ${imgIndex}`} 
+                                <img
+                                  src={src}
+                                  alt={`User Upload ${imgIndex}`}
                                   className="w-32 h-32 object-cover"
                                   onClick={() => setSelectedImageIndex(imgIndex)}
                                 />
@@ -322,7 +322,7 @@ export default function ChatCanvas() {
                     </div>
                   )}
                 </div>
-          
+
                 <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={image ?? ""} alt="User" />
@@ -331,7 +331,7 @@ export default function ChatCanvas() {
                 </div>
               </div>
             );
-          }          
+          }
 
           if (message.role === "assistant") {
             return (
