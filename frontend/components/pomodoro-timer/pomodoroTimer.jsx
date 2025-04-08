@@ -104,6 +104,7 @@ const PomodoroTimer = () => {
                 alignItems: "center",
                 gap: "1rem",
             }}
+            className="rounded-l-lg shadow-md cursor-pointer"
             onClick={() => setCompactMode(!compactMode)}
         >
             {!compactMode && (
@@ -119,7 +120,7 @@ const PomodoroTimer = () => {
                                 cursor: "pointer",
                                 ...buttonStyle
                             }}
-                            className="h-auto w-auto"
+                            className="h-auto w-auto rounded-md"
                         >
                             <X size="0.5rem" />
                         </Button>

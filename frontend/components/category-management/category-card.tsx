@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip" // Added ShadCN Tooltip imports
 
 export const CategoryCardSection: React.FC<{
   category: Category
@@ -46,7 +47,7 @@ export const CategoryCardSection: React.FC<{
   return (
     <>
       <Card
-        className="w-full p-4 shadow-lg flex flex-col justify-between transition-all hover:shadow-xl relative"
+        className="w-full p-4 shadow-lg flex flex-col justify-between transition-all hover:shadow-xl relative rounded-lg cursor-pointer"
         style={{
           backgroundColor: category.cat_background,
           color: category.cat_foreground,
@@ -79,12 +80,13 @@ export const CategoryCardSection: React.FC<{
         </div>
       </Card>
 
-
       {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           onClick={(e) => {
             if (e.target === e.currentTarget) handleCancel();
-          }}>
+          }}
+        >
           <Card className="w-full max-w-[80vh] p-6 flex flex-col">
             <div className="flex-1 flex flex-col space-y-4 mb-10">
               {/* Title Input */}
@@ -106,24 +108,33 @@ export const CategoryCardSection: React.FC<{
                   <Minimize2 size={20} color={category.cat_foreground} />
                 </div>
                 <span className={'text-xs mt-2 flex justify-end'}>
-                  <span className={`${tempTitle.length >= 50 ? "text-red-500" : "text-gray-500"}`}>{tempTitle.length}/50</span>
-                  <span title="Provide a category title for all events in this color category."><Info className="h-4 w-4 ml-1 text-gray-400" /></span>
+                  <span className={`${tempTitle.length >= 50 ? "text-red-500" : "text-gray-500"}`}>
+                    {tempTitle.length}/50
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 ml-1 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Provide a category title for all events in this color category.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </span>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-stretch gap-2">
                   {/* Current Color Section */}
-                  <div className="inline-flex items-center gap-2 border p-2 justify-center w-[25%] h-full">
+                  <div className="inline-flex items-center gap-2 border p-2 justify-center w-[25%] h-10 rounded-lg">
                     <span className="text-sm font-medium">Current Color:</span>
-                    <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: category.cat_background }}></div>
+                    <div className="w-6 h-6 rounded-lg" style={{ backgroundColor: category.cat_background }}></div>
                   </div>
 
                   {/* Active Toggle Switch */}
-                  <div className="inline-flex items-center gap-2 border p-2 justify-center w-[25%] h-full">
-                    <Switch
-                      checked={active} // Bind the switch to the active state
-                      onCheckedChange={() => setActive((prev) => !prev)} // Toggle active state
-                    />
+                  <div className="inline-flex items-center gap-2 border p-2 justify-center w-[25%] h-10 rounded-lg">
                     <span className="text-sm font-medium">Active</span>
+                    <Switch
+                      checked={active}
+                      onCheckedChange={() => setActive((prev) => !prev)}
+                    />
                   </div>
                 </div>
               </Label>
@@ -131,22 +142,29 @@ export const CategoryCardSection: React.FC<{
               {/* Description Textarea */}
               <Label className="flex flex-col p-3 relative">
                 <span className="text-base font-bold">Description</span>
-                <Textarea
+                <Input
                   value={tempDesc}
                   onChange={(e) => {
                     if (e.target.value.length <= 200) setTempDesc(e.target.value)
                   }}
                   placeholder="Your description..."
                   maxLength={200}
-                  className="border-none focus:ring-0 bg-transparent p-0 mt-4 resize-none"
+                  className="focus:outline-none focus:ring-0 bg-transparent p-0 mt-3 resize-none"
                 />
                 <span className={`text-xs mt-2 flex justify-end ${tempDesc.length >= 200 ? "text-red-500" : "text-gray-500"}`}>
                   {tempDesc.length}/200
-                  <span title="Provide a clearer description to improve AI agent actions."><Info className="h-4 w-4 text-gray-400 ml-1" /></span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 ml-1 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Provide a clearer description to improve AI agent actions.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </span>
               </Label>
 
-              {/* Event Name Prefix Textarea */}
+              {/* Event Name Prefix Input */}
               <Label className="flex flex-col p-3 relative">
                 <span className="text-base font-bold">Event Name Prefix</span>
                 <Input
@@ -156,15 +174,24 @@ export const CategoryCardSection: React.FC<{
                   }}
                   placeholder='Prefix for the events in this category. E.g. "[ASU]" -> [ASU] Capstone Project Meeting'
                   maxLength={10}
-                  className="border-none focus:ring-0 bg-transparent p-0 mt-4 h-auto"
+                  className="border-none focus:ring-0 bg-transparent p-0 mt-3 h-auto"
                 />
                 <span className={'text-xs mt-2 flex justify-end'}>
-                  <span className={`${tempEventPrefix.length >= 10 ? "text-red-500" : "text-gray-500"}`}>{tempEventPrefix.length}/10</span>
-                  <span title="Provide a prefix for all events' names in this color category."><Info className="h-4 w-4 ml-1 text-gray-400" /></span>
+                  <span className={`${tempEventPrefix.length >= 10 ? "text-red-500" : "text-gray-500"}`}>
+                    {tempEventPrefix.length}/10
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 ml-1 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Provide a prefix for all events' names in this color category.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </span>
               </Label>
 
-              {/* Example Tags Inputs */}
+              {/* Example Tags Input */}
               <Label className="flex flex-col p-3 relative">
                 <span className="text-base font-bold">Example Events Names</span>
                 <Input
@@ -173,7 +200,14 @@ export const CategoryCardSection: React.FC<{
                   disabled={true}
                 />
                 <span className={'text-xs mt-2 flex justify-end'}>
-                  <span title="Provide list of events' name that should be added into this category. This would provide some clear context on similar events in this category for the AI agent."><Info className="h-4 w-4 ml-1 text-gray-400" /></span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 ml-1 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Provide list of events' name that should be added into this category. This would provide some clear context on similar events in this category for the AI agent.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </span>
               </Label>
             </div>
@@ -182,7 +216,13 @@ export const CategoryCardSection: React.FC<{
             <div className="relative">
               <div className="absolute bottom-0 right-0 flex gap-2 max-w-[30%] w-full">
                 <Button variant="ghost" onClick={handleCancel} className="flex-1">Cancel</Button>
-                <Button style={{ backgroundColor: category.cat_background }} onClick={handleSave} className="flex-1 text-black">Save</Button>
+                <Button
+                  style={{ backgroundColor: category.cat_background }}
+                  onClick={handleSave}
+                  className="flex-1 text-black"
+                >
+                  Save
+                </Button>
               </div>
             </div>
           </Card>

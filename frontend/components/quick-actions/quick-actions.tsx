@@ -64,7 +64,9 @@ export default function QuickActions() {
     ]
 
     return (
-        <div style={{ position: "fixed", bottom: "3rem", right: "3rem" }}>
+        <div 
+            style={{ position: "fixed", bottom: "3rem", right: "3rem" }}
+        >
             <Popover>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -108,6 +110,7 @@ export default function QuickActions() {
                                             color: "var(--color-primary)",
                                         }}
                                         onClick={action.onClick}
+                                        className="rounded-md"
                                     >
                                         {action.icon}
                                     </Button>

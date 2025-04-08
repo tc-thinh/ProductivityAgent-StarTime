@@ -219,11 +219,11 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
   return (
     <div className="w-full justify-content-center flex flex-col items-center transition-all duration-300">
       {/* Transcript Textarea (Secondary Panel) */}
-      <div className="w-[75vh] bg-gray-100 shadow-lg">
+      <div className="w-[75vh] bg-gray-100">
         {transcript && (
-          <div>
+          <div className="rounded-lg">
             <Textarea
-              className="text-sm bg-transparent text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-0 p-3"
+              className="text-lg resize-none p-3"
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}
               rows={2}
@@ -234,7 +234,7 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
       </div>
 
       {/* Main Search Card */}
-      <Card className="w-[80vh] mx-auto bg-white border border-gray-200 shadow-lg transition-all duration-300 mt-0">
+      <Card className="w-[80vh] mx-auto bg-white border border-gray-200 shadow-lg transition-all duration-300 mt-0 rounded-lg">
         <CardContent style={{ height: `${cardHeight}px` }}>
           <Textarea
             ref={textareaRef}
@@ -360,7 +360,7 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
-                <p>Show Attached Images</p>
+                <p>Upload Image</p>
               </TooltipContent>
             </Tooltip>
 
