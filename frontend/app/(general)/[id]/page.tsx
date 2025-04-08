@@ -285,42 +285,48 @@ export default function ChatCanvas() {
                     </div>
                   )}
 
-                  {/* Render Images with Drawer */}
-                  {images.length > 0 && (
-                    <div key={`${messageKey}-images-container`} className="flex flex-wrap gap-2 mb-1">
-                      {images.map((src: string, imgIndex: number) => {
-                        const imageKey = `${messageKey}-image-${imgIndex}`;
-                        return (
-                          <div key={imageKey} className="relative cursor-pointer">
-                            <Drawer key={`drawer-${imageKey}`}>
-                              <DrawerTrigger asChild>
-                                <img
-                                  src={src}
-                                  alt={`User Upload ${imgIndex}`}
-                                  className="w-32 h-32 object-cover"
-                                  onClick={() => setSelectedImageIndex(imgIndex)}
-                                />
-                              </DrawerTrigger>
-                              <DrawerContent aria-label="Image Preview">
-                                <VisuallyHidden>
-                                  <DialogTitle>Image Preview</DialogTitle>
-                                </VisuallyHidden>
-                                <div className="p-4 flex justify-center items-center">
+                {/* Render Images with Drawer */}
+                {images.length > 0 && (
+                  <div key={`${messageKey}-images-container`} className="flex flex-wrap gap-2 mb-1">
+                    {images.map((src: string, imgIndex: number) => {
+                      const imageKey = `${messageKey}-image-${imgIndex}`;
+                      return (
+                        <div key={imageKey} className="relative cursor-pointer">
+                          <Drawer key={`drawer-${imageKey}`}>
+                            <DrawerTrigger asChild>
+                              <Image 
+                                src={src} 
+                                alt={`User Upload ${imgIndex}`} 
+                                width={128}
+                                height={128}
+                                className="w-32 h-32 object-cover"
+                                onClick={() => setSelectedImageIndex(imgIndex)}
+                              />
+                            </DrawerTrigger>
+                            <DrawerContent aria-label="Image Preview">
+                              <VisuallyHidden>
+                                <DialogTitle>Image Preview</DialogTitle>
+                              </VisuallyHidden>
+                              <div className="p-4 flex flex-col items-center">
+                                {/* Image Preview */}
+                                <div className="mb-4">
                                   <Image
                                     src={src}
                                     alt="Preview in drawer"
                                     width={600}
                                     height={400}
-                                    className="w-auto h-auto max-w-full max-h-[70vh] object-contain rounded-lg"
+                                    className="w-auto h-auto max-w-full max-h-[50vh] object-contain rounded-lg"
                                   />
                                 </div>
-                              </DrawerContent>
-                            </Drawer>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                              </div>
+                            </DrawerContent>
+                          </Drawer>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
                 </div>
 
                 <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center">
