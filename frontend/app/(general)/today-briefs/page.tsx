@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-
-const HTTP_BACKEND = process.env.NEXT_PUBLIC_HTTP_BACKEND
+import UnderConstruction from '@/components/construction-page/under-construction'
 
 export default function TodayBriefs() {
     const [taskBrief, setTaskBrief] = useState<string>('')
@@ -12,9 +11,5 @@ export default function TodayBriefs() {
     useEffect(() => {
     }, [])
 
-    return (
-        <>
-            <p>Hello</p>
-        </>
-    )
+  return <UnderConstruction />;
 }
