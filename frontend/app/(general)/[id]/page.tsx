@@ -6,7 +6,7 @@ import { ConversationMessage, ToolCall } from "@/lib/types"
 import { SearchEngine } from "@/components/search-engine/search-engine"
 import { CreateEventCard } from "@/components/tool-call-card/CreateEventCard"
 import { ToolWaitCard } from "@/components/tool-call-card/ToolWaitCard"
-import { Loader2, Bot } from "lucide-react"
+import { Bot, ChevronDown } from "lucide-react"
 import { MarkdownContent } from "@/components/markdown-content"
 import { useUserStore } from "@/store/userStore"
 import { fetchBackendService, convertToBase64, combinePrompt } from "@/lib/utils"
@@ -20,7 +20,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
 import { DialogTitle } from '@radix-ui/react-dialog'
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import Image from "next/image"
-
+import { ProgressPage } from "@/components/progress-bar/progress-bar"
 import { Path } from "@/lib/types"
 import useBreadcrumbPath from "@/store/breadcrumbPathStore"
 import { useApplicationStore } from "@/store/applicationStore"
@@ -251,16 +251,14 @@ export default function ChatCanvas() {
   console.log(filteredMessages)
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
-      </div>
-    )
+    return <ProgressPage initPercentage={33} timeDone={500} />
   }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div
+        className="flex-1 overflow-y-auto p-6 space-y-4"
+      >
         {filteredMessages.map((message, index) => {
           const messageKey = `message-${index}-${message.role}`;
 
@@ -285,47 +283,47 @@ export default function ChatCanvas() {
                     </div>
                   )}
 
-                {/* Render Images with Drawer */}
-                {images.length > 0 && (
-                  <div key={`${messageKey}-images-container`} className="flex flex-wrap gap-2 mb-1">
-                    {images.map((src: string, imgIndex: number) => {
-                      const imageKey = `${messageKey}-image-${imgIndex}`;
-                      return (
-                        <div key={imageKey} className="relative cursor-pointer">
-                          <Drawer key={`drawer-${imageKey}`}>
-                            <DrawerTrigger asChild>
-                              <Image 
-                                src={src} 
-                                alt={`User Upload ${imgIndex}`} 
-                                width={128}
-                                height={128}
-                                className="w-32 h-32 object-cover"
-                                onClick={() => setSelectedImageIndex(imgIndex)}
-                              />
-                            </DrawerTrigger>
-                            <DrawerContent aria-label="Image Preview">
-                              <VisuallyHidden>
-                                <DialogTitle>Image Preview</DialogTitle>
-                              </VisuallyHidden>
-                              <div className="p-4 flex flex-col items-center">
-                                {/* Image Preview */}
-                                <div className="mb-4">
-                                  <Image
-                                    src={src}
-                                    alt="Preview in drawer"
-                                    width={600}
-                                    height={400}
-                                    className="w-auto h-auto max-w-full max-h-[50vh] object-contain rounded-lg"
-                                  />
+                  {/* Render Images with Drawer */}
+                  {images.length > 0 && (
+                    <div key={`${messageKey}-images-container`} className="flex flex-wrap gap-2 mb-1">
+                      {images.map((src: string, imgIndex: number) => {
+                        const imageKey = `${messageKey}-image-${imgIndex}`;
+                        return (
+                          <div key={imageKey} className="relative cursor-pointer">
+                            <Drawer key={`drawer-${imageKey}`}>
+                              <DrawerTrigger asChild>
+                                <Image
+                                  src={src}
+                                  alt={`User Upload ${imgIndex}`}
+                                  width={128}
+                                  height={128}
+                                  className="w-32 h-32 object-cover"
+                                  onClick={() => setSelectedImageIndex(imgIndex)}
+                                />
+                              </DrawerTrigger>
+                              <DrawerContent aria-label="Image Preview">
+                                <VisuallyHidden>
+                                  <DialogTitle>Image Preview</DialogTitle>
+                                </VisuallyHidden>
+                                <div className="p-4 flex flex-col items-center">
+                                  {/* Image Preview */}
+                                  <div className="mb-4">
+                                    <Image
+                                      src={src}
+                                      alt="Preview in drawer"
+                                      width={600}
+                                      height={400}
+                                      className="w-auto h-auto max-w-full max-h-[50vh] object-contain rounded-lg"
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            </DrawerContent>
-                          </Drawer>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                              </DrawerContent>
+                            </Drawer>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
                 </div>
 
