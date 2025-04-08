@@ -6,7 +6,7 @@ import { ConversationMessage, ToolCall } from "@/lib/types"
 import { SearchEngine } from "@/components/search-engine/search-engine"
 import { CreateEventCard } from "@/components/tool-call-card/CreateEventCard"
 import { ToolWaitCard } from "@/components/tool-call-card/ToolWaitCard"
-import { Bot, ChevronDown } from "lucide-react"
+import { Bot } from "lucide-react"
 import { MarkdownContent } from "@/components/markdown-content"
 import { useUserStore } from "@/store/userStore"
 import { fetchBackendService, convertToBase64, combinePrompt } from "@/lib/utils"
@@ -24,6 +24,7 @@ import { ProgressPage } from "@/components/progress-bar/progress-bar"
 import { Path } from "@/lib/types"
 import useBreadcrumbPath from "@/store/breadcrumbPathStore"
 import { useApplicationStore } from "@/store/applicationStore"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@radix-ui/react-tooltip"
 
 const WS_BACKEND = process.env.NEXT_PUBLIC_WS_BACKEND
 
@@ -271,7 +272,7 @@ export default function ChatCanvas() {
                 <div className="flex flex-col w-full">
                   {/* Secondary Transcript Box (on top) */}
                   {content.voiceTranscript && (
-                    <div key={`${messageKey}-transcript`} className="p-3 bg-gray-100 text-sm text-gray-700 w-full mb-1 rounded-md">
+                    <div key={`${messageKey}-transcript`} className="p-3 bg-gray-100 text-gray-700 w-full mb-1 rounded-md">
                       {content.voiceTranscript}
                     </div>
                   )}
