@@ -34,7 +34,7 @@ const toolCallWrapper = (index: number, component: any) => {
       className="flex items-start gap-3 max-w-[60%] mr-auto"
     >
       <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center">
-        <Bot className="h-5 w-5 text-gray-600" />
+        <Bot className="h-5 w-5 text-gray-600 rounded-md" />
       </div>
       <div className="p-4 rounded-lg bg-gray-50 flex-1">
         {component}
@@ -271,14 +271,14 @@ export default function ChatCanvas() {
                 <div className="flex flex-col w-full">
                   {/* Secondary Transcript Box (on top) */}
                   {content.voiceTranscript && (
-                    <div key={`${messageKey}-transcript`} className="p-3 bg-gray-100 text-sm text-gray-700 w-full mb-1">
+                    <div key={`${messageKey}-transcript`} className="p-3 bg-gray-100 text-sm text-gray-700 w-full mb-1 rounded-md">
                       {content.voiceTranscript}
                     </div>
                   )}
 
                   {/* Main Text Content */}
                   {content.text && (
-                    <div key={`${messageKey}-text`} className="p-3 bg-blue-50 text-gray-900 w-full mb-1">
+                    <div key={`${messageKey}-text`} className="p-3 bg-blue-50 text-gray-900 w-full mb-1 rounded-md">
                       <MarkdownContent content={content.text} />
                     </div>
                   )}
@@ -297,7 +297,7 @@ export default function ChatCanvas() {
                                   alt={`User Upload ${imgIndex}`}
                                   width={128}
                                   height={128}
-                                  className="w-32 h-32 object-cover"
+                                  className="w-32 h-32 object-cover rounded-lg"
                                   onClick={() => setSelectedImageIndex(imgIndex)}
                                 />
                               </DrawerTrigger>
@@ -328,7 +328,7 @@ export default function ChatCanvas() {
                 </div>
 
                 <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center">
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-8 w-8 rounded-md">
                     <AvatarImage src={image ?? ""} alt="User" />
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
@@ -343,7 +343,7 @@ export default function ChatCanvas() {
                 key={messageKey}
                 className="flex items-start gap-3 max-w-[60%] mr-auto"
               >
-                <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center">
+                <div className="flex-shrink-0 h-8 w-8 rounded-lg flex items-center justify-center">
                   <Bot className="h-5 w-5 text-green-600" />
                 </div>
                 <div className="p-4 rounded-lg flex-1">

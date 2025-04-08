@@ -24,11 +24,11 @@ export function CreateEventCard({ result }: { result?: any }) {
   if (!eventData.summary || !eventData.start.dateTime) return null;
 
   return (
-    <Card className="border-0 shadow-none">
+    <Card className="border-0 shadow-none rounded-md">
       <CardHeader className="p-3">
         <div className="flex justify-between items-center">
           <h3 className="font-medium">{eventData.summary}</h3>
-          <span className="text-xs px-2 py-1 bg-green-100 text-green-800">
+          <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-md">
             {eventData.status || "scheduled"}
           </span>
         </div>
@@ -39,7 +39,7 @@ export function CreateEventCard({ result }: { result?: any }) {
         )}
       </CardHeader>
       
-      <CardContent className="p-3 pt-3">
+      <CardContent className="p-3 pt-3 rounded-md">
         <div className="text-sm space-y-2">
           <div className="flex justify-between">
             <span className="text-gray-500">Start:</span>

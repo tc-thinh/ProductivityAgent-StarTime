@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function ToolWaitCard({ message }: { message?: string }) {
     return (
-        <Card className="border-0 shadow-none">
+        <Card className="border-0 shadow-none rounded-md">
             <CardHeader className="p-3">
                 <div className="flex justify-between items-center">
                     <h3 className="font-medium">{message}</h3>
