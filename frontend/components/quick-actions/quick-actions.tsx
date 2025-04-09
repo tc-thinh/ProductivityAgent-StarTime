@@ -8,7 +8,8 @@ import {
     Icon,
     StickyNote,
     ShoppingCart,
-    ListTodo
+    ListTodo,
+    Calendar
 } from "lucide-react"
 import {
     fruit,
@@ -42,29 +43,36 @@ export default function QuickActions() {
             onClick: () => { pomodoroTurnOn() }
         },
         {
+            title: "Your Google Calendar",
+            icon: <Calendar size="3rem" />,
+            onClick: () => {
+                window.open("https://calendar.google.com/", "_blank")
+            }
+        },
+        {
             title: "Pop-up Notes",
             icon: <StickyNote size="3rem" />,
-            onClick: () => {}
+            onClick: () => { }
         },
         {
             title: "Habit Tracker",
             icon: <>{getIcon(gridLines)}</>,
-            onClick: () => {}
+            onClick: () => { }
         },
         {
             title: "Bucket List",
             icon: <ListTodo size="3rem" />,
-            onClick: () => {}
+            onClick: () => { }
         },
         {
-           title: "Shopping List",
-           icon: <ShoppingCart size="3rem" />,
-           onClick: () => {}
+            title: "Shopping List",
+            icon: <ShoppingCart size="3rem" />,
+            onClick: () => { }
         }
     ]
 
     return (
-        <div 
+        <div
             style={{ position: "fixed", bottom: "3rem", right: "3rem" }}
         >
             <Popover>
