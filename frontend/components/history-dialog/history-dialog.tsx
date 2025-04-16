@@ -38,6 +38,7 @@ export function HistoryDialog() {
 
         const fetchData = async () => {
             if (!debouncedQuery) {
+                setResult([])
                 return
             }
 
