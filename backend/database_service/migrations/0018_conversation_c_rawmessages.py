@@ -16,9 +16,14 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             """
-            CREATE INDEX c_rawmessages_search_idx 
-            ON database_service_conversation 
-            USING GIN (to_tsvector('english', c_rawmessages));
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            """
+        ),
+        migrations.RunSQL(
+            """
+            CREATE INDEX c_rawmessages_trgm_idx 
+            ON your_app_conversation 
+            USING GIN (c_rawmessages gin_trgm_ops);
             """
         ),
     ]

@@ -12,7 +12,6 @@ class ConversationHeaderSerializer(serializers.ModelSerializer):
         exclude = ['u_id', 'c_messages', 'c_rawmessages']
 
 class ConversationSearchSerializer(serializers.ModelSerializer):
-    rank = serializers.FloatField(read_only=True)
     headline = serializers.CharField(read_only=True)
 
     class Meta:
@@ -20,7 +19,7 @@ class ConversationSearchSerializer(serializers.ModelSerializer):
         fields = [
             'c_id',
             'c_name',
-            'rank',
             'headline',
         ]
-        read_only_fields = ['rank', 'headline']
+        read_only_fields = ['headline']
+    

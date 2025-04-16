@@ -1,7 +1,10 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, SearchHeadline
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, SearchHeadline, TrigramSimilarity
 from database_service.models.users import User
+from django.contrib.postgres.aggregates import StringAgg
+from django.db.models import F, Q
+from django.db.models.functions import Greatest
 
 class Conversation(models.Model):
     c_id = models.AutoField(primary_key=True)
@@ -40,10 +43,18 @@ def search_conversations(search_term: str, user_id: str):
         min_words=15,
     )
 
-    results = Conversation.objects.annotate(
+    trigram_similarity = TrigramSimilarity('c_rawmessages', search_term)
+
+    # Combine full-text search and trigram similarity
+    results = Conversation.objects.filter(u_id=user_id, c_deleted=False).annotate(
         search=vector,
         rank=SearchRank(vector, query),
-        headline=headline
-    ).filter(search=query, u_id=user_id, c_deleted=False).order_by('-rank')
-
+        similarity=trigram_similarity,
+        headline=headline,
+        combined_score=Greatest('rank', 'similarity')  # Combine scores for ranking
+    ).filter(
+        Q(search=query) | Q(similarity__gt=0.1)  # Include both full-text and trigram matches
+    ).order_by('-combined_score')
+    
     return results
+    
