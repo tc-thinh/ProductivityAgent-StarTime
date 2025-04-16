@@ -16,16 +16,18 @@ class Conversation(models.Model):
     def __str__(self):
         return self.c_name
     
-def search_conversations(search_term: str):
+def search_conversations(search_term: str, user_id: str):
     """
-    Search conversations by c_rawmessages with relevance ranking and highlighted previews.
+    Search conversations by c_rawmessages with relevance ranking and highlighted previews, filtered by user_id.
     
     Args:
         search_term (str): The term to search for.
+        user_id (int): The user ID to filter conversations by.
     
     Returns:
-        Queryset: Conversations matching the search term, ranked by relevance, with previews.
+        Queryset: Conversations matching the search term and user_id, ranked by relevance, with previews.
     """
+
     vector = SearchVector('c_rawmessages', config='english')
     query = SearchQuery(search_term, config='english')
     headline = SearchHeadline(
@@ -42,6 +44,6 @@ def search_conversations(search_term: str):
         search=vector,
         rank=SearchRank(vector, query),
         headline=headline
-    ).filter(search=query).order_by('-rank')
+    ).filter(search=query, u_id=user_id, c_deleted=False).order_by('-rank')
 
     return results

@@ -1,2 +1,2 @@
-from database_service.serializers.conversation_serializer import ConversationSerializer, ConversationHeaderSerializer
+from database_service.serializers.conversation_serializer import ConversationSerializer, ConversationHeaderSerializer, ConversationSearchSerializer
 from database_service.serializers.category_serializer import CategorySerializer
