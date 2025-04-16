@@ -14,6 +14,7 @@ import useDebounce from "@/hooks/use-debounce"
 import { fetchBackendService } from "@/lib/utils"
 import { toast } from "sonner"
 import { useUserStore } from "@/store/userStore"
+import { Plus } from "lucide-react"
 
 interface SearchResult {
     c_id: string,
@@ -42,7 +43,6 @@ export function HistoryDialog() {
                 return
             }
 
-            console.log(accessToken)
             const normalizedQuery = debouncedQuery.toLowerCase().trim()
             const { success, data } = await fetchBackendService<SearchResult[]>(
                 {
@@ -79,6 +79,17 @@ export function HistoryDialog() {
                     </header>
 
                     <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 pt-0">
+                        <Button 
+                            variant="ghost" 
+                            className="gap-2 px-2 hover:bg-transparent mt-2 items-left"
+                            onClick={() => {
+                                window.location.href = "/"
+                            }}
+                            >
+                            <Plus className="w-4 h-4" />
+                            Create new conversation
+                        </Button>
+
                         {result.length > 0 ? (
                             result.map((item) => (
                                 <div key={item.c_id} className="border rounded p-4">
@@ -87,7 +98,7 @@ export function HistoryDialog() {
                                 </div>
                             ))
                         ) : (
-                            debouncedQuery && <p className="text-muted-foreground">No results found.</p>
+                            <p className="text-muted-foreground">No results found.</p>
                         )}
                     </div>
                 </main>
