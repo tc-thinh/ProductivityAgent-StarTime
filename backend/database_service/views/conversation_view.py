@@ -3,7 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from database_service.models import Conversation
-from database_service.serializers import ConversationSerializer, ConversationHeaderSerializer
+from database_service.models.conversations import search_conversations
+from database_service.serializers import ConversationSerializer, ConversationHeaderSerializer, ConversationSearchSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from app_lib.utils.users import get_user_from_query_param, get_user_from_body
@@ -112,3 +113,41 @@ class ConversationListView(APIView):
         serializer = ConversationSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
+class ConversationSearchView(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'token',
+                openapi.IN_QUERY,
+                description="User identifier token",
+                type=openapi.TYPE_STRING,
+                required=True
+            ),
+            openapi.Parameter(
+                'search_query',
+                openapi.IN_QUERY,
+                description="Search query for conversations",
+                type=openapi.TYPE_STRING,
+                required=True
+            ),
+        ],
+        responses={
+            200: openapi.Response('OK', ConversationSerializer(many=True)),
+            404: openapi.Response('Not Found'),
+            400: openapi.Response('Bad Request'),
+        }
+    )
+    def get(self, request):
+        user = get_user_from_query_param(request)
+        if not user:
+            return Response({"error": "Missing or incorrect token."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        search_query = request.query_params.get('search_query')
+        if not search_query:
+            return Response({"error": "Missing search query."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        results = search_conversations(search_query, user.u_id)
+        
+        serializer = ConversationSearchSerializer(results, many=True)
+        return Response(serializer.data)
+    
