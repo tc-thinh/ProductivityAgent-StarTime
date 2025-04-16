@@ -31,27 +31,25 @@ export default function CategoryManager() {
 
   useEffect(() => {
     if (hydrated && accessToken) {
-      if (hydrated && accessToken) {
-        // Simulate a delay for testing the progress bar
-        fetchBackendService<Category[]>({
-          endpoint: `database/categories/?token=${accessToken}&active=false`,
-          method: "GET",
-        })
-        .then(({ success, data, error }) => {
-          if (success && data) {
-            setCategories(data)
-          } else {
-            console.error("Can't fetch data, use mock instead:", error)
-            setCategories(mockCategories)
-          }
-          setLoading(false)
-        })
-        .catch(error => {
+      // Simulate a delay for testing the progress bar
+      fetchBackendService<Category[]>({
+        endpoint: `database/categories/?token=${accessToken}&active=false`,
+        method: "GET",
+      })
+      .then(({ success, data, error }) => {
+        if (success && data) {
+          setCategories(data)
+        } else {
           console.error("Can't fetch data, use mock instead:", error)
           setCategories(mockCategories)
-          setLoading(false)
-        })
-      }
+        }
+        setLoading(false)
+      })
+      .catch(error => {
+        console.error("Can't fetch data, use mock instead:", error)
+        setCategories(mockCategories)
+        setLoading(false)
+      })
     }
   }, [hydrated, accessToken, refreshTrigger])
 
