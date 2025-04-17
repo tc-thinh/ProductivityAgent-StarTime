@@ -16,7 +16,8 @@ import useDebounce from "@/hooks/use-debounce"
 import { fetchBackendService } from "@/lib/utils"
 import { toast } from "sonner"
 import { useUserStore } from "@/store/userStore"
-import { Plus } from "lucide-react"
+import { Plus, TextSearch } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SearchResult {
     c_id: number,
@@ -25,7 +26,7 @@ interface SearchResult {
     headline: string
 }
 
-export function HistoryDialog() {
+export function HistoryDialog({ className }: { className?: string }) {
     const [open, setOpen] = useState(false)
 
     const [hoveredItem, setHoveredItem] = useState<SearchResult | null>(null)
@@ -75,7 +76,22 @@ export function HistoryDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm">Open Dialog</Button>
+                <div className={className}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="h-full aspect-square flex items-center justify-center"
+                                onClick={() => setOpen(true)}
+                            >
+                                <TextSearch className="w-10 h-10" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left" align="center">
+                            Search through your past conversations.
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
             </DialogTrigger>
             <DialogContent
                 className="overflow-hidden p-0 md:max-h-[70%] md:max-w-[50%] lg:max-w-[50%]"

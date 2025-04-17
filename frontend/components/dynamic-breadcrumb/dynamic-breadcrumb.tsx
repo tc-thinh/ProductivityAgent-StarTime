@@ -10,13 +10,14 @@ import {
 
 import { Path } from "@/lib/types"
 import useBreadcrumbPath from "@/store/breadcrumbPathStore"
-import { useEffect, useState } from "react" // Import useEffect and useState
+import { useEffect, useState } from "react" 
 
-export default function DynamicBreadcrumb() {
+import { HistoryDialog } from "@/components/history-dialog/history-dialog"
+
+export default function DynamicBreadcrumb({ className }: { className?: string }) {
   const { path } = useBreadcrumbPath()
   const [breadcrumbItems, setBreadcrumbItems] = useState<Path[]>([])
 
-  // Use useEffect to generate breadcrumb items on the client side
   useEffect(() => {
     if (path) {
       setBreadcrumbItems(path)
@@ -24,7 +25,7 @@ export default function DynamicBreadcrumb() {
   }, [path])
 
   return (
-    <Breadcrumb>
+    <Breadcrumb className={className}>
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink href="/">Home</BreadcrumbLink>
