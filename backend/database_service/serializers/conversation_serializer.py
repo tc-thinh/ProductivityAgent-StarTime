@@ -19,6 +19,7 @@ class ConversationSearchSerializer(serializers.ModelSerializer):
         fields = [
             'c_id',
             'c_name',
+            'c_created_at',
             'headline',
         ]
         read_only_fields = ['headline']

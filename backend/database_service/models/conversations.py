@@ -54,7 +54,7 @@ def search_conversations(search_term: str, user_id: str):
         combined_score=Greatest('rank', 'similarity')  # Combine scores for ranking
     ).filter(
         Q(search=query) | Q(similarity__gt=0.1)  # Include both full-text and trigram matches
-    ).order_by('-combined_score')
+    ).order_by('-c_created_at', '-combined_score')
     
     return results
     
