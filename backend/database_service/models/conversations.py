@@ -21,7 +21,7 @@ class Conversation(models.Model):
     
 def search_conversations(search_term: str, user_id: str):
     """
-    Search conversations by c_rawmessages with relevance ranking and highlighted previews, filtered by user_id.
+    Search conversations by c_rawmessages and c_name with relevance ranking and highlighted previews, filtered by user_id.
     
     Args:
         search_term (str): The term to search for.
@@ -31,7 +31,8 @@ def search_conversations(search_term: str, user_id: str):
         Queryset: Conversations matching the search term and user_id, ranked by relevance, with previews.
     """
 
-    vector = SearchVector('c_rawmessages', config='english')
+    vector_rawmessages = SearchVector('c_rawmessages', config='english')
+    vector_name = SearchVector('c_name', config='english')
     query = SearchQuery(search_term, config='english')
     headline = SearchHeadline(
         'c_rawmessages',
@@ -43,17 +44,22 @@ def search_conversations(search_term: str, user_id: str):
         min_words=15,
     )
 
-    trigram_similarity = TrigramSimilarity('c_rawmessages', search_term)
+    trigram_similarity_rawmessages = TrigramSimilarity('c_rawmessages', search_term)
+    trigram_similarity_name = TrigramSimilarity('c_name', search_term)
 
     # Combine full-text search and trigram similarity
     results = Conversation.objects.filter(u_id=user_id, c_deleted=False).annotate(
-        search=vector,
-        rank=SearchRank(vector, query),
-        similarity=trigram_similarity,
+        search_rawmessages=vector_rawmessages,
+        search_name=vector_name,
+        rank_rawmessages=SearchRank(vector_rawmessages, query),
+        rank_name=SearchRank(vector_name, query),
+        similarity_rawmessages=trigram_similarity_rawmessages,
+        similarity_name=trigram_similarity_name,
         headline=headline,
-        combined_score=Greatest('rank', 'similarity')  # Combine scores for ranking
+        combined_score=Greatest('rank_rawmessages', 'similarity_rawmessages', 'rank_name', 'similarity_name')  # Combine scores for ranking
     ).filter(
-        Q(search=query) | Q(similarity__gt=0.1)  # Include both full-text and trigram matches
+        Q(search_rawmessages=query) | Q(search_name=query) | 
+        Q(similarity_rawmessages__gt=0.1) | Q(similarity_name__gt=0.1)  # Include both full-text and trigram matches
     ).order_by('-c_created_at', '-combined_score')
     
     return results
