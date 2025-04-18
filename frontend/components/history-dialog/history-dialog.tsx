@@ -47,27 +47,38 @@ export function HistoryDialog({ className }: { className?: string }) {
         setQuery(e.target.value)
     }
 
+    const fetchPreviousConversations = async () => {
+        const { success, data } = await fetchBackendService<SearchResult[]>(
+            {
+                endpoint: `database/conversations/?token=${accessToken}`,
+                method: 'GET'
+            }
+        )
+        
+        if (!success) toast.error("Something went wrong. Please try again later")
+
+        setResult(data || [])
+    }
+
     useEffect(() => {
         if (!accessToken) return
 
         const fetchData = async () => {
-            if (!debouncedQuery) {
-                setResult([])
-                return
-            }
-
             const normalizedQuery = debouncedQuery.toLowerCase().trim()
-            const { success, data } = await fetchBackendService<SearchResult[]>(
-                {
-                    endpoint: `database/conversations/search/?token=${accessToken}&&search_query=${normalizedQuery}`,
-                    method: "GET"
-                }
-            )
+            if (!normalizedQuery) {
+                await fetchPreviousConversations()
+            } else {
+                const { success, data } = await fetchBackendService<SearchResult[]>(
+                    {
+                        endpoint: `database/conversations/search/?token=${accessToken}&&search_query=${normalizedQuery}`,
+                        method: 'GET'
+                    }
+                )
 
-            if (!success) toast.error("Something went wrong. Please try again later")
+                if (!success) toast.error("Something went wrong. Please try again later")
 
-            console.log(data)
-            setResult(data || [])
+                setResult(data || [])        
+            }
         }
 
         fetchData()
@@ -143,10 +154,10 @@ export function HistoryDialog({ className }: { className?: string }) {
                                         }}
                                     >
                                         <div
-                                            className={`flex flex-col items-left ${hoveredItem?.c_id === item.c_id ? "w-[85%]" : "w-full"}`}
+                                            className={`flex flex-col items-left ${hoveredItem?.c_id === item.c_id ? "w-[80%]" : "w-full"}`}
                                         >
                                             <div className="items-left text-left pl-2">
-                                                <h3 className="text-lg font-semibold truncate overflow-hidden text-ellipsis whitespace-nowrap">
+                                                <h3 className="text-lg truncate overflow-hidden text-ellipsis whitespace-nowrap">
                                                     {item.c_name}
                                                 </h3>
                                             </div>
@@ -184,7 +195,7 @@ export function HistoryDialog({ className }: { className?: string }) {
                                 </div>
                             ))
                         ) : (
-                            <p className="ml-3 text-muted-foreground">No results found.</p>
+                            <p className="ml-3 text-muted-foreground">No conversations found.</p>
                         )}
                     </div>
                 </main>
