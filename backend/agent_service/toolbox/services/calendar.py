@@ -57,7 +57,7 @@ def simplify_event(event):
     return simplified
 
 async def create_event(event: CalendarEvent, token: str, calendarId: str = 'primary'):
-    color_category = get_category_by_event(event.get('summary', ''), event.get('description', ''))
+    color_category = get_category_by_event(event.get('summary', ''), event.get('description', ''), token)
     logger.info(f"Color category: {color_category}")
 
     event['colorId'] = color_category['cat_color_id']
