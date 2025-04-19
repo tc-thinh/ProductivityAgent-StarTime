@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('ai/', include('agent_service.urls')),
     path('database/', include('database_service.urls')),
+    path('schema-viewer/', include('schema_viewer.urls')),
 ]

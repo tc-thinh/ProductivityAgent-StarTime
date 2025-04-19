@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "channels",
+    'schema_viewer',
 
     "agent_service",
     "database_service"
