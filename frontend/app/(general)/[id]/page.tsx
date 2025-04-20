@@ -377,12 +377,28 @@ export default function ChatCanvas() {
                     message="Fetching Today's Event..."
                   />);
                 }
+              case "GetTomorrowEvents":
+                if (message.tool_call_result && message.tool_call_result?.content) {
+                  return <div key={messageKey}></div>;
+                } else {
+                  return toolCallWrapper(index, <ToolWaitCard
+                    message="Fetching Tomorrow's Event..."
+                  />);
+                }
               case "GetThisWeekEvents":
                 if (message.tool_call_result && message.tool_call_result?.content) {
                   return <div key={messageKey}></div>;
                 } else {
                   return toolCallWrapper(index, <ToolWaitCard
                     message="Fetching This Week's Event..."
+                  />);
+                }
+              case "GetNextWeekEvents":
+                if (message.tool_call_result && message.tool_call_result?.content) {
+                  return <div key={messageKey}></div>;
+                } else {
+                  return toolCallWrapper(index, <ToolWaitCard
+                    message="Fetching Next Week's Event..."
                   />);
                 }
               default:
