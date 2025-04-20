@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             """
             CREATE INDEX c_rawmessages_trgm_idx 
-            ON your_app_conversation 
+            ON database_service_conversation 
             USING GIN (c_rawmessages gin_trgm_ops);
             """
         ),
