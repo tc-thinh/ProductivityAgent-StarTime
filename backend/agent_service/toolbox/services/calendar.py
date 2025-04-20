@@ -131,3 +131,16 @@ async def get_this_week_events(token: str, calendarId: str = 'primary'):
     simplified_events = [simplify_event(event) for event in events]
     
     return simplified_events
+
+async def modify_event(token: str, eventId: str, modifiedEvent: CalendarEvent, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
+
+    modifiedEvent['id'] = eventId
+    
+    color_category = get_category_by_event(modifiedEvent.get('summary', ''), modifiedEvent.get('description', ''), token)
+    logger.info(f"Color category: {color_category}")
+
+    modifiedEvent['colorId'] = color_category['cat_color_id']
+    modifiedEvent['summary'] = f"{color_category['cat_event_prefix']} {modifiedEvent['summary']}"
+
+    return service.events().update(calendarId=calendarId, eventId=eventId, body=modifiedEvent).execute()

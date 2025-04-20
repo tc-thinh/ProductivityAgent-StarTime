@@ -1,6 +1,6 @@
-from agent_service.toolbox.services.calendar import create_event, get_today_events, get_this_week_events
+from agent_service.toolbox.services.calendar import create_event, get_today_events, get_this_week_events, modify_event
 from openai import pydantic_function_tool
-from agent_service.toolbox.models.calendar_event import CreateCalendarEvent, GetTodayEvents, GetThisWeekEvents
+from agent_service.toolbox.models.calendar_event import CreateCalendarEvent, GetTodayEvents, GetThisWeekEvents, ModifyEvent
 from datetime import datetime
 from tzlocal import get_localzone
 from agent_service.apps import AgentServiceConfig
@@ -17,13 +17,18 @@ tools = [
     pydantic_function_tool(
         GetThisWeekEvents,
         description="Fetch all events scheduled for this week."
-    )
+    ),
+    pydantic_function_tool(
+        ModifyEvent,
+        description="Modify an existing calendar event. Provide the event ID and the new details."
+    ),
 ]
 
 tool_map = {
     "CreateCalendarEvent": create_event,
     "GetTodayEvents": get_today_events,
-    "GetThisWeekEvents": get_this_week_events
+    "GetThisWeekEvents": get_this_week_events,
+    "ModifyEvent": modify_event,
 }
 
 def get_environmental_context_prompt():

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Dict, Any
 from pydantic import BaseModel, Field
 
 # Model for date/time information.
@@ -117,4 +117,14 @@ class GetThisWeekEvents(BaseModel):
     calendarId: str = Field(
         ...,
         description="Identifier of the calendar to fetch events from (e.g., 'primary')."
+    )
+
+class ModifyEvent(BaseModel):
+    eventId: str = Field(
+        ...,
+        description="Identifier of the event to be modified."
+    )
+    modifiedEvent: CalendarEvent = Field(
+        ...,
+        description="The calendar event details that replace the old event - like a PUT request."
     )
