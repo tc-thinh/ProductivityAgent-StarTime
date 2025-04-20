@@ -176,6 +176,13 @@ export function HistoryDialog({ className }: { className?: string }) {
                                                     yesterday.setDate(today.getDate() - 1);
 
                                                     if (
+                                                        createdDate.getFullYear() === today.getFullYear() &&
+                                                        createdDate.getMonth() === today.getMonth() &&
+                                                        createdDate.getDate() === today.getDate()
+                                                    ) {
+                                                        return "Today";
+                                                    }
+                                                    else if (
                                                         createdDate.getFullYear() === yesterday.getFullYear() &&
                                                         createdDate.getMonth() === yesterday.getMonth() &&
                                                         createdDate.getDate() === yesterday.getDate()
