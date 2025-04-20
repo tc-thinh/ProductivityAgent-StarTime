@@ -1,0 +1,40 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/ # Generally exclude the whole .yarn directory
+# If you need patches before install, you might add: !.yarn/patches
+
+# testing
+/coverage
+
+# build outputs
+/.next/
+/out/
+/build
+
+# misc
+.DS_Store
+*.pem # Keep sensitive files out!
+
+# debug/logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env* # Never bake environment variables into the image
+
+# vercel
+.vercel
+
+# typescript build artifacts
+*.tsbuildinfo
+next-env.d.ts
+
+# Dockerfile itself
+Dockerfile
+
+# .dockerignore itself
+.dockerignore
