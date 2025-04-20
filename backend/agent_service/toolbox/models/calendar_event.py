@@ -128,3 +128,9 @@ class ModifyEvent(BaseModel):
         ...,
         description="The calendar event details that replace the old event - like a PUT request."
     )
+
+class DeleteEvent(BaseModel):
+    eventId: str = Field(
+        ...,
+        description="Identifier of the event to be deleted."
+    )

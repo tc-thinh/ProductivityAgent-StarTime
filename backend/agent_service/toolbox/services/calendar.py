@@ -50,6 +50,10 @@ async def get_calendar_service(token: str):
 def simplify_event(event):
     """Extract only essential information from event"""
     simplified = {
+        'id': event.get('id', '0'),
+        'description': event.get('description', 'No description.'),
+        'location': event.get('location', 'No location.'),
+        'attendees': event.get('attendees', []),
         'summary': event.get('summary', 'No Title'),
         'start': event.get('start', {}).get('dateTime', event.get('start', {}).get('date', 'Unknown')),
         'end': event.get('end', {}).get('dateTime', event.get('end', {}).get('date', 'Unknown'))
@@ -144,3 +148,7 @@ async def modify_event(token: str, eventId: str, modifiedEvent: CalendarEvent, c
     modifiedEvent['summary'] = f"{color_category['cat_event_prefix']} {modifiedEvent['summary']}"
 
     return service.events().update(calendarId=calendarId, eventId=eventId, body=modifiedEvent).execute()
+
+async def delete_event(token: str, eventId: str, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
+    return service.events().delete(calendarId=calendarId, eventId=eventId).execute()
