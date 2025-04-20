@@ -113,7 +113,19 @@ class GetTodayEvents(BaseModel):
         description="Identifier of the calendar to fetch events from (e.g., 'primary')."
     )
 
+class GetTomorrowEvents(BaseModel):
+    calendarId: str = Field(
+        ...,
+        description="Identifier of the calendar to fetch events from (e.g., 'primary')."
+    )
+
 class GetThisWeekEvents(BaseModel):
+    calendarId: str = Field(
+        ...,
+        description="Identifier of the calendar to fetch events from (e.g., 'primary')."
+    )
+
+class GetNextWeekEvents(BaseModel):
     calendarId: str = Field(
         ...,
         description="Identifier of the calendar to fetch events from (e.g., 'primary')."

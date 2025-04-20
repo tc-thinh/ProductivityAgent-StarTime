@@ -101,6 +101,31 @@ async def get_today_events(token: str, calendarId: str = 'primary'):
     simplified_events = [simplify_event(event) for event in events]
     
     return simplified_events
+
+async def get_tomorrow_events(token: str, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
+    
+    now = datetime.now()
+    tomorrow = now.date() + timedelta(days=1)
+    
+    start_of_day = datetime.combine(tomorrow, datetime.min.time())
+    end_of_day = datetime.combine(tomorrow, datetime.max.time())
+    
+    start_time_str = start_of_day.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    end_time_str = end_of_day.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    
+    events_result = service.events().list(
+        calendarId=calendarId,
+        timeMin=start_time_str,
+        timeMax=end_time_str,
+        singleEvents=True,
+        orderBy='startTime'
+    ).execute()
+    
+    events = events_result.get('items', [])
+    simplified_events = [simplify_event(event) for event in events]
+    
+    return simplified_events
     
 async def get_this_week_events(token: str, calendarId: str = 'primary'):
     service = await get_calendar_service(token)
@@ -134,6 +159,35 @@ async def get_this_week_events(token: str, calendarId: str = 'primary'):
     # Simplify events to only include essential information
     simplified_events = [simplify_event(event) for event in events]
     
+    return simplified_events
+
+async def get_next_week_events(token: str, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
+
+    now = datetime.now()
+    today = now.date()
+
+    # Find the start of next week (next Monday)
+    start_of_next_week = today + timedelta(days=(7 - today.weekday()))
+    end_of_next_week = start_of_next_week + timedelta(days=6)
+
+    start_datetime = datetime.combine(start_of_next_week, datetime.min.time())
+    end_datetime = datetime.combine(end_of_next_week, datetime.max.time())
+
+    start_time_str = start_datetime.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    end_time_str = end_datetime.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+
+    events_result = service.events().list(
+        calendarId=calendarId,
+        timeMin=start_time_str,
+        timeMax=end_time_str,
+        singleEvents=True,
+        orderBy='startTime'
+    ).execute()
+
+    events = events_result.get('items', [])
+    simplified_events = [simplify_event(event) for event in events]
+
     return simplified_events
 
 async def modify_event(token: str, eventId: str, modifiedEvent: CalendarEvent, calendarId: str = 'primary'):

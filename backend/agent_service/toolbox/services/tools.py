@@ -1,6 +1,6 @@
-from agent_service.toolbox.services.calendar import create_event, get_today_events, get_this_week_events, modify_event, delete_event
+from agent_service.toolbox.services.calendar import create_event, get_today_events, get_this_week_events, modify_event, delete_event, get_tomorrow_events, get_next_week_events
 from openai import pydantic_function_tool
-from agent_service.toolbox.models.calendar_event import CreateCalendarEvent, GetTodayEvents, GetThisWeekEvents, ModifyEvent, DeleteEvent
+from agent_service.toolbox.models.calendar_event import CreateCalendarEvent, GetTodayEvents, GetThisWeekEvents, ModifyEvent, DeleteEvent, GetTomorrowEvents, GetNextWeekEvents
 from datetime import datetime
 from tzlocal import get_localzone
 from agent_service.apps import AgentServiceConfig
@@ -15,8 +15,16 @@ tools = [
         description="Fetch all events scheduled for today."
     ),
     pydantic_function_tool(
+        GetTomorrowEvents,
+        description="Fetch all events scheduled for tomorrow."
+    ),
+    pydantic_function_tool(
         GetThisWeekEvents,
         description="Fetch all events scheduled for this week."
+    ),
+    pydantic_function_tool(
+        GetNextWeekEvents,
+        description="Fetch all events scheduled for next week."
     ),
     pydantic_function_tool(
         ModifyEvent,
@@ -31,7 +39,9 @@ tools = [
 tool_map = {
     "CreateCalendarEvent": create_event,
     "GetTodayEvents": get_today_events,
+    "GetTomorrowEvents": get_tomorrow_events,
     "GetThisWeekEvents": get_this_week_events,
+    "GetNextWeekEvents": get_next_week_events,
     "ModifyEvent": modify_event,
     "DeleteEvent": delete_event
 }
