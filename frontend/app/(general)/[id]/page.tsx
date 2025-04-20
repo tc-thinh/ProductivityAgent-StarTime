@@ -104,6 +104,7 @@ export default function ChatCanvas() {
             "token": accessToken || "",
             "images": imagesBase64,
             "conversationId": id,
+            "ianaTimezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
           }
         }
       )

@@ -56,8 +56,6 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
   const initialHeight = 50
   const cardHeight = newLineCount > 0 ? Math.min(newLineCount + 2, maxLines) * 24 : initialHeight
 
-
-
   // Set up SpeechRecognition
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -144,7 +142,7 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
         }
         return true
       })
-  
+
       setImages((prevImages) => [...prevImages, ...imageFiles])
       const newImagePreviews = imageFiles.map((file) => ({
         url: URL.createObjectURL(file),
@@ -181,18 +179,18 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
   // Handle image deletion
   const handleDeleteImage = (index: number) => {
     console.log("Deleting image at index:", index, "Current selected index:", selectedImageIndex)
-    
+
     // Create new arrays without the deleted image
     const newImages = images.filter((_, i) => i !== index)
     const newImagePreviews = imagePreviews.filter((_, i) => i !== index)
-  
+
     // Revoke the URL of the deleted image immediately
     URL.revokeObjectURL(imagePreviews[index].url)
-  
+
     // Update state
     setImages(newImages)
     setImagePreviews(newImagePreviews)
-  
+
     // Adjust selectedImageIndex
     if (newImagePreviews.length === 0) {
       setSelectedImageIndex(null)
@@ -206,7 +204,7 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
       // If deleting an image after the selected one, no need to adjust
       setSelectedImageIndex(selectedImageIndex)
     }
-  
+
     console.log("New previews length:", newImagePreviews.length, "New selected index:", selectedImageIndex)
   }
 
@@ -252,80 +250,80 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
         <CardFooter className="flex justify-between items-center">
           {/* Image Previews on the Left with Horizontal Scrolling */}
           <div className="flex items-center space-x-2 overflow-x-auto max-w-[400px] [&::-webkit-scrollbar]:w-2[&::-webkit-scrollbar]:h-2[&::-webkit-scrollbar-track]:bg-gray-100[&::-webkit-scrollbar-thumb]:bg-gray-300dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
-          {imagePreviews.map((preview, index) => (
-            <Drawer key={preview.url}>
-              <DrawerTrigger asChild>
-                <div className="relative flex-shrink-0 cursor-pointer">
-                  {preview.url ? (
-                    <div className="flex flex-col items-center">
-                      <Image
-                        src={preview.url}
-                        alt={`Uploaded preview ${index}`}
-                        width={48}
-                        height={48}
-                        className="w-[2rem] h-[2rem] object-cover"
-                        onClick={() => handleImageSelect(index)}
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-[2rem] h-[2rem] bg-gray-200 flex items-center justify-center">
-                      <Images className="h-4 w-4 text-gray-400" />
-                    </div>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDeleteImage(index)
-                    }}
-                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-                  >
-                    ×
-                  </button>
-                </div>
-              </DrawerTrigger>
-
-              <DrawerContent aria-label="Image Preview">
-                <VisuallyHidden>
-                  <DialogTitle>Image Preview</DialogTitle>
-                </VisuallyHidden>
-                <div className="p-4 flex flex-col items-center">
-                  {selectedImageIndex !== null &&
-                    selectedImageIndex >= 0 &&
-                    selectedImageIndex < imagePreviews.length && (
-                      <>
-                        <div className="mb-4">
-                          <Image
-                            src={imagePreviews[selectedImageIndex].url}
-                            alt="Preview in drawer"
-                            width={600}
-                            height={400}
-                            className="w-auto h-auto max-w-full max-h-[50vh] object-contain rounded-lg"
-                          />
-                        </div>
-                        <div className="w-full max-w-[350px] space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">File name:</span>
-                            <span>{imagePreviews[selectedImageIndex].name}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">File size:</span>
-                            <span>
-                              {imagePreviews[selectedImageIndex].size > 1024 * 1024
-                                ? `${(imagePreviews[selectedImageIndex].size / (1024 * 1024)).toFixed(1)} MB`
-                                : `${(imagePreviews[selectedImageIndex].size / 1024).toFixed(1)} KB`}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">File type:</span>
-                            <span>{imagePreviews[selectedImageIndex].type.split('/')[1]?.toUpperCase()}</span>
-                          </div>
-                        </div>
-                      </>
+            {imagePreviews.map((preview, index) => (
+              <Drawer key={preview.url}>
+                <DrawerTrigger asChild>
+                  <div className="relative flex-shrink-0 cursor-pointer">
+                    {preview.url ? (
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src={preview.url}
+                          alt={`Uploaded preview ${index}`}
+                          width={48}
+                          height={48}
+                          className="w-[2rem] h-[2rem] object-cover"
+                          onClick={() => handleImageSelect(index)}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-[2rem] h-[2rem] bg-gray-200 flex items-center justify-center">
+                        <Images className="h-4 w-4 text-gray-400" />
+                      </div>
                     )}
-                </div>
-              </DrawerContent>
-            </Drawer>
-          ))}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteImage(index)
+                      }}
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </DrawerTrigger>
+
+                <DrawerContent aria-label="Image Preview">
+                  <VisuallyHidden>
+                    <DialogTitle>Image Preview</DialogTitle>
+                  </VisuallyHidden>
+                  <div className="p-4 flex flex-col items-center">
+                    {selectedImageIndex !== null &&
+                      selectedImageIndex >= 0 &&
+                      selectedImageIndex < imagePreviews.length && (
+                        <>
+                          <div className="mb-4">
+                            <Image
+                              src={imagePreviews[selectedImageIndex].url}
+                              alt="Preview in drawer"
+                              width={600}
+                              height={400}
+                              className="w-auto h-auto max-w-full max-h-[50vh] object-contain rounded-lg"
+                            />
+                          </div>
+                          <div className="w-full max-w-[350px] space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">File name:</span>
+                              <span>{imagePreviews[selectedImageIndex].name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">File size:</span>
+                              <span>
+                                {imagePreviews[selectedImageIndex].size > 1024 * 1024
+                                  ? `${(imagePreviews[selectedImageIndex].size / (1024 * 1024)).toFixed(1)} MB`
+                                  : `${(imagePreviews[selectedImageIndex].size / 1024).toFixed(1)} KB`}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">File type:</span>
+                              <span>{imagePreviews[selectedImageIndex].type.split('/')[1]?.toUpperCase()}</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                  </div>
+                </DrawerContent>
+              </Drawer>
+            ))}
           </div>
 
           {/* Action Buttons on the Right */}

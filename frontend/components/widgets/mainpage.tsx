@@ -35,7 +35,8 @@ export default function Landing() {
           body: {
             "userPrompt": queryText,
             "token": accessToken || "",
-            "images": imagesBase64
+            "images": imagesBase64,
+            "ianaTimezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
           }
         }
       )

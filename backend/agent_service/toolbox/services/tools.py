@@ -2,7 +2,7 @@ from agent_service.toolbox.services.calendar import create_event, get_today_even
 from openai import pydantic_function_tool
 from agent_service.toolbox.models.calendar_event import CreateCalendarEvent, GetTodayEvents, GetThisWeekEvents, ModifyEvent, DeleteEvent, GetTomorrowEvents, GetNextWeekEvents
 from datetime import datetime
-from tzlocal import get_localzone
+from pytz import timezone
 from agent_service.apps import AgentServiceConfig
 
 tools = [
@@ -46,10 +46,12 @@ tool_map = {
     "DeleteEvent": delete_event
 }
 
-def get_environmental_context_prompt():
+def get_environmental_context_prompt(iana_timezone: str) -> str:
     prompt = AgentServiceConfig.langfuse_client.get_prompt("MainAgent_SystemContext", type="chat")
 
+    local_time = datetime.now(timezone(iana_timezone)).isoformat()
+
     return prompt.compile(
-        today=str(datetime.now().isoformat()), 
-        timezone=str(get_localzone())
+        today=local_time, 
+        timezone=iana_timezone,
     )
