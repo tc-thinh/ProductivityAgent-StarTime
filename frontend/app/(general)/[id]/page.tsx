@@ -191,7 +191,7 @@ export default function ChatCanvas() {
 
     ws.onclose = () => {
       console.log('WebSocket connection closed')
-      setIsLoading(false)
+      window.location.href = "/"
     }
 
     ws.onerror = (error) => {
