@@ -16,8 +16,27 @@ import useDebounce from "@/hooks/use-debounce"
 import { fetchBackendService } from "@/lib/utils"
 import { toast } from "sonner"
 import { useUserStore } from "@/store/userStore"
-import { Plus, TextSearch } from "lucide-react"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+    Plus,
+    TextSearch,
+    Trash
+} from "lucide-react"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger
+} from "@/components/ui/tooltip"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface SearchResult {
     c_id: number,
@@ -34,6 +53,45 @@ export function HistoryDialog({ className }: { className?: string }) {
     const [result, setResult] = useState<SearchResult[]>([])
     const debouncedQuery = useDebounce(query, 200)
     const { hydrated, accessToken } = useUserStore()
+    const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
+
+    const DeleteConversationDialog = ({ conversationId }: { conversationId: number }) => {
+        return (
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="ml-2 aspect-square flex items-center justify-center" size="icon">
+                        <Trash className="w-4 h-4" />
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure deleting this conversation?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete this conversation.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={async () => {
+                            const { success } = await fetchBackendService(
+                                {
+                                    endpoint: `database/conversations/?conversationId=${conversationId}`,
+                                    method: "DELETE",
+                                    body: { token: accessToken }
+                                }
+                            )
+    
+                            setRefreshTrigger((prev) => prev + 1)
+                            if (!success) toast.error("Something went wrong. Please try again later")
+                            else toast.success("Conversation deleted successfully")
+
+                            setHoveredItem(null)
+                        }}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        )
+    }
 
     const handleMouseEnter = (item: SearchResult) => {
         setHoveredItem(item)
@@ -54,7 +112,7 @@ export function HistoryDialog({ className }: { className?: string }) {
                 method: 'GET'
             }
         )
-        
+
         if (!success) toast.error("Something went wrong. Please try again later")
 
         setResult(data || [])
@@ -77,12 +135,12 @@ export function HistoryDialog({ className }: { className?: string }) {
 
                 if (!success) toast.error("Something went wrong. Please try again later")
 
-                setResult(data || [])        
+                setResult(data || [])
             }
         }
 
         fetchData()
-    }, [hydrated, accessToken, debouncedQuery])
+    }, [hydrated, accessToken, debouncedQuery, refreshTrigger])
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -148,7 +206,7 @@ export function HistoryDialog({ className }: { className?: string }) {
                                 >
                                     <Button
                                         variant="ghost"
-                                        className="w-full h-full"
+                                        className={`h-full w-full`}
                                         onClick={() => {
                                             window.location.href = `/${item.c_id}`;
                                         }}
@@ -199,6 +257,11 @@ export function HistoryDialog({ className }: { className?: string }) {
                                             </div>
                                         )}
                                     </Button>
+                                    {hoveredItem?.c_id === item.c_id && (
+                                        <div className="flex items-center ml-2">
+                                            <DeleteConversationDialog conversationId={item.c_id} />
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         ) : (
