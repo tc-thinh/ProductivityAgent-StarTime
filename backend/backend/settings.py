@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-&_qsgh$157*+j-x&429r-!93_z@!he=itar2f73c0!o1^d(dz+
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -165,3 +165,5 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+ALLOWED_HOSTS = ['productivityagent-normosai.onrender.com']
