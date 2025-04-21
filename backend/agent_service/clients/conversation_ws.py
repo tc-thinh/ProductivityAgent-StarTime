@@ -24,7 +24,7 @@ class DBConversationWebSocketClient:
     async def connect(self):
         """Establish WebSocket connection"""
         try:
-            self.connection = await websockets.connect(self.ws_url)
+            self.connection = await websockets.connect(self.ws_url, max_size=10 * 1024 * 1024)
             logger.info(f"Connected to WebSocket: {self.ws_url}")
         except Exception as e:
             logger.error(f"Connection failed: {str(e)}", exc_info=True)
