@@ -165,5 +165,3 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
-
-ALLOWED_HOSTS = ['productivityagent-normosai.onrender.com']
