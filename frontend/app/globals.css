@@ -88,6 +88,16 @@
 }
 
 @layer components {
+  .tool-tag {
+    @apply font-semibold px-1.5 py-0.5 rounded-[var(--radius)];
+  }
+  :root .tool-tag {
+    @apply bg-blue-50 text-blue-600;
+  }
+  .dark .tool-tag {
+    @apply bg-blue-900/30 text-blue-300;
+  }
+
   .markdown-content {
     @apply max-w-none;
     
@@ -163,6 +173,7 @@
     a {
       @apply text-blue-600 dark:text-blue-400 hover:underline;
     }
+
   }
 }
 
