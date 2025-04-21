@@ -47,7 +47,7 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
 
   // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const recognitionRef = useRef<any | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Dynamic height calculation for CardContent
@@ -74,9 +74,9 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
           setIsRecording(false)
         }
 
-        recognitionRef.current.onresult = (event) => {
+        recognitionRef.current.onresult = (event: any) => {
           const newTranscript = Array.from(event.results)
-            .map((result) => result[0].transcript)
+            .map((result: any) => result[0]?.transcript)
             .join("")
           setTranscript(newTranscript)
         }

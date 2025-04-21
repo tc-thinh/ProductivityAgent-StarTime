@@ -2,10 +2,7 @@ import NextAuth, { AuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import { signIn, signOut } from 'next-auth/react'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { useUserStore } from '@/store/userStore'
 import { fetchBackendService } from './utils'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_HTTP_BACKEND
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -72,10 +69,6 @@ export const authOptions: AuthOptions = {
   },
 }
 
-interface AuthHandler {
-  (req: NextApiRequest, res: NextApiResponse): Promise<void>
-}
-
-const authHandler: AuthHandler = (req, res) => NextAuth(req, res, authOptions)
+const authHandler: any = (req: any, res: any) => NextAuth(req, res, authOptions)
 
 export { authHandler as GET, authHandler as POST, signIn, signOut }
