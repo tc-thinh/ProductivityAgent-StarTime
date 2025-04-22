@@ -1,8 +1,8 @@
 import ReactMarkdown from 'react-markdown'
 import * as React from "react"
 import remarkGfm from 'remark-gfm'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { materialLight } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+// import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+// import { materialLight } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 export function MarkdownContent({ content }: { content: string }) {
   return (
@@ -25,27 +25,24 @@ export function MarkdownContent({ content }: { content: string }) {
           em: ({ ...props }) => <em className="italic" {...props} />,
           
           // Lists - Custom implementation with hyphens
-          ul: ({ children, depth, ...props }) => (
+          ul: ({ children, ...props }) => (
             <ul 
-              className={`my-2 ${depth > 0 ? 'pl-3 list-dash' : 'list-none'}`} 
+              className="my-2 list-none" 
               {...props}
             >
               {React.Children.map(children, (child) => {
                 if (React.isValidElement(child)) {
                   return React.cloneElement(child, {
-                    depth,
-                    className: `flex items-start ${depth > 0 ? 'pl-2' : ''}`
+                    className: 'flex items-start'
                   } as React.HTMLProps<HTMLLIElement>)
                 }
                 return child
               })}
             </ul>
           ),
-          li: ({ children, ordered, depth, ...props }) => (
+          li: ({ children, ...props }) => (
             <li className={props.className} {...props}>
-              {!ordered && depth === 0 && (
-                <span className="mr-2">-</span>
-              )}
+              <span className="mr-2">-</span>
               <div className="flex-1">
                 {children}
               </div>
@@ -69,15 +66,16 @@ export function MarkdownContent({ content }: { content: string }) {
                 {children}
               </code>
             ) : (
-              <SyntaxHighlighter
-                style={materialLight}
-                language={match?.[1] || 'text'}
-                PreTag="div"
-                className="text-sm mb-3"
-                {...props}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
+              // <SyntaxHighlighter
+              //   style={materialLight}
+              //   language={match?.[1] || 'text'}
+              //   PreTag="div"
+              //   className="text-sm mb-3"
+              //   {...props}
+              // >
+              //   {String(children).replace(/\n$/, '')}
+              // </SyntaxHighlighter>
+              <></>
             )
           },
           blockquote: ({...props }) => (

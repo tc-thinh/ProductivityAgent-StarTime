@@ -22,6 +22,7 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('conversations/', ConversationListView.as_view(), name='conversation-view-create-edit'),
+    path('conversations/search/', ConversationSearchView.as_view(), name='conversation-search'),
     path('categories/', CategoryListView.as_view(), name='category-list-view'),
     path('auth/', AuthView.as_view(), name='auth'),
 ]

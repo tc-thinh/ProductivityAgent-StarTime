@@ -3,7 +3,7 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { ClientLayout } from "./client-layout"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { SessionProvider, useSession } from "next-auth/react"
+import { SessionProvider } from "next-auth/react"
 import pomodoroStore from "@/store/pomodoroStore"
 import { useAuthSync } from "@/hooks/useAuthAsync"
 

@@ -140,9 +140,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navAssistant} groupName="Your Assistant" />
         <NavMain items={data.navEvents} groupName="Events Manager" />
-        <NavMain items={data.navTasks} groupName="Tasks Manager" />
-        <NavMain items={data.navBriefs} groupName="Briefings" />
-        <NavHistories />
+        {/* <NavMain items={data.navTasks} groupName="Tasks Manager" /> */}
+        {/* <NavMain items={data.navBriefs} groupName="Briefings" /> */}
+        {/* <NavHistories /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

@@ -19,11 +19,11 @@ load_dotenv()
 openai_client = AgentServiceConfig.openai_client
 MODEL = os.getenv('OPENAI_LLM_STANDARD')
 
-async def agent_action(prompt: str, images: List[str], token: str, conv_id: int):
+async def agent_action(prompt: str, images: List[str], token: str, conv_id: int, iana_timezone: str = "UTC"):
     """Main agent execution with proper async handling"""
     logger.info("Starting agent action for conversation %s", conv_id)
     
-    messages = get_environmental_context_prompt()
+    messages = get_environmental_context_prompt(iana_timezone)
     
     # Get the new conversation id
     prev_messages = await sync_to_async(fetch_previous_messages)(conv_id)
@@ -194,12 +194,12 @@ async def handle_assistant_response(content, messages, ws_client):
         logger.error(f"Failed to send assistant response: {e}", exc_info=True)
         raise
 
-def start_agent_action(prompt: str, images: List[int], token: str, conv_id: int):
+def start_agent_action(prompt: str, images: List[int], token: str, conv_id: int, iana_timezone: str = "UTC"):
     """Thread entry point with proper event loop handling"""
     try:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(agent_action(prompt, images, token, conv_id))
+        loop.run_until_complete(agent_action(prompt, images, token, conv_id, iana_timezone))
     except Exception as e:
         logger.error(f"Agent thread failed: {e}", exc_info=True)
     finally:

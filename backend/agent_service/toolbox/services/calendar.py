@@ -50,6 +50,10 @@ async def get_calendar_service(token: str):
 def simplify_event(event):
     """Extract only essential information from event"""
     simplified = {
+        'id': event.get('id', '0'),
+        'description': event.get('description', 'No description.'),
+        'location': event.get('location', 'No location.'),
+        'attendees': event.get('attendees', []),
         'summary': event.get('summary', 'No Title'),
         'start': event.get('start', {}).get('dateTime', event.get('start', {}).get('date', 'Unknown')),
         'end': event.get('end', {}).get('dateTime', event.get('end', {}).get('date', 'Unknown'))
@@ -57,7 +61,7 @@ def simplify_event(event):
     return simplified
 
 async def create_event(event: CalendarEvent, token: str, calendarId: str = 'primary'):
-    color_category = get_category_by_event(event.get('summary', ''), event.get('description', ''))
+    color_category = get_category_by_event(event.get('summary', ''), event.get('description', ''), token)
     logger.info(f"Color category: {color_category}")
 
     event['colorId'] = color_category['cat_color_id']
@@ -97,6 +101,31 @@ async def get_today_events(token: str, calendarId: str = 'primary'):
     simplified_events = [simplify_event(event) for event in events]
     
     return simplified_events
+
+async def get_tomorrow_events(token: str, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
+    
+    now = datetime.now()
+    tomorrow = now.date() + timedelta(days=1)
+    
+    start_of_day = datetime.combine(tomorrow, datetime.min.time())
+    end_of_day = datetime.combine(tomorrow, datetime.max.time())
+    
+    start_time_str = start_of_day.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    end_time_str = end_of_day.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    
+    events_result = service.events().list(
+        calendarId=calendarId,
+        timeMin=start_time_str,
+        timeMax=end_time_str,
+        singleEvents=True,
+        orderBy='startTime'
+    ).execute()
+    
+    events = events_result.get('items', [])
+    simplified_events = [simplify_event(event) for event in events]
+    
+    return simplified_events
     
 async def get_this_week_events(token: str, calendarId: str = 'primary'):
     service = await get_calendar_service(token)
@@ -131,3 +160,49 @@ async def get_this_week_events(token: str, calendarId: str = 'primary'):
     simplified_events = [simplify_event(event) for event in events]
     
     return simplified_events
+
+async def get_next_week_events(token: str, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
+
+    now = datetime.now()
+    today = now.date()
+
+    # Find the start of next week (next Monday)
+    start_of_next_week = today + timedelta(days=(7 - today.weekday()))
+    end_of_next_week = start_of_next_week + timedelta(days=6)
+
+    start_datetime = datetime.combine(start_of_next_week, datetime.min.time())
+    end_datetime = datetime.combine(end_of_next_week, datetime.max.time())
+
+    start_time_str = start_datetime.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    end_time_str = end_datetime.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+
+    events_result = service.events().list(
+        calendarId=calendarId,
+        timeMin=start_time_str,
+        timeMax=end_time_str,
+        singleEvents=True,
+        orderBy='startTime'
+    ).execute()
+
+    events = events_result.get('items', [])
+    simplified_events = [simplify_event(event) for event in events]
+
+    return simplified_events
+
+async def modify_event(token: str, eventId: str, modifiedEvent: CalendarEvent, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
+
+    modifiedEvent['id'] = eventId
+    
+    color_category = get_category_by_event(modifiedEvent.get('summary', ''), modifiedEvent.get('description', ''), token)
+    logger.info(f"Color category: {color_category}")
+
+    modifiedEvent['colorId'] = color_category['cat_color_id']
+    modifiedEvent['summary'] = f"{color_category['cat_event_prefix']} {modifiedEvent['summary']}"
+
+    return service.events().update(calendarId=calendarId, eventId=eventId, body=modifiedEvent).execute()
+
+async def delete_event(token: str, eventId: str, calendarId: str = 'primary'):
+    service = await get_calendar_service(token)
+    return service.events().delete(calendarId=calendarId, eventId=eventId).execute()

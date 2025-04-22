@@ -54,8 +54,6 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
   const [hashtagPosition, setHashtagPosition] = useState({ top: 0, left: 0 });
   const [currentHashtagRange, setCurrentHashtagRange] = useState({ start: 0, end: 0 });
 
-
-
   // State declarations
   const [inputValue, setInputValue] = useState<string>("")
   const [isRecording, setIsRecording] = useState<boolean>(false)
@@ -72,7 +70,7 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
 
   // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const recognitionRef = useRef<any | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Dynamic height calculation for CardContent
@@ -121,9 +119,9 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
           setIsRecording(false)
         }
 
-        recognitionRef.current.onresult = (event) => {
+        recognitionRef.current.onresult = (event: any) => {
           const newTranscript = Array.from(event.results)
-            .map((result) => result[0].transcript)
+            .map((result: any) => result[0]?.transcript)
             .join("")
           setTranscript(newTranscript)
         }
@@ -165,8 +163,6 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
     }
   };
   
-  
-
   const handlePaste = (event: React.ClipboardEvent) => {
     const items = event.clipboardData.items
     for (const item of items) {
@@ -381,8 +377,6 @@ export function SearchEngine({ handleSearch }: SearchEngineProps) {
     }, 0);
   };
   
-
-
   const ToolsDropdown = () => {
     return (
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>

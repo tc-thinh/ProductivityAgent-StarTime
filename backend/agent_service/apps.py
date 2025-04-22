@@ -1,7 +1,7 @@
 import os
 from django.apps import AppConfig
 from dotenv import load_dotenv
-from openai import OpenAI
+from langfuse.openai import OpenAI
 from langfuse import Langfuse
 import logging
 

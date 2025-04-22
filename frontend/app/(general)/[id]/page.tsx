@@ -104,6 +104,7 @@ export default function ChatCanvas() {
             "token": accessToken || "",
             "images": imagesBase64,
             "conversationId": id,
+            "ianaTimezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
           }
         }
       )
@@ -191,7 +192,7 @@ export default function ChatCanvas() {
 
     ws.onclose = () => {
       console.log('WebSocket connection closed')
-      setIsLoading(false)
+      window.location.href = "/"
     }
 
     ws.onerror = (error) => {
@@ -377,12 +378,28 @@ export default function ChatCanvas() {
                     message="Fetching Today's Event..."
                   />);
                 }
+              case "GetTomorrowEvents":
+                if (message.tool_call_result && message.tool_call_result?.content) {
+                  return <div key={messageKey}></div>;
+                } else {
+                  return toolCallWrapper(index, <ToolWaitCard
+                    message="Fetching Tomorrow's Event..."
+                  />);
+                }
               case "GetThisWeekEvents":
                 if (message.tool_call_result && message.tool_call_result?.content) {
                   return <div key={messageKey}></div>;
                 } else {
                   return toolCallWrapper(index, <ToolWaitCard
                     message="Fetching This Week's Event..."
+                  />);
+                }
+              case "GetNextWeekEvents":
+                if (message.tool_call_result && message.tool_call_result?.content) {
+                  return <div key={messageKey}></div>;
+                } else {
+                  return toolCallWrapper(index, <ToolWaitCard
+                    message="Fetching Next Week's Event..."
                   />);
                 }
               default:

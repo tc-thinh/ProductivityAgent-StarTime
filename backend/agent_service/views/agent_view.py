@@ -20,6 +20,7 @@ def process(data: dict, conversation_id: int, create_new: bool = True):
         user_prompt = data.get('userPrompt')
         user_token = data.get('token')
         images = data.get('images')
+        iana_timezone = data.get('ianaTimezone', 'UTC')
         processed_prompt = ""
 
         if user_prompt:
@@ -42,7 +43,7 @@ def process(data: dict, conversation_id: int, create_new: bool = True):
             try:
                 process_thread = threading.Thread(
                     target=start_agent_action,
-                    args=(processed_prompt, images, user_token, conversation_id),
+                    args=(processed_prompt, images, user_token, conversation_id, iana_timezone),
                     daemon=True
                 )
                 process_thread.start()
@@ -73,6 +74,10 @@ class AgentView(APIView):
                     type=openapi.TYPE_ARRAY, 
                     items=openapi.Items(type=openapi.TYPE_STRING),
                     description='List of base64 images.'
+                ),
+                'ianaTimezone': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='IANA timezone string'
                 )
             },
         ),
@@ -127,6 +132,10 @@ class AgentMessageView(APIView):
                 'conversationId': openapi.Schema(
                     type=openapi.TYPE_INTEGER,
                     description='Current Conversation ID'
+                ),
+                'ianaTimezone': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='IANA timezone string'
                 )
             },
         ),

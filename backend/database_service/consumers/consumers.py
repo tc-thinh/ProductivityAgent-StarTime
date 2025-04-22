@@ -5,6 +5,7 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db import transaction
 from database_service.serializers import ConversationSerializer
+import asyncio
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -37,7 +38,12 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
             logger.error(f"Error sending initial data: {str(e)}", exc_info=True)
         
     def _get_conversation(self):
-        return Conversation.objects.get(c_id=self.conversation_id)
+        try:
+            return Conversation.objects.get(c_id=self.conversation_id, c_deleted=False)
+        except Conversation.DoesNotExist:
+            logger.error(f"Conversation {self.conversation_id} does not exist.", exc_info=True)
+            asyncio.run(self.close())
+            return None
 
     async def disconnect(self, close_code):
         # Remove the client from the group
@@ -71,7 +77,19 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
 
     def _update_messages_in_db(self, new_message):
         with transaction.atomic():
+            raw_message = ""
+            try:
+                message_content = new_message.get("content", "")
+                if type(message_content) == list:
+                    raw_message = message_content[0].get("text", "")
+                elif type(message_content) == str:
+                    raw_message = message_content
+
+            except (IndexError, KeyError):
+                logger.error(f"Error extracting raw message from new message: {new_message}", exc_info=True)
+
             conversation = Conversation.objects.select_for_update().get(c_id=self.conversation_id)
+            conversation.c_rawmessages += raw_message + "\n"
             conversation.c_messages.append(new_message)
             conversation.save()
 
@@ -93,5 +111,3 @@ class ConversationUpdatesWebSocket(AsyncWebsocketConsumer):
                 'message': serialized
             }
         )
-
-    

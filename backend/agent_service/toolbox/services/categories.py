@@ -25,11 +25,11 @@ def simplify_category(category):
     }
     return simplified
 
-def get_available_categories():
+def get_available_categories(token: str):
     """
     Fetch all active categories from the database service.
     """
-    url = f"{DATABASE_SERVICE_URL}/categories/?active=true"
+    url = f"{DATABASE_SERVICE_URL}/categories/?token={token}&&active=true"
     try:
         response = requests.get(url)
         response.raise_for_status()  # Raise an exception for HTTP errors
@@ -39,8 +39,8 @@ def get_available_categories():
         print(f"Error fetching categories: {e}")
         return []
 
-def get_category_by_event(event_name: str, event_description: str) -> dict[str, str]:
-    categories = get_available_categories()
+def get_category_by_event(event_name: str, event_description: str, token: str) -> dict[str, str]:
+    categories = get_available_categories(token)
     default = { "cat_color_id": "0", "cat_event_prefix": "" }
 
     # If no categories are available, return a default category
@@ -57,7 +57,7 @@ def get_category_by_event(event_name: str, event_description: str) -> dict[str, 
     }] + [simplify_category(category) for category in categories]
     logger.info(f"Available categories: {simplified_categories}")
     
-    prompt = langfuse_client.get_prompt("langfuse_client", type="chat")
+    prompt = langfuse_client.get_prompt("CategoryAgent_SystemContext", type="chat")
     response = openai_client.beta.chat.completions.parse(
         model=MODEL,
         messages=prompt.compile(

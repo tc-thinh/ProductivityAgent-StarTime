@@ -14,7 +14,7 @@ function UnderConstruction() {
         </p>
         <Button
           color="primary"
-          size="large"
+          size="lg"
           className='p-2'
           onClick={() => {
             window.location.href = '/'

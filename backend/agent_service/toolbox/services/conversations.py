@@ -15,10 +15,11 @@ DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 logger = logging.getLogger(__name__)
 
 def get_conversation_name(user_request: str, images: List[str]) -> str:
-    prompt = langfuse_client.get_prompt("NamingAgent_SysteContext", type="chat")
+    prompt = langfuse_client.get_prompt("NamingAgent_SystemContext", type="chat")
     messages = prompt.compile(
         initial_request=user_request
     )
+    logger.info(f"{messages}")
 
     if images:
         for image_string in images:
