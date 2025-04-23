@@ -24,7 +24,8 @@ import {
   AtSign,
   FolderSync,
   Bot,
-  Vault
+  Vault,
+  MapPinCheck,
 } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -73,6 +74,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Category Management",
         url: "/category-management",
         icon: LayoutGrid,
+        isActive: true,
+        items: [
+        ],
+      }
+    ],
+    navAboutUs: [
+      {
+        title: "Our Development Roadmap",
+        url: "https://drive.google.com/file/d/1LYx5X8r6uwt_cP431cC4ZC7MCeGGOm2e/view?usp=sharing",
+        icon: MapPinCheck,
         isActive: true,
         items: [
         ],
@@ -140,6 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navAssistant} groupName="Your Assistant" />
         <NavMain items={data.navEvents} groupName="Events Manager" />
+        <NavMain items={data.navAboutUs} groupName="About Us" />
         {/* <NavMain items={data.navTasks} groupName="Tasks Manager" /> */}
         {/* <NavMain items={data.navBriefs} groupName="Briefings" /> */}
         {/* <NavHistories /> */}
