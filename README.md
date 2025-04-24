@@ -10,6 +10,11 @@ python manage.py runserver 8080 / daphne -p 8080 backend.asgi:application / daph
 ```
 
 ```bash
+cd ai
+uvicorn src.main:backend_app --reload
+```
+
+```bash
 cd frontend
 yarn
 yarn run dev
