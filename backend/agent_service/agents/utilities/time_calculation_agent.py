@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from agents import Agent, Runner, function_tool
 from agent_service.apps import AgentServiceConfig
@@ -88,6 +89,8 @@ class TimeCalculationAgent:
         self.instructions = AgentServiceConfig.langfuse_client.get_prompt(
             "TimeCalculationAgent_Instructions", 
             type="text"
+        ).compile(
+            currentTime=datetime.now(timezone.utc)
         )
 
         self.agent = Agent(

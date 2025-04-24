@@ -1,4 +1,4 @@
 from pydantic import BaseModel, Field
 
-class Category(BaseModel):
+class AgentCategory(BaseModel):
     cat_id: int = Field(..., title="Category ID")

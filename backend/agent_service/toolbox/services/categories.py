@@ -1,7 +1,7 @@
 import requests
 import os
 from agent_service.apps import AgentServiceConfig
-from agent_service.toolbox.models.category import Category
+from agent_service.toolbox.models.category import AgentCategory
 import logging
 from agent_service.apps import AgentServiceConfig
 
@@ -65,7 +65,7 @@ def get_category_by_event(event_name: str, event_description: str, token: str) -
             event_name=event_name,
             event_description=event_description
         ),
-        response_format=Category
+        response_format=AgentCategory
     )
 
     category = response.choices[0].message

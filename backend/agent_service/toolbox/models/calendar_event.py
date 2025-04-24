@@ -50,7 +50,7 @@ class ReminderOverride(BaseModel):
 class Reminders(BaseModel):
     useDefault: bool = Field(
         ...,
-        description="Indicates whether to use the calendar’s default reminders."
+        description="Indicates whether to use the calendar's default reminders."
     )
     overrides: List[ReminderOverride] = Field(
         ...,
