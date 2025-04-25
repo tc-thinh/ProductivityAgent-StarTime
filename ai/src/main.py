@@ -43,4 +43,3 @@ if __name__ == "__main__":
         workers=settings.SERVER_WORKERS,
         log_level=settings.LOGGING_LEVEL,
     )
-    
