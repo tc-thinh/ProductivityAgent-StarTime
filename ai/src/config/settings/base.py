@@ -57,6 +57,8 @@ class BackendBaseSettings(BaseSettings):
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
 
+    DATABASE_SERVICE: str
+
     model_config = SettingsConfigDict(
         case_sensitive=True,
         env_file=f"{str(ROOT_DIR)}/.env",
